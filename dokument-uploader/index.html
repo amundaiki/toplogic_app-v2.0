@@ -501,20 +501,18 @@
 
             try {
                 console.log('Sending request to:', webhookUrl);
-                
                 const response = await fetch(webhookUrl, {
                     method: 'POST',
-                    body: formData,
-                    mode: 'no-cors' // Important for Make.com webhooks
+                    body: formData
                 });
 
                 clearInterval(progressInterval);
                 progressFill.style.width = '100%';
                 
-                console.log('Response received:', response);
-
-                // With no-cors mode, we can't read the response, but the request will go through
-                // Make.com webhooks always return 200 OK, so we assume success if no error
+                console.log('Fetch response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`Server svarte ${response.status}`);
+                }
                 if (documentType === 'test') {
                     showMessage('TEST MODUS: Dokumentet er sendt til test-webhook! Sjekk Make.com scenarioet for å se om data kom frem.', 'success');
                 } else {
@@ -527,7 +525,7 @@
                     progressFill.style.width = '0%';
                 }, 1000);
                 
-                // Alternative: Try sending as base64 encoded JSON if FormData fails
+                // Alternativ: Prøv å sende som base64-enkodet JSON hvis FormData feiler
                 const reader = new FileReader();
                 reader.onload = async function(e) {
                     const base64File = e.target.result.split(',')[1];
@@ -539,7 +537,7 @@
                         timestamp: new Date().toISOString()
                     };
                     
-                    console.log('Trying alternative method with JSON payload');
+                    console.log('Prøver alternativ metode med JSON payload');
                     
                     try {
                         const jsonResponse = await fetch(webhookUrl, {
@@ -547,28 +545,24 @@
                             headers: {
                                 'Content-Type': 'application/json',
                             },
-                            body: JSON.stringify(jsonPayload),
-                            mode: 'no-cors'
+                            body: JSON.stringify(jsonPayload)
                         });
-                        
-                        console.log('JSON response sent');
+                        console.log('JSON response status:', jsonResponse.status);
                     } catch (jsonError) {
-                        console.error('JSON method also failed:', jsonError);
+                        console.error('JSON-metode feilet også:', jsonError);
                     }
                 };
-                
-                // Read file as base64
                 reader.readAsDataURL(file);
                 
-                // Alternative method 2: Use XMLHttpRequest
-                console.log('Trying XMLHttpRequest method...');
+                // Alternativ metode 2: Bruk XMLHttpRequest
+                console.log('Prøver XMLHttpRequest-metode...');
                 const xhr = new XMLHttpRequest();
                 xhr.open('POST', webhookUrl, true);
                 xhr.onload = function() {
-                    console.log('XHR complete, status:', xhr.status);
+                    console.log('XHR ferdig, status:', xhr.status);
                 };
                 xhr.onerror = function() {
-                    console.error('XHR error');
+                    console.error('XHR-feil');
                 };
                 const xhrFormData = new FormData();
                 xhrFormData.append('file', file);
@@ -588,13 +582,15 @@
         });
 
         function showMessage(text, type) {
-            message.textContent = text;
-            message.className = `message ${type} show`;
-            
-            if (type === 'success') {
-                setTimeout(() => {
-                    message.classList.remove('show');
-                }, 5000);
+            if (message) {
+                message.textContent = text;
+                message.className = `message ${type} show`;
+                
+                if (type === 'success') {
+                    setTimeout(() => {
+                        if (message) message.classList.remove('show');
+                    }, 5000);
+                }
             }
         }
 
