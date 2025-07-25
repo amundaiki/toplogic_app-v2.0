@@ -189,6 +189,14 @@
                         <option value="ingen">Ingen normal leverandør – hent alle parameter</option>
                     </select>
                 </div>
+                <div class="form-group" id="paramGroup" style="display:none;">
+                    <label for="parametre">Hvilke parameter ønsker du?</label>
+                    <textarea id="parametre" name="parametre" rows="3" placeholder="Skriv inn ønskede parameter, f.eks. parameter1, parameter2..."></textarea>
+                    <div style="margin-top:10px;">
+                        <input type="checkbox" id="kunDisse" name="kunDisse">
+                        <label for="kunDisse" style="display:inline;font-weight:400;">Kun disse parameterne (ikke ta med andre)</label>
+                    </div>
+                </div>
                 <div class="form-group">
                     <label for="fakturaFile">Last opp faktura</label>
                     <div class="file-upload-area" id="dropZone">
@@ -259,6 +267,8 @@
             const opplaster = document.getElementById('opplaster').value;
             const leverandor = document.getElementById('leverandor').value;
             const file = fileInput.files[0];
+            const parametre = document.getElementById('parametre').value;
+            const kunDisse = document.getElementById('kunDisse').checked;
             if (!opplaster) {
                 showMessage('Vennligst velg hvem som laster opp', 'error');
                 return;
@@ -281,6 +291,10 @@
             formData.append('leverandor', leverandor);
             formData.append('fileName', file.name);
             formData.append('timestamp', new Date().toISOString());
+            if (leverandor === 'ingen') {
+                formData.append('parametre', parametre);
+                formData.append('kunDisse', kunDisse);
+            }
             submitBtn.disabled = true;
             loadingSpinner.style.display = 'block';
             message.classList.remove('show');
@@ -314,6 +328,23 @@
                 }
             }
         }
+        // Vis/skjul parameterfelt basert på leverandørvalg
+        document.getElementById('leverandor').addEventListener('change', function() {
+            const paramGroup = document.getElementById('paramGroup');
+            if (this.value === 'ingen') {
+                paramGroup.style.display = '';
+            } else {
+                paramGroup.style.display = 'none';
+            }
+        });
+        // Vis parameterfelt ved lasting hvis "ingen" er valgt (f.eks. ved refresh)
+        window.addEventListener('DOMContentLoaded', function() {
+            const leverandor = document.getElementById('leverandor');
+            const paramGroup = document.getElementById('paramGroup');
+            if (leverandor.value === 'ingen') {
+                paramGroup.style.display = '';
+            }
+        });
     </script>
 </body>
 </html>
