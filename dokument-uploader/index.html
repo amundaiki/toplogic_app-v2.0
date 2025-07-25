@@ -293,7 +293,7 @@
                 <div class="form-group">
                     <label for="pdfFile">Last opp dokument</label>
                     <div class="file-upload-area" id="dropZone">
-                        <input type="file" id="pdfFile" name="pdfFile" accept=".pdf,.xlsx,.xls,.csv" required>
+                        <input type="file" id="pdfFile" name="pdfFile" accept=".pdf,.xlsx,.xls,.csv" required multiple>
                         <svg class="upload-icon" viewBox="0 0 24 24">
                             <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
                         </svg>
@@ -301,7 +301,8 @@
                         <p class="supported-formats">Støttede formater: PDF, Excel (XLSX/XLS), CSV</p>
                     </div>
                     <div class="file-info" id="fileInfo">
-                        <p>Valgt fil: <span class="file-name" id="fileName"></span></p>
+                        <p>Valgte filer:</p>
+                        <ul id="fileList"></ul>
                     </div>
                 </div>
 
@@ -366,7 +367,7 @@
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('pdfFile');
         const fileInfo = document.getElementById('fileInfo');
-        const fileName = document.getElementById('fileName');
+        const fileList = document.getElementById('fileList');
         const form = document.getElementById('uploadForm');
         const submitBtn = document.getElementById('submitBtn');
         const loadingSpinner = document.getElementById('loadingSpinner');
@@ -415,9 +416,15 @@
 
         function handleFiles(files) {
             if (files.length > 0) {
-                const file = files[0];
-                fileName.textContent = file.name;
+                fileList.innerHTML = '';
+                for (let i = 0; i < files.length; i++) {
+                    const li = document.createElement('li');
+                    li.textContent = files[i].name;
+                    fileList.appendChild(li);
+                }
                 fileInfo.classList.add('show');
+            } else {
+                fileInfo.classList.remove('show');
             }
         }
 
@@ -426,37 +433,27 @@
             console.log('Form submit triggered');
             
             const documentType = document.getElementById('documentType').value;
-            const file = fileInput.files[0];
+            const files = fileInput.files;
             
             console.log('Document type:', documentType);
-            console.log('File:', file);
+            console.log('Files:', files);
             
             if (!documentType) {
                 showMessage('Vennligst velg dokumenttype', 'error');
                 return;
             }
             
-            if (!file) {
-                showMessage('Vennligst velg en fil', 'error');
+            if (!files || files.length === 0) {
+                showMessage('Vennligst velg en eller flere filer', 'error');
                 return;
             }
 
-            // Validate file size (max 10MB)
-            if (file.size > 10 * 1024 * 1024) {
-                showMessage('Filen er for stor. Maksimal størrelse er 10MB.', 'error');
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('documentType', documentType);
-            formData.append('fileName', file.name);
-            formData.append('timestamp', new Date().toISOString());
-
-            // Log FormData contents
-            console.log('FormData contents:');
-            for (let [key, value] of formData.entries()) {
-                console.log(key + ':', value);
+            // Validate file sizes (max 10MB per file)
+            for (let i = 0; i < files.length; i++) {
+                if (files[i].size > 10 * 1024 * 1024) {
+                    showMessage('Filen ' + files[i].name + ' er for stor. Maksimal størrelse er 10MB.', 'error');
+                    return;
+                }
             }
 
             const webhookUrl = webhooks[documentType];
@@ -473,101 +470,43 @@
             progressBar.classList.add('show');
             message.classList.remove('show');
             
-            showMessage('Sender fil til Make.com...', 'success');
-
-            // Simulate progress
             let progress = 0;
-            const progressInterval = setInterval(() => {
-                progress += 10;
-                progressFill.style.width = Math.min(progress, 90) + '%';
-            }, 200);
+            let currentFile = 0;
+            progressFill.style.width = '0%';
 
-            try {
-                console.log('Sending request to:', webhookUrl);
-                
-                const response = await fetch(webhookUrl, {
-                    method: 'POST',
-                    body: formData,
-                    mode: 'no-cors' // Important for Make.com webhooks
-                });
-
-                clearInterval(progressInterval);
-                progressFill.style.width = '100%';
-                
-                console.log('Response received:', response);
-
-                // With no-cors mode, we can't read the response, but the request will go through
-                // Make.com webhooks always return 200 OK, so we assume success if no error
-                if (documentType === 'test') {
-                    showMessage('TEST MODUS: Dokumentet er sendt til test-webhook! Sjekk Make.com scenarioet for å se om data kom frem.', 'success');
-                } else {
-                    showMessage('Dokumentet er sendt til prosessering! Du vil motta resultatet på e-post.', 'success');
+            async function uploadFile(file, index) {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('documentType', documentType);
+                formData.append('fileName', file.name);
+                formData.append('timestamp', new Date().toISOString());
+                try {
+                    await fetch(webhookUrl, {
+                        method: 'POST',
+                        body: formData,
+                        mode: 'no-cors'
+                    });
+                } catch (error) {
+                    console.error('Feil ved sending av', file.name, error);
                 }
-                form.reset();
-                fileInfo.classList.remove('show');
-                setTimeout(() => {
-                    progressBar.classList.remove('show');
-                    progressFill.style.width = '0%';
-                }, 1000);
-                
-                // Alternative: Try sending as base64 encoded JSON if FormData fails
-                const reader = new FileReader();
-                reader.onload = async function(e) {
-                    const base64File = e.target.result.split(',')[1];
-                    const jsonPayload = {
-                        file: base64File,
-                        fileName: file.name,
-                        fileType: file.type,
-                        documentType: documentType,
-                        timestamp: new Date().toISOString()
-                    };
-                    
-                    console.log('Trying alternative method with JSON payload');
-                    
-                    try {
-                        const jsonResponse = await fetch(webhookUrl, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify(jsonPayload),
-                            mode: 'no-cors'
-                        });
-                        
-                        console.log('JSON response sent');
-                    } catch (jsonError) {
-                        console.error('JSON method also failed:', jsonError);
-                    }
-                };
-                
-                // Read file as base64
-                reader.readAsDataURL(file);
-                
-                // Alternative method 2: Use XMLHttpRequest
-                console.log('Trying XMLHttpRequest method...');
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', webhookUrl, true);
-                xhr.onload = function() {
-                    console.log('XHR complete, status:', xhr.status);
-                };
-                xhr.onerror = function() {
-                    console.error('XHR error');
-                };
-                const xhrFormData = new FormData();
-                xhrFormData.append('file', file);
-                xhrFormData.append('test', 'true');
-                xhr.send(xhrFormData);
-                
-            } catch (error) {
-                clearInterval(progressInterval);
-                console.error('Feil ved sending:', error);
-                showMessage(`Feil: ${error.message}. Sjekk konsollen for detaljer.`, 'error');
+            }
+
+            for (let i = 0; i < files.length; i++) {
+                showMessage('Sender fil ' + (i+1) + ' av ' + files.length + ' til Make.com...', 'success');
+                await uploadFile(files[i], i);
+                progress = Math.round(((i+1) / files.length) * 100);
+                progressFill.style.width = progress + '%';
+            }
+
+            showMessage('Alle dokumenter er sendt til prosessering! Du vil motta resultatet på e-post.', 'success');
+            form.reset();
+            fileInfo.classList.remove('show');
+            setTimeout(() => {
                 progressBar.classList.remove('show');
                 progressFill.style.width = '0%';
-            } finally {
-                submitBtn.disabled = false;
-                loadingSpinner.style.display = 'none';
-            }
+            }, 1000);
+            submitBtn.disabled = false;
+            loadingSpinner.style.display = 'none';
         });
 
         function showMessage(text, type) {
@@ -583,25 +522,27 @@
 
         // Auto-select document type based on filename
         fileInput.addEventListener('change', function() {
-            const filename = this.files[0]?.name.toLowerCase() || '';
-            const typeSelect = document.getElementById('documentType');
-            
-            if (filename.includes('test')) {
-                typeSelect.value = 'test';
-            } else if (filename.includes('bring')) {
-                typeSelect.value = 'faktura_bring';
-            } else if (filename.includes('ups')) {
-                typeSelect.value = 'faktura_ups';
-            } else if (filename.includes('dhl')) {
-                typeSelect.value = 'faktura_dhl';
-            } else if (filename.includes('postnord')) {
-                typeSelect.value = 'faktura_postnord';
-            } else if (filename.includes('fedex')) {
-                typeSelect.value = 'faktura_fedex';
-            } else if (filename.includes('schenker')) {
-                typeSelect.value = 'faktura_schenker';
-            } else if (filename.includes('ntg')) {
-                typeSelect.value = 'faktura_ntg';
+            const files = this.files;
+            if (files.length === 1) {
+                const filename = files[0]?.name.toLowerCase() || '';
+                const typeSelect = document.getElementById('documentType');
+                if (filename.includes('test')) {
+                    typeSelect.value = 'test';
+                } else if (filename.includes('bring')) {
+                    typeSelect.value = 'faktura_bring';
+                } else if (filename.includes('ups')) {
+                    typeSelect.value = 'faktura_ups';
+                } else if (filename.includes('dhl')) {
+                    typeSelect.value = 'faktura_dhl';
+                } else if (filename.includes('postnord')) {
+                    typeSelect.value = 'faktura_postnord';
+                } else if (filename.includes('fedex')) {
+                    typeSelect.value = 'faktura_fedex';
+                } else if (filename.includes('schenker')) {
+                    typeSelect.value = 'faktura_schenker';
+                } else if (filename.includes('ntg')) {
+                    typeSelect.value = 'faktura_ntg';
+                }
             }
         });
         // Test webhook directly
