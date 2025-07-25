@@ -236,6 +236,7 @@
                     <span>Send faktura</span>
                     <div class="loading" id="loadingSpinner"></div>
                 </button>
+                <button type="button" class="submit-btn" id="resetBtn" style="background:#ccc;color:#222;margin-top:10px;">Nullstill</button>
             </form>
             <div class="message" id="message"></div>
         </div>
@@ -329,8 +330,7 @@
                     throw new Error(`Server svarte ${response.status}`);
                 }
                 showMessage('Fakturaen er sendt til prosessering! Du vil motta resultatet på e-post.', 'success');
-                form.reset();
-                fileInfo.classList.remove('show');
+                // Ikke nullstill skjema automatisk
             } catch (error) {
                 showMessage(`Feil: ${error.message}. Sjekk konsollen for detaljer.`, 'error');
             } finally {
@@ -365,6 +365,12 @@
             if (leverandor.value === 'ingen') {
                 paramGroup.style.display = '';
             }
+        });
+        // Nullstill-knapp funksjon
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            form.reset();
+            fileInfo.classList.remove('show');
+            document.getElementById('paramGroup').style.display = (document.getElementById('leverandor').value === 'ingen') ? '' : 'none';
         });
     </script>
 </body>
