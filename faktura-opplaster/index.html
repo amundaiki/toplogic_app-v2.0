@@ -1,1 +1,319 @@
-
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TopLogic - Fakturaopplasting</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            overflow: hidden;
+        }
+        .header {
+            background: #1a237e;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 26px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .content { padding: 32px; }
+        .form-group { margin-bottom: 22px; }
+        label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        select, input[type="file"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        select:focus, input[type="file"]:focus {
+            outline: none;
+            border-color: #1a237e;
+        }
+        .file-upload-area {
+            border: 3px dashed #e0e0e0;
+            border-radius: 12px;
+            padding: 32px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            background: #fafafa;
+        }
+        .file-upload-area:hover {
+            border-color: #1a237e;
+            background: #f5f5f5;
+        }
+        .file-upload-area.drag-over {
+            border-color: #1a237e;
+            background: #e8eaf6;
+        }
+        .file-upload-area input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            left: 0;
+            top: 0;
+        }
+        .upload-icon {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 12px;
+            fill: #1a237e;
+        }
+        .file-info {
+            margin-top: 16px;
+            padding: 12px;
+            background: #e8eaf6;
+            border-radius: 8px;
+            display: none;
+        }
+        .file-info.show { display: block; }
+        .file-name {
+            font-weight: 600;
+            color: #1a237e;
+            word-break: break-all;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: #1a237e;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .submit-btn:hover {
+            background: #0d47a1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 35, 126, 0.4);
+        }
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .loading {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .message {
+            margin-top: 18px;
+            padding: 14px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+        .message.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #81c784;
+        }
+        .message.error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef5350;
+        }
+        .message.show { display: block; }
+        .supported-formats {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Fakturaopplasting</h1>
+            <p>Last opp faktura og angi opplaster og leverandør</p>
+        </div>
+        <div class="content">
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label for="opplaster">Hvem laster opp?</label>
+                    <select id="opplaster" name="opplaster" required>
+                        <option value="">Velg opplaster...</option>
+                        <option value="Peter">Peter</option>
+                        <option value="Janne">Janne</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="leverandor">Leverandør</label>
+                    <select id="leverandor" name="leverandor" required>
+                        <option value="ingen">Ingen normal leverandør – hent alle parameter</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="fakturaFile">Last opp faktura</label>
+                    <div class="file-upload-area" id="dropZone">
+                        <input type="file" id="fakturaFile" name="fakturaFile" accept=".pdf,.xlsx,.xls,.csv" required>
+                        <svg class="upload-icon" viewBox="0 0 24 24">
+                            <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
+                        </svg>
+                        <p><strong>Klikk for å velge fil</strong> eller dra og slipp her</p>
+                        <p class="supported-formats">Støttede formater: PDF, Excel (XLSX/XLS), CSV</p>
+                    </div>
+                    <div class="file-info" id="fileInfo">
+                        <p>Valgt fil: <span class="file-name" id="fileName"></span></p>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <span>Send faktura</span>
+                    <div class="loading" id="loadingSpinner"></div>
+                </button>
+            </form>
+            <div class="message" id="message"></div>
+        </div>
+    </div>
+    <script>
+        const webhookUrl = 'https://hook.eu2.make.com/kul69xvao6hb000u0u4vqpvfk48e5el2';
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fakturaFile');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const form = document.getElementById('uploadForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const message = document.getElementById('message');
+        // Drag and drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+        function highlight(e) { dropZone.classList.add('drag-over'); }
+        function unhighlight(e) { dropZone.classList.remove('drag-over'); }
+        dropZone.addEventListener('drop', handleDrop, false);
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+            handleFiles(files);
+        }
+        fileInput.addEventListener('change', function(e) {
+            handleFiles(this.files);
+        });
+        function handleFiles(files) {
+            if (files.length > 0) {
+                const file = files[0];
+                fileName.textContent = file.name;
+                fileInfo.classList.add('show');
+            }
+        }
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const opplaster = document.getElementById('opplaster').value;
+            const leverandor = document.getElementById('leverandor').value;
+            const file = fileInput.files[0];
+            if (!opplaster) {
+                showMessage('Vennligst velg hvem som laster opp', 'error');
+                return;
+            }
+            if (!leverandor) {
+                showMessage('Vennligst velg leverandør', 'error');
+                return;
+            }
+            if (!file) {
+                showMessage('Vennligst velg en fil', 'error');
+                return;
+            }
+            if (file.size > 10 * 1024 * 1024) {
+                showMessage('Filen er for stor. Maksimal størrelse er 10MB.', 'error');
+                return;
+            }
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('opplaster', opplaster);
+            formData.append('leverandor', leverandor);
+            formData.append('fileName', file.name);
+            formData.append('timestamp', new Date().toISOString());
+            submitBtn.disabled = true;
+            loadingSpinner.style.display = 'block';
+            message.classList.remove('show');
+            showMessage('Sender faktura til Make.com...', 'success');
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    body: formData
+                });
+                if (!response.ok) {
+                    throw new Error(`Server svarte ${response.status}`);
+                }
+                showMessage('Fakturaen er sendt til prosessering! Du vil motta resultatet på e-post.', 'success');
+                form.reset();
+                fileInfo.classList.remove('show');
+            } catch (error) {
+                showMessage(`Feil: ${error.message}. Sjekk konsollen for detaljer.`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                loadingSpinner.style.display = 'none';
+            }
+        });
+        function showMessage(text, type) {
+            if (message) {
+                message.textContent = text;
+                message.className = `message ${type} show`;
+                if (type === 'success') {
+                    setTimeout(() => {
+                        if (message) message.classList.remove('show');
+                    }, 5000);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
