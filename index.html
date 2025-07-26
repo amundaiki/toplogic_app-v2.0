@@ -6,52 +6,41 @@
     <title>TopLogic AI-Apper</title>
     <style>
         :root {
-            --color-black: #000000;
+            --color-red: #c72027;
+            --color-red-dark: #a51a1e;
             --color-white: #ffffff;
-            --color-cyan-bluish-gray: #abb8c3;
-            --color-vivid-cyan-blue: #0693e3;
-            --color-vivid-purple: #9b51e0;
-            --color-vivid-red: #cf2e2e;
-            --color-luminous-vivid-orange: #ff6900;
-            --color-luminous-vivid-amber: #fcb900;
-            --color-pale-pink: #f78da7;
-            --color-pale-cyan-blue: #8ed1fc;
-            --color-dark-button: #32373c;
-            --shadow-natural: 6px 6px 9px rgba(0, 0, 0, 0.2);
-            --content-size: 823px;
-            --wide-size: 1080px;
-            --spacing-50: 1.5rem;
+            --color-black: #000000;
+            --color-gray-dark: #4a4a4a;
+            --color-gray-light: #f8f8f8;
+            --max-width: 1200px;
         }
         body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background: linear-gradient(135deg, var(--color-vivid-cyan-blue) 0%, var(--color-vivid-purple) 100%);
-            color: var(--color-black);
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: var(--color-gray-light);
+            color: var(--color-gray-dark);
             margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             min-height: 100vh;
         }
         .container {
-            background-color: var(--color-white);
-            padding: 40px;
+            background: var(--color-white);
+            max-width: var(--max-width);
+            margin: 48px auto;
             border-radius: 16px;
-            box-shadow: var(--shadow-natural);
+            box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+            padding: 48px 24px;
             text-align: center;
-            max-width: var(--wide-size);
-            width: 100%;
         }
         h1 {
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            font-size: 2.6rem;
+            font-weight: 300;
             color: var(--color-white);
-            background: linear-gradient(90deg, var(--color-vivid-cyan-blue) 0%, var(--color-vivid-purple) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-fill-color: transparent;
-            margin-bottom: 30px;
-            font-size: 2.5rem;
-            font-weight: 700;
+            background: linear-gradient(90deg, var(--color-red) 0%, var(--color-red-dark) 100%);
+            padding: 32px 0 24px 0;
+            margin: -48px -24px 32px -24px;
+            border-radius: 16px 16px 0 0;
             letter-spacing: -1px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.10);
         }
         ul {
             list-style: none;
@@ -59,26 +48,27 @@
             margin: 0;
         }
         li {
-            margin-bottom: 18px;
+            margin-bottom: 20px;
         }
         a {
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
             text-decoration: none;
             color: var(--color-white);
-            background-color: var(--color-dark-button);
+            background-color: var(--color-red);
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 15px 28px;
+            padding: 14px 28px;
             border-radius: 8px;
-            transition: background-color 0.3s, transform 0.3s, opacity 0.3s;
-            font-size: 1.2rem;
-            font-weight: 600;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            font-size: 1.1rem;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: none;
+            transition: background 0.2s, color 0.2s, opacity 0.2s;
         }
         a:hover {
-            background-color: var(--color-vivid-cyan-blue);
+            background-color: var(--color-red-dark);
             color: var(--color-white);
-            transform: translateY(-2px) scale(1.03);
         }
         a::before {
             content: attr(data-icon);
@@ -87,22 +77,25 @@
         }
         /* Låste lenker */
         a[style*="opacity: 0.5"] {
-            background-color: var(--color-cyan-bluish-gray) !important;
-            color: var(--color-black) !important;
+            background-color: var(--color-gray-dark) !important;
+            color: var(--color-white) !important;
             cursor: not-allowed !important;
+            opacity: 0.5 !important;
             box-shadow: none;
         }
         hr {
-            margin: 32px 0;
+            margin: 40px 0 32px 0;
             border: none;
-            border-top: 1px solid var(--color-cyan-bluish-gray);
+            border-top: 1px solid var(--color-gray-light);
         }
-        @media (max-width: 700px) {
+        @media (max-width: 800px) {
             .container {
                 padding: 18px;
             }
             h1 {
                 font-size: 1.5rem;
+                padding: 18px 0 12px 0;
+                margin: -18px -18px 24px -18px;
             }
             a {
                 font-size: 1rem;
