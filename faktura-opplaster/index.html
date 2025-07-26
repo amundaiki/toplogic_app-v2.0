@@ -187,6 +187,7 @@
 <body>
     <div class="container">
         <div class="header">
+            <img src="https://www.toplogic.no/wp-content/uploads/2023/01/Toplogic_norge_logo.svg" alt="Toplogic logo" style="max-width: 120px; margin-bottom: 16px; display: block; margin-left: auto; margin-right: auto; filter: brightness(0) invert(1);" />
             <h1>Fakturaopplasting</h1>
             <p>Last opp faktura og angi opplaster og leverandør</p>
         </div>
@@ -205,22 +206,14 @@
                     <label for="leverandor">Leverandør</label>
                     <select id="leverandor" name="leverandor" required>
                         <option value="ingen">Ingen normal leverandør – hent alle parameter</option>
-                        <option value="bring">Bring</option>
-                        <option value="schenker">Schenker</option>
-                        <option value="dhl">DHL</option>
-                        <option value="postnord">PostNord</option>
-                        <option value="dsv">DSV</option>
-                        <option value="ntg">NTG</option>
-                        <option value="bla_kurer">Blå Kurer</option>
-                        <option value="fedex">FedEx</option>
-                        <option value="freja">Freja</option>
-                        <option value="ntex">NTEX</option>
-                        <option value="samtransport">Samtransport</option>
+                        <option value="fast1">Fast 1</option>
+                        <option value="fast2">Fast 2</option>
+                        <option value="fast3">Fast 3</option>
                     </select>
                 </div>
                 <div class="form-group" id="paramGroup" style="display:none;">
                     <label for="parametre">Hvilke parameter ønsker du?</label>
-                    <textarea id="parametre" name="parametre" rows="3" placeholder="Skriv inn ønskede parameter, f.eks. parameter1, parameter2..."></textarea>
+                    <textarea id="parametre" name="parametre" rows="3" placeholder="f.eks. volum, antall, osv"></textarea>
                     <div style="margin-top:10px;">
                         <input type="checkbox" id="kunDisse" name="kunDisse">
                         <label for="kunDisse" style="display:inline;font-weight:400;">Kun disse parameterne (ikke ta med andre)</label>
@@ -229,12 +222,12 @@
                 <div class="form-group">
                     <label for="fakturaFile">Last opp faktura</label>
                     <div class="file-upload-area" id="dropZone">
-                        <input type="file" id="fakturaFile" name="fakturaFile" accept=".pdf,.xlsx,.xls,.csv" required>
+                        <input type="file" id="fakturaFile" name="fakturaFile" accept=".pdf" required>
                         <svg class="upload-icon" viewBox="0 0 24 24">
                             <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
                         </svg>
                         <p><strong>Klikk for å velge fil</strong> eller dra og slipp her</p>
-                        <p class="supported-formats">Støttede formater: PDF, Excel (XLSX/XLS), CSV</p>
+                        <p class="supported-formats">Støttet format: PDF</p>
                     </div>
                     <div class="file-info" id="fileInfo">
                         <p>Valgt fil: <span class="file-name" id="fileName"></span></p>
