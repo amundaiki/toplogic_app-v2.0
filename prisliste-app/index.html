@@ -198,6 +198,15 @@
         <div class="content">
             <form id="uploadForm">
                 <div class="form-group">
+                    <label for="opplaster">Hvem laster opp?</label>
+                    <select id="opplaster" name="opplaster" required>
+                        <option value="">Velg opplaster...</option>
+                        <option value="Peter">Peter</option>
+                        <option value="Janne">Janne</option>
+                        <option value="Amund">Amund</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label for="prislisteType">Pristype</label>
                     <select id="prislisteType" name="prislisteType" required>
                         <option value="">Velg pristype...</option>
@@ -208,12 +217,12 @@
                 <div class="form-group">
                     <label for="prislisteFile">Last opp prisliste</label>
                     <div class="file-upload-area" id="dropZone">
-                        <input type="file" id="prislisteFile" name="prislisteFile" accept=".pdf,.xlsx,.xls,.csv" required>
+                        <input type="file" id="prislisteFile" name="prislisteFile" accept=".pdf" required>
                         <svg class="upload-icon" viewBox="0 0 24 24">
                             <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
                         </svg>
                         <p><strong>Klikk for å velge fil</strong> eller dra og slipp her</p>
-                        <p class="supported-formats">Støttede formater: PDF, Excel (XLSX/XLS), CSV</p>
+                        <p class="supported-formats">Støttet format: PDF</p>
                     </div>
                     <div class="file-info" id="fileInfo">
                         <p>Valgt fil: <span class="file-name" id="fileName"></span></p>
@@ -301,8 +310,13 @@
         }
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
+            const opplaster = document.getElementById('opplaster').value;
             const prislisteType = document.getElementById('prislisteType').value;
             const file = fileInput.files[0];
+            if (!opplaster) {
+                showMessage('Vennligst velg hvem som laster opp', 'error');
+                return;
+            }
             if (!prislisteType) {
                 showMessage('Vennligst velg pristype', 'error');
                 return;
@@ -313,6 +327,10 @@
             }
             if (file.size > 10 * 1024 * 1024) {
                 showMessage('Filen er for stor. Maksimal størrelse er 10MB.', 'error');
+                return;
+            }
+            if (file && file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+                showMessage('Kun PDF-filer er støttet.', 'error');
                 return;
             }
             if (prislisteType === 'annet') {
@@ -326,6 +344,7 @@
             formData.append('prislisteType', prislisteType);
             formData.append('fileName', file.name);
             formData.append('timestamp', new Date().toISOString());
+            formData.append('opplaster', opplaster);
             if (prislisteType === 'annet') {
                 formData.append('annetBeskrivelse', annetBeskrivelse.value.trim());
             }
