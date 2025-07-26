@@ -197,6 +197,32 @@
             font-size: 14px;
             color: #666;
         }
+        .toggle-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .toggle-btn {
+            flex: 1;
+            padding: 10px 16px;
+            border: 2px solid var(--color-red);
+            border-radius: 8px;
+            background: var(--color-white);
+            color: var(--color-red);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+        }
+        .toggle-btn.active {
+            background: var(--color-red);
+            color: var(--color-white);
+        }
+        .toggle-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(199, 32, 39, 0.15);
+        }
     </style>
 </head>
 <body>
@@ -227,13 +253,14 @@
                     </select>
                 </div>
                 <div class="form-group" id="paramGroup" style="display:none;">
-                    <label for="parametre">Hvilke parameter ønsker du?</label>
-                    <textarea id="parametre" name="parametre" rows="3" placeholder="f.eks. volum, antall, osv"></textarea>
-                    <small style="color:#666;display:block;margin-top:4px;">Skriv inn hvilke parameter du ønsker å hente ut fra fakturaen (for eksempel volum, antall, osv).<br>Hvis du lar feltet stå tom, vil alle tilgjengelige parameter bli hentet ut.</small>
-                    <div style="margin-top:10px;">
-                        <input type="checkbox" id="kunDisse" name="kunDisse">
-                        <label for="kunDisse" style="display:inline;font-weight:400;">Kun disse parameterne (ikke ta med andre)</label>
+                    <label for="parametre">Parametermodus</label>
+                    <div class="toggle-group">
+                        <button type="button" class="toggle-btn active" id="inkluderBtn">Inkluder</button>
+                        <button type="button" class="toggle-btn" id="ekskluderBtn">Ekskluder</button>
                     </div>
+                    <textarea id="parametre" name="parametre" rows="3" placeholder="f.eks. volum, antall, osv"></textarea>
+                    <small style="color:#666;display:block;margin-top:4px;">Skriv inn hvilke parameter du ønsker å inkludere eller ekskludere fra analysen.<br>Hvis du lar feltet stå tomt, hentes alle parametre.</small>
+                    <input type="hidden" id="paramMode" name="paramMode" value="inkluder">
                 </div>
                 <div class="form-group">
                     <label for="fakturaFile">Last opp faktura</label>
@@ -307,7 +334,7 @@
             const leverandor = document.getElementById('leverandor').value;
             const file = fileInput.files[0];
             const parametre = document.getElementById('parametre').value;
-            const kunDisse = document.getElementById('kunDisse').checked;
+            const paramMode = document.getElementById('paramMode').value;
             if (!opplaster) {
                 showMessage('Vennligst velg hvem som laster opp', 'error');
                 return;
@@ -332,7 +359,7 @@
             formData.append('timestamp', new Date().toISOString());
             if (leverandor === 'ingen') {
                 formData.append('parametre', parametre);
-                formData.append('kunDisse', kunDisse);
+                formData.append('paramMode', paramMode);
             }
             submitBtn.disabled = true;
             loadingSpinner.style.display = 'block';
@@ -383,11 +410,32 @@
                 paramGroup.style.display = '';
             }
         });
+        // Toggle-knapper for parametermodus
+        const inkluderBtn = document.getElementById('inkluderBtn');
+        const ekskluderBtn = document.getElementById('ekskluderBtn');
+        const paramModeInput = document.getElementById('paramMode');
+
+        inkluderBtn.addEventListener('click', function() {
+            inkluderBtn.classList.add('active');
+            ekskluderBtn.classList.remove('active');
+            paramModeInput.value = 'inkluder';
+        });
+
+        ekskluderBtn.addEventListener('click', function() {
+            ekskluderBtn.classList.add('active');
+            inkluderBtn.classList.remove('active');
+            paramModeInput.value = 'ekskluder';
+        });
+
         // Nullstill-knapp funksjon
         document.getElementById('resetBtn').addEventListener('click', function() {
             form.reset();
             fileInfo.classList.remove('show');
             document.getElementById('paramGroup').style.display = (document.getElementById('leverandor').value === 'ingen') ? '' : 'none';
+            // Reset toggle-knapper til standard tilstand
+            inkluderBtn.classList.add('active');
+            ekskluderBtn.classList.remove('active');
+            paramModeInput.value = 'inkluder';
         });
     </script>
 </body>
