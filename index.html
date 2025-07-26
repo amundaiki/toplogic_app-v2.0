@@ -75,14 +75,38 @@
         <h1>Toplogic AI-Apps</h1>
         <ul>
             <li><a href="faktura-opplaster/" data-icon="📑">PDF faktura til EXCEL</a></li>
-            <li><a href="prisliste-app/" data-icon="📈">Prislister til EXCEL</a></li>
+            <li><a href="#" id="prisliste-link" data-icon="📈">Prislister til EXCEL</a></li>
         </ul>
         <hr style="margin: 32px 0; border: none; border-top: 1px solid #e2e8f0;">
         <ul>
-            <li><a href="#" data-icon="📤" style="pointer-events: none; opacity: 0.5; cursor: not-allowed;">Dokumentbehandler (låst)</a></li>
-            <li><a href="#" data-icon="📊" style="pointer-events: none; opacity: 0.5; cursor: not-allowed;">Kostnadsanalyse (låst)</a></li>
+            <li><a href="#" data-icon="📤" id="dokumentbehandler-link">Dokumentbehandler (låst)</a></li>
+            <li><a href="#" data-icon="📊" id="kostnadsanalyse-link">Kostnadsanalyse (låst)</a></li>
         </ul>
     </div>
+
+<script>
+    document.getElementById('prisliste-link').addEventListener('click', function(e) {
+        e.preventDefault();
+        const passord = prompt('Skriv inn passord for å åpne Prislister til EXCEL:');
+        if (passord === '1') {
+            window.location.href = 'prisliste-app/';
+        }
+    });
+    document.getElementById('dokumentbehandler-link').addEventListener('click', function(e) {
+        e.preventDefault();
+        const passord = prompt('Skriv inn passord for å åpne Dokumentbehandler:');
+        if (passord === '1') {
+            window.location.href = 'dokument-uploader/';
+        }
+    });
+    document.getElementById('kostnadsanalyse-link').addEventListener('click', function(e) {
+        e.preventDefault();
+        const passord = prompt('Skriv inn passord for å åpne Kostnadsanalyse:');
+        if (passord === '1') {
+            window.location.href = 'kostnadsanalyse/';
+        }
+    });
+</script>
 
 </body>
 </html>
