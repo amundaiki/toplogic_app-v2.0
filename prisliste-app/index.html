@@ -407,8 +407,6 @@
                     throw new Error(`Server svarte ${response.status}`);
                 }
                 showMessage('Prislisten er sendt til prosessering! Du vil motta resultatet på e-post.', 'success');
-                form.reset();
-                fileInfo.classList.remove('show');
                 setTimeout(() => {
                     progressBar.classList.remove('show');
                     progressFill.style.width = '0%';
