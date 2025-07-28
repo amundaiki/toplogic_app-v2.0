@@ -4,300 +4,148 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TopLogic - Prislisteopplasting</title>
-    <link rel="icon" type="image/png" href="https://images.squarespace-cdn.com/content/v1/67a10d12887082593bb5d293/5906a95f-191d-416a-a782-fce63d997100/aiki.png?format=1500w">
-    <style>
-        :root {
-            --color-red: #c72027;
-            --color-red-dark: #a51a1e;
-            --color-white: #ffffff;
-            --color-black: #000000;
-            --color-gray-dark: #4a4a4a;
-            --color-gray-light: #f8f8f8;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-            background: var(--color-gray-light);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            color: var(--color-gray-dark);
-        }
-        .container {
-            background: var(--color-white);
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-            max-width: 500px;
-            width: 100%;
-            overflow: hidden;
-        }
-        .header {
-            background: linear-gradient(90deg, var(--color-red) 0%, var(--color-red-dark) 100%);
-            color: var(--color-white);
-            padding: 30px;
-            text-align: center;
-        }
-        .header h1 {
-            font-size: 26px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-        }
-        .header p {
-            opacity: 0.95;
-            font-size: 16px;
-        }
-        .content { padding: 32px; }
-        .form-group { margin-bottom: 22px; }
-        label {
-            display: block;
-            font-weight: 600;
-            color: var(--color-gray-dark);
-            margin-bottom: 8px;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-        }
-        select, input[type="file"] {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            background: var(--color-white);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-        }
-        select:focus, input[type="file"]:focus {
-            outline: none;
-            border-color: var(--color-red);
-        }
-        textarea#annetBeskrivelse {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            background: var(--color-white);
-            transition: all 0.3s ease;
-            resize: vertical;
-            min-height: 60px;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-        }
-        textarea#annetBeskrivelse:focus {
-            outline: none;
-            border-color: var(--color-red);
-        }
-        .file-upload-area {
-            border: 3px dashed #e0e0e0;
-            border-radius: 12px;
-            padding: 32px;
-            text-align: center;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            position: relative;
-            background: #fafafa;
-        }
-        .file-upload-area:hover {
-            border-color: var(--color-red);
-            background: #f8f8f8;
-        }
-        .file-upload-area.drag-over {
-            border-color: var(--color-red);
-            background: #ffeaea;
-        }
-        .file-upload-area input[type="file"] {
-            position: absolute;
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-            left: 0;
-            top: 0;
-        }
-        .upload-icon {
-            width: 50px;
-            height: 50px;
-            margin: 0 auto 12px;
-            fill: var(--color-red);
-        }
-        .file-info {
-            margin-top: 16px;
-            padding: 12px;
-            background: #ffeaea;
-            border-radius: 8px;
-            display: none;
-        }
-        .file-info.show { display: block; }
-        .file-name {
-            font-weight: 600;
-            color: var(--color-red);
-            word-break: break-all;
-        }
-        .submit-btn {
-            width: 100%;
-            padding: 14px;
-            background: var(--color-red);
-            color: var(--color-white);
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-        }
-        .submit-btn:hover {
-            background: var(--color-red-dark);
-            color: var(--color-white);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(199, 32, 39, 0.15);
-        }
-        .submit-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .loading {
-            display: none;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #ffffff;
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 1s ease-in-out infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .message {
-            margin-top: 18px;
-            padding: 14px;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: 500;
-            display: none;
-            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-        }
-        .message.success {
-            background: #e8f5e9;
-            color: #2e7d32;
-            border: 1px solid #81c784;
-        }
-        .message.error {
-            background: #ffebee;
-            color: var(--color-red);
-            border: 1px solid #ef5350;
-        }
-        .message.show { display: block; }
-        .supported-formats {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #666;
-        }
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: #e0e0e0;
-            border-radius: 2px;
-            margin-top: 18px;
-            overflow: hidden;
-            display: none;
-        }
-        .progress-bar.show { display: block; }
-        .progress-fill {
-            height: 100%;
-            background: var(--color-red);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-    </style>
+    <link rel="icon" type="image/png" href="https://images.squarespace-cdn.com/content/v1/67a10d12887082593bb5d293/d39dc0a0-5a17-4ef9-88a4-2d0edb45fd5e/LOGO+l.png?format=500w">
+    <link rel="stylesheet" href="../shared.css">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>TopLogic Prislisteopplasting</h1>
-            <p>Last opp og prosesser prislister enkelt og sikkert</p>
-        </div>
-        <div class="content">
-            <form id="uploadForm">
-                <div class="form-group">
-                    <label for="opplaster">Hvem laster opp?</label>
-                    <select id="opplaster" name="opplaster" required>
-                        <option value="">Velg opplaster...</option>
-                        <option value="Peter">Peter</option>
-                        <option value="Janne">Janne</option>
-                        <option value="Amund">Amund</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="prislisteType">Pristype</label>
-                    <select id="prislisteType" name="prislisteType" required>
-                        <option value="">Velg pristype...</option>
-                        <option value="bring_transport">Bring Transportguide</option>
-                        <option value="annet">Annet</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="prislisteFile">Last opp prisliste</label>
-                    <div class="file-upload-area" id="dropZone">
-                        <input type="file" id="prislisteFile" name="prislisteFile" accept=".pdf" required>
-                        <svg class="upload-icon" viewBox="0 0 24 24">
-                            <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
-                        </svg>
-                        <p><strong>Klikk for å velge fil</strong> eller dra og slipp her</p>
-                        <p class="supported-formats">Støttet format: PDF</p>
+    <div class="page-container">
+        <div class="toplogic-container">
+            <div class="toplogic-header">
+                <img src="https://www.toplogic.no/wp-content/uploads/2023/01/Toplogic_norge_logo.svg" alt="TopLogic logo" class="header-logo" />
+                <h1>Prislisteopplasting</h1>
+                <p>Last opp og prosesser prislister enkelt og sikkert med AI-drevet analyse</p>
+            </div>
+            
+            <div class="toplogic-content">
+                <form id="uploadForm">
+                    <div class="form-group">
+                        <label for="opplaster" class="form-label">Hvem laster opp?</label>
+                        <select id="opplaster" name="opplaster" class="form-select" required>
+                            <option value="">Velg opplaster...</option>
+                            <!-- Vil bli populert via JavaScript -->
+                        </select>
                     </div>
-                    <div class="file-info" id="fileInfo">
-                        <p>Valgt fil: <span class="file-name" id="fileName"></span></p>
+
+                    <div class="form-group">
+                        <label for="prislisteType" class="form-label">Pristype</label>
+                        <select id="prislisteType" name="prislisteType" class="form-select" required>
+                            <option value="">Velg pristype...</option>
+                            <option value="bring_transport">Bring Transportguide</option>
+                            <option value="prisliste_drivstoff">Drivstofftillegg oversikt</option>
+                            <option value="prisliste_valuta">Valutapåslag oversikt</option>
+                            <option value="prisliste_miljo">Miljøavgift oversikt</option>
+                            <option value="annet">Annet (beskriv nedenfor)</option>
+                        </select>
                     </div>
+
+                    <div class="form-group" id="annetBeskrivelseGroup" style="display:none;">
+                        <label for="annetBeskrivelse" class="form-label">Beskriv hvilken liste dette er og hva som skal hentes</label>
+                        <textarea id="annetBeskrivelse" name="annetBeskrivelse" class="form-textarea" rows="3" placeholder="Beskriv hvilken type prisliste dette er og hvilke data som skal ekstraheres..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="prislisteFile" class="form-label">Last opp prisliste</label>
+                        <div class="file-upload-area" id="dropZone">
+                            <input type="file" id="prislisteFile" name="prislisteFile" accept=".pdf,.xlsx,.xls,.csv" required>
+                            <svg class="upload-icon" viewBox="0 0 24 24">
+                                <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
+                            </svg>
+                            <p><strong>Klikk for å velge fil</strong> eller dra og slipp her</p>
+                            <p class="supported-formats">Støttede formater: PDF, Excel (XLSX/XLS), CSV</p>
+                        </div>
+                        <div class="file-info" id="fileInfo">
+                            <p>Valgt fil: <span class="file-name" id="fileName"></span></p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Ønskede output-formater</label>
+                        <div style="display: flex; flex-wrap: wrap; gap: var(--spacing-md);">
+                            <label style="display: flex; align-items: center; gap: var(--spacing-sm); font-weight: normal; text-transform: none; letter-spacing: normal;">
+                                <input type="checkbox" name="outputFormat" value="excel" checked style="margin: 0;">
+                                <span>Strukturert Excel</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: var(--spacing-sm); font-weight: normal; text-transform: none; letter-spacing: normal;">
+                                <input type="checkbox" name="outputFormat" value="csv" style="margin: 0;">
+                                <span>CSV-format</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: var(--spacing-sm); font-weight: normal; text-transform: none; letter-spacing: normal;">
+                                <input type="checkbox" name="outputFormat" value="summary" style="margin: 0;">
+                                <span>Sammendrag</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full btn-large" id="submitBtn">
+                        <span>Send prisliste</span>
+                        <div class="loading-spinner" id="loadingSpinner"></div>
+                    </button>
+
+                    <button type="button" class="btn btn-secondary btn-full mt-lg" id="resetBtn">
+                        Nullstill
+                    </button>
+                </form>
+
+                <div class="message" id="message"></div>
+
+                <!-- Info-seksjon -->
+                <div style="margin-top: var(--spacing-xxxl); padding: var(--spacing-lg); background: var(--color-gray-light); border-radius: var(--radius-md);">
+                    <h4 style="color: var(--color-gray-dark); margin-bottom: var(--spacing-md); font-size: var(--font-size-medium);">Hva gjør vi?</h4>
+                    <ul style="color: var(--color-gray-medium); font-size: var(--font-size-normal); margin-left: var(--spacing-lg);">
+                        <li>AI analyserer prislisten automatisk</li>
+                        <li>Identifiserer produkter, priser og kategorier</li>
+                        <li>Strukturerer data i Excel-format</li>
+                        <li>Validerer og renser dataene</li>
+                        <li>Sender strukturert prisliste til din e-post</li>
+                    </ul>
                 </div>
-                <div class="form-group" id="annetBeskrivelseGroup" style="display:none;">
-                    <label for="annetBeskrivelse">Beskriv hvilken liste dette er og hva som skal hentes</label>
-                    <textarea id="annetBeskrivelse" name="annetBeskrivelse" rows="3" style="width:100%;padding:12px 16px;border:2px solid #e0e0e0;border-radius:8px;font-size:16px;"></textarea>
+
+                <!-- Støttede formater -->
+                <div style="margin-top: var(--spacing-xl); padding: var(--spacing-md); background: var(--color-success-bg); border-radius: var(--radius-md); border-left: 4px solid var(--color-success);">
+                    <h5 style="color: var(--color-success); margin-bottom: var(--spacing-sm); font-size: var(--font-size-normal);">Støttede prislisteformater</h5>
+                    <p style="color: var(--color-gray-medium); font-size: var(--font-size-small); margin: 0;">
+                        <strong>Bring Transportguide:</strong> Automatisk gjenkjenning og prising<br>
+                        <strong>Drivstofftillegg:</strong> Ekstraherer tilleggssatser og perioder<br>
+                        <strong>Andre format:</strong> Fleksibel AI-analyse tilpasset ditt innhold
+                    </p>
                 </div>
-                <div class="progress-bar" id="progressBar">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-                <button type="submit" class="submit-btn" id="submitBtn">
-                    <span>Send prisliste</span>
-                    <div class="loading" id="loadingSpinner"></div>
-                </button>
-                <button type="button" class="submit-btn" id="resetBtn" style="background:#ccc;color:#222;margin-top:10px;">Nullstill</button>
-            </form>
-            <div class="message" id="message"></div>
+            </div>
         </div>
     </div>
+
+    <!-- Last inn konfigurasjon og delt funksjonalitet -->
+    <script src="../config.js"></script>
+    <script src="../shared.js"></script>
+    
     <script>
-        // Webhook URLs for prislister
-        const webhooks = {
-            'prisliste_drivstoff': 'https://hook.eu2.make.com/your-fuel-webhook',
-            'prisliste_valuta': 'https://hook.eu2.make.com/your-currency-webhook',
-            'prisliste_miljo': 'https://hook.eu2.make.com/your-environment-webhook',
-            'bring_transport': 'https://hook.eu2.make.com/mwmlrm2esor86r8w3dnyr7elo557rc2j'
-        };
-        const dropZone = document.getElementById('dropZone');
-        const fileInput = document.getElementById('prislisteFile');
-        const fileInfo = document.getElementById('fileInfo');
-        const fileName = document.getElementById('fileName');
-        const form = document.getElementById('uploadForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const loadingSpinner = document.getElementById('loadingSpinner');
-        const message = document.getElementById('message');
-        const progressBar = document.getElementById('progressBar');
-        const progressFill = document.getElementById('progressFill');
+        // Initialiser TopLogic App
+        const app = new TopLogicApp();
+        const config = window.TopLogicConfig;
+
+        // Populer brukere fra config
+        function populateUsers() {
+            const opplasterSelect = document.getElementById('opplaster');
+            config.APP_CONFIG.users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.value;
+                option.textContent = user.label;
+                opplasterSelect.appendChild(option);
+            });
+        }
+
+        // Initialiser komponenter
+        populateUsers();
+
+        // DOM elementer
         const prislisteTypeSelect = document.getElementById('prislisteType');
         const annetBeskrivelseGroup = document.getElementById('annetBeskrivelseGroup');
         const annetBeskrivelse = document.getElementById('annetBeskrivelse');
 
+        // Vis/skjul beskrivelse når "Annet" er valgt
         prislisteTypeSelect.addEventListener('change', function() {
             if (this.value === 'annet') {
                 annetBeskrivelseGroup.style.display = 'block';
@@ -308,142 +156,136 @@
                 annetBeskrivelse.value = '';
             }
         });
-        // Drag and drop
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, preventDefaults, false);
-        });
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone.addEventListener(eventName, highlight, false);
-        });
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, unhighlight, false);
-        });
-        function highlight(e) { dropZone.classList.add('drag-over'); }
-        function unhighlight(e) { dropZone.classList.remove('drag-over'); }
-        dropZone.addEventListener('drop', handleDrop, false);
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            fileInput.files = files;
-            handleFiles(files);
-        }
-        fileInput.addEventListener('change', function(e) {
-            handleFiles(this.files);
-        });
-        function handleFiles(files) {
-            if (files.length > 0) {
-                const file = files[0];
-                fileName.textContent = file.name;
-                fileInfo.classList.add('show');
+
+        // Setup file upload med støtte for flere filtyper
+        app.setupFileUpload('prislisteFile', {
+            allowedTypes: 'excel', // Støtter både Excel og PDF
+            onFileSelect: (file) => {
+                console.log('Prisliste valgt:', file.name);
+                // Auto-detect type basert på filnavn hvis mulig
+                if (file.name.toLowerCase().includes('bring')) {
+                    prislisteTypeSelect.value = 'bring_transport';
+                }
+            },
+            onValidationError: (error) => {
+                app.showMessage(error, 'error');
             }
-        }
-        form.addEventListener('submit', async function(e) {
+        });
+
+        // Form submission
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+
+            const formData = new FormData();
             const opplaster = document.getElementById('opplaster').value;
             const prislisteType = document.getElementById('prislisteType').value;
-            const file = fileInput.files[0];
+            const file = document.getElementById('prislisteFile').files[0];
+
+            // Valider required felter
             if (!opplaster) {
-                showMessage('Vennligst velg hvem som laster opp', 'error');
+                app.showMessage(config.APP_CONFIG.messages.error.noUser, 'error');
                 return;
             }
+
             if (!prislisteType) {
-                showMessage('Vennligst velg pristype', 'error');
+                app.showMessage(config.APP_CONFIG.messages.error.noPriceType, 'error');
                 return;
             }
+
             if (!file) {
-                showMessage('Vennligst velg en fil', 'error');
+                app.showMessage(config.APP_CONFIG.messages.error.noFile, 'error');
                 return;
             }
-            if (file.size > 10 * 1024 * 1024) {
-                showMessage('Filen er for stor. Maksimal størrelse er 10MB.', 'error');
+
+            // Valider fil
+            if (!config.CONFIG_HELPERS.isValidFileSize(file)) {
+                app.showMessage(config.APP_CONFIG.messages.error.fileTooBig, 'error');
                 return;
             }
-            if (file && file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
-                showMessage('Kun PDF-filer er støttet.', 'error');
+
+            // Spesiell validering for PDF og Excel filer
+            const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+            const isExcel = config.CONFIG_HELPERS.isValidFileType(file, 'excel');
+            
+            if (!isPdf && !isExcel) {
+                app.showMessage('Kun PDF, Excel og CSV filer er støttet.', 'error');
                 return;
             }
-            if (prislisteType === 'annet') {
-                if (!annetBeskrivelse.value.trim()) {
-                    showMessage('Vennligst beskriv hvilken liste dette er og hva som skal hentes.', 'error');
-                    return;
-                }
+
+            if (prislisteType === 'annet' && !annetBeskrivelse.value.trim()) {
+                app.showMessage(config.APP_CONFIG.messages.error.noDescription, 'error');
+                return;
             }
-            const formData = new FormData();
+
+            // Bygg FormData
             formData.append('file', file);
             formData.append('prislisteType', prislisteType);
             formData.append('fileName', file.name);
-            formData.append('timestamp', new Date().toISOString());
+            formData.append('timestamp', config.CONFIG_HELPERS.getTimestamp());
             formData.append('opplaster', opplaster);
+
             if (prislisteType === 'annet') {
                 formData.append('annetBeskrivelse', annetBeskrivelse.value.trim());
             }
-            const webhookUrl = webhooks[prislisteType] || webhooks['bring_transport'];
-            if (!webhookUrl) {
-                showMessage('Ugyldig pristype valgt', 'error');
-                return;
-            }
-            submitBtn.disabled = true;
-            loadingSpinner.style.display = 'block';
-            progressBar.classList.add('show');
-            message.classList.remove('show');
-            showMessage('Sender prisliste til Make.com...', 'success');
-            let progress = 0;
-            const progressInterval = setInterval(() => {
-                progress += 10;
-                progressFill.style.width = Math.min(progress, 90) + '%';
-            }, 200);
-            try {
-                const response = await fetch(webhookUrl, {
-                    method: 'POST',
-                    body: formData
-                });
-                clearInterval(progressInterval);
-                progressFill.style.width = '100%';
-                if (!response.ok) {
-                    throw new Error(`Server svarte ${response.status}`);
-                }
-                showMessage('Prislisten er sendt til prosessering! Du vil motta resultatet på e-post.', 'success');
-                setTimeout(() => {
-                    progressBar.classList.remove('show');
-                    progressFill.style.width = '0%';
-                }, 1000);
-            } catch (error) {
-                clearInterval(progressInterval);
-                showMessage(`Feil: ${error.message}. Sjekk konsollen for detaljer.`, 'error');
-                progressBar.classList.remove('show');
-                progressFill.style.width = '0%';
-            } finally {
-                submitBtn.disabled = false;
-                loadingSpinner.style.display = 'none';
-            }
-        });
-        function showMessage(text, type) {
-            if (message) {
-                message.textContent = text;
-                message.className = `message ${type} show`;
-                if (type === 'success') {
-                    setTimeout(() => {
-                        if (message) message.classList.remove('show');
-                    }, 5000);
-                }
-            }
-        }
 
-        // Nullstill-knapp funksjon
-        document.getElementById('resetBtn').addEventListener('click', function() {
-            form.reset();
-            fileInfo.classList.remove('show');
-            annetBeskrivelseGroup.style.display = 'none';
-            annetBeskrivelse.required = false;
-            annetBeskrivelse.value = '';
-            progressBar.classList.remove('show');
-            progressFill.style.width = '0%';
-            message.classList.remove('show');
+            // Output formater
+            const outputFormats = Array.from(document.querySelectorAll('input[name="outputFormat"]:checked'))
+                .map(cb => cb.value);
+            formData.append('outputFormats', outputFormats.join(','));
+
+            // Bestem webhook URL basert på type
+            let webhookType;
+            switch(prislisteType) {
+                case 'bring_transport':
+                    webhookType = 'prisliste_bring_transport';
+                    break;
+                case 'prisliste_drivstoff':
+                    webhookType = 'prisliste_drivstoff';
+                    break;
+                case 'prisliste_valuta':
+                    webhookType = 'prisliste_valuta';
+                    break;
+                case 'prisliste_miljo':
+                    webhookType = 'prisliste_miljo';
+                    break;
+                default:
+                    webhookType = 'prisliste_bring_transport'; // Fallback
+            }
+
+            // Send til Make.com
+            await app.submitForm(formData, webhookType, {
+                onStart: () => {
+                    app.setLoadingState(true);
+                    app.showMessage('Sender prisliste til Make.com...', 'success');
+                },
+                onProgress: (progress) => {
+                    app.setProgress(progress);
+                },
+                onSuccess: (message) => {
+                    app.showMessage(config.APP_CONFIG.messages.success.prislisteUploaded, 'success');
+                },
+                onError: (error) => {
+                    app.showMessage(error, 'error');
+                },
+                onComplete: () => {
+                    app.setLoadingState(false);
+                }
+            });
         });
+
+        // Reset button
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            app.resetForm('uploadForm', {
+                onReset: () => {
+                    // Reset custom visibility
+                    annetBeskrivelseGroup.style.display = 'none';
+                    annetBeskrivelse.required = false;
+                    annetBeskrivelse.value = '';
+                }
+            });
+        });
+
+        console.log('📊 TopLogic Prislisteopplasting er lastet');
     </script>
 </body>
 </html>

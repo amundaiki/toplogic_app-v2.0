@@ -4,464 +4,181 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TopLogic - Dokumenthåndtering</title>
-    <link rel="icon" type="image/png" href="https://images.squarespace-cdn.com/content/v1/67a10d12887082593bb5d293/5906a95f-191d-416a-a782-fce63d997100/aiki.png?format=1500w">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            width: 100%;
-            overflow: hidden;
-        }
-
-        .header {
-            background: #1a237e;
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 28px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .header p {
-            opacity: 0.9;
-            font-size: 16px;
-        }
-
-        .content {
-            padding: 40px;
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        label {
-            display: block;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            background: white;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        select:focus {
-            outline: none;
-            border-color: #1a237e;
-        }
-
-        .file-upload-area {
-            border: 3px dashed #e0e0e0;
-            border-radius: 12px;
-            padding: 40px;
-            text-align: center;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            position: relative;
-            background: #fafafa;
-        }
-
-        .file-upload-area:hover {
-            border-color: #1a237e;
-            background: #f5f5f5;
-        }
-
-        .file-upload-area.drag-over {
-            border-color: #1a237e;
-            background: #e8eaf6;
-        }
-
-        .file-upload-area input[type="file"] {
-            position: absolute;
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-            left: 0;
-            top: 0;
-        }
-
-        .upload-icon {
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 16px;
-            fill: #1a237e;
-        }
-
-        .file-info {
-            margin-top: 20px;
-            padding: 16px;
-            background: #e8eaf6;
-            border-radius: 8px;
-            display: none;
-        }
-
-        .file-info.show {
-            display: block;
-        }
-
-        .file-name {
-            font-weight: 600;
-            color: #1a237e;
-            word-break: break-all;
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 16px;
-            background: #1a237e;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .submit-btn:hover {
-            background: #0d47a1;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(26, 35, 126, 0.4);
-        }
-
-        .submit-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .loading {
-            display: none;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #ffffff;
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .message {
-            margin-top: 20px;
-            padding: 16px;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: 500;
-            display: none;
-        }
-
-        .message.success {
-            background: #e8f5e9;
-            color: #2e7d32;
-            border: 1px solid #81c784;
-        }
-
-        .message.error {
-            background: #ffebee;
-            color: #c62828;
-            border: 1px solid #ef5350;
-        }
-
-        .message.show {
-            display: block;
-        }
-
-        .supported-formats {
-            margin-top: 12px;
-            font-size: 14px;
-            color: #666;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: #e0e0e0;
-            border-radius: 2px;
-            margin-top: 20px;
-            overflow: hidden;
-            display: none;
-        }
-
-        .progress-bar.show {
-            display: block;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: #1a237e;
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        .transport-logos {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 20px;
-            opacity: 0.6;
-        }
-
-        .transport-logos img {
-            height: 30px;
-            filter: grayscale(100%);
-        }
-    </style>
+    <link rel="icon" type="image/png" href="https://images.squarespace-cdn.com/content/v1/67a10d12887082593bb5d293/d39dc0a0-5a17-4ef9-88a4-2d0edb45fd5e/LOGO+l.png?format=500w">
+    <link rel="stylesheet" href="../shared.css">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>TopLogic Dokumenthåndtering</h1>
-            <p>Automatisk prosessering av transportdokumenter</p>
-        </div>
-        
-        <div id="statusCheck" style="background: #fff3cd; color: #856404; padding: 10px; text-align: center; font-size: 14px; display: none;">
-            <strong>⚠️ Advarsel:</strong> <span id="statusMessage"></span>
-        </div>
-        
-        <div class="content">
-            <form id="uploadForm">
-                <div class="form-group">
-                    <label for="documentType">Dokumenttype</label>
-                    <select id="documentType" name="documentType" required>
-                        <option value="">Velg dokumenttype...</option>
-                        <option value="test" style="background: #ffeb3b; font-weight: bold;">🧪 TEST - Kun for testing</option>
-                        <optgroup label="Transportfakturaer">
-                            <option value="faktura_bring">Bring - Faktura</option>
-                            <option value="faktura_postnord">PostNord - Faktura</option>
-                            <option value="faktura_ups">UPS - Faktura</option>
-                            <option value="faktura_dhl">DHL - Faktura</option>
-                            <option value="faktura_fedex">FedEx - Faktura</option>
-                            <option value="faktura_schenker">DB Schenker - Faktura</option>
-                            <option value="faktura_ntg">NTG Road - Faktura</option>
-                            <option value="faktura_other">Annen transportør - Faktura</option>
-                        </optgroup>
-                        <optgroup label="Prisoversikter">
-                            <option value="prisliste_drivstoff">Drivstofftillegg oversikt</option>
-                            <option value="prisliste_valuta">Valutapåslag oversikt</option>
-                            <option value="prisliste_miljo">Miljøavgift oversikt</option>
-                            <option value="bring_transport">Bring Transportguide</option>
-                        </optgroup>
-                        <optgroup label="Andre dokumenter">
-                            <option value="rapport_frakt">Fraktrapport</option>
-                            <option value="rapport_analyse">Kostnadsanalyse</option>
-                            <option value="dokument_annet">Annet dokument</option>
-                        </optgroup>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="pdfFile">Last opp dokument</label>
-                    <div class="file-upload-area" id="dropZone">
-                        <input type="file" id="pdfFile" name="pdfFile" accept=".pdf,.xlsx,.xls,.csv" required>
-                        <svg class="upload-icon" viewBox="0 0 24 24">
-                            <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
-                        </svg>
-                        <p><strong>Klikk for å velge fil</strong> eller dra og slipp her</p>
-                        <p class="supported-formats">Støttede formater: PDF, Excel (XLSX/XLS), CSV</p>
-                    </div>
-                    <div class="file-info" id="fileInfo">
-                        <p>Valgt fil: <span class="file-name" id="fileName"></span></p>
-                    </div>
-                </div>
-
-                <div class="progress-bar" id="progressBar">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-
-                <button type="submit" class="submit-btn" id="submitBtn">
-                    <span>Send til prosessering</span>
-                    <div class="loading" id="loadingSpinner"></div>
-                </button>
-            </form>
-
-            <div class="message" id="message"></div>
-
-            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
-                <p style="font-size: 12px; color: #666; text-align: center;">
-                    Åpne konsollen (F12) for å se debug-informasjon og filnavn som sendes
-                </p>
-                <button type="button" onclick="testWebhook()" style="margin-top: 10px; padding: 8px 16px; background: #666; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                    Test webhook med 3 unike filer
-                </button>
-                <details style="margin-top: 10px;">
-                    <summary style="cursor: pointer; font-size: 12px; color: #666;">Feilsøking: Samme fil sendes flere ganger?</summary>
-                    <div style="font-size: 12px; color: #666; margin-top: 10px; padding: 10px; background: #f5f5f5; border-radius: 4px;">
-                        <p><strong>Sjekk i konsollen (F12):</strong></p>
-                        <ul style="margin-left: 20px; margin-top: 5px;">
-                            <li>Se etter "Adding file X: filnavn.pdf"</li>
-                            <li>Hver fil skal ha unikt navn og nummer</li>
-                            <li>Transaction ID skal være forskjellig for hver fil</li>
-                        </ul>
-                        <p style="margin-top: 10px;"><strong>I Make.com webhook history:</strong></p>
-                        <ul style="margin-left: 20px; margin-top: 5px;">
-                            <li>Sjekk fileName eller fileName_0, fileName_1, etc.</li>
-                            <li>Se etter transactionId eller batchId</li>
-                            <li>Verifiser at filnavn er forskjellige</li>
-                        </ul>
-                    </div>
-                </details>
+    <div class="page-container">
+        <div class="toplogic-container">
+            <div class="toplogic-header">
+                <img src="https://www.toplogic.no/wp-content/uploads/2023/01/Toplogic_norge_logo.svg" alt="TopLogic logo" class="header-logo" />
+                <h1>Dokumenthåndtering</h1>
+                <p>Automatisk prosessering av transportdokumenter med avansert AI-analyse</p>
             </div>
+            
+            <div id="statusCheck" style="background: #fff3cd; color: #856404; padding: 10px; text-align: center; font-size: 14px; display: none;">
+                <strong>Advarsel:</strong> <span id="statusMessage"></span>
+            </div>
+            
+            <div class="toplogic-content">
+                <form id="uploadForm">
+                    <div class="form-group">
+                        <label for="documentType" class="form-label">Dokumenttype</label>
+                        <select id="documentType" name="documentType" class="form-select" required>
+                            <option value="">Velg dokumenttype...</option>
+                            <option value="test" style="background: #ffeb3b; font-weight: bold;">TEST - Kun for testing</option>
+                            <optgroup label="Transportfakturaer">
+                                <option value="faktura_bring">Bring - Faktura</option>
+                                <option value="faktura_postnord">PostNord - Faktura</option>
+                                <option value="faktura_ups">UPS - Faktura</option>
+                                <option value="faktura_dhl">DHL - Faktura</option>
+                                <option value="faktura_fedex">FedEx - Faktura</option>
+                                <option value="faktura_schenker">DB Schenker - Faktura</option>
+                                <option value="faktura_ntg">NTG Road - Faktura</option>
+                                <option value="faktura_other">Annen transportør - Faktura</option>
+                            </optgroup>
+                            <optgroup label="Prisoversikter">
+                                <option value="prisliste_drivstoff">Drivstofftillegg oversikt</option>
+                                <option value="prisliste_valuta">Valutapåslag oversikt</option>
+                                <option value="prisliste_miljo">Miljøavgift oversikt</option>
+                                <option value="bring_transport">Bring Transportguide</option>
+                            </optgroup>
+                            <optgroup label="Andre dokumenter">
+                                <option value="rapport_frakt">Fraktrapport</option>
+                                <option value="rapport_analyse">Kostnadsanalyse</option>
+                                <option value="dokument_annet">Annet dokument</option>
+                            </optgroup>
+                        </select>
+                    </div>
 
-            <div class="transport-logos">
-                <!-- Her kan dere legge til logoer for transportørene -->
+                    <div class="form-group">
+                        <label for="pdfFile" class="form-label">Last opp dokument</label>
+                        <div class="file-upload-area" id="dropZone">
+                            <input type="file" id="pdfFile" name="pdfFile" accept=".pdf,.xlsx,.xls,.csv" required>
+                            <svg class="upload-icon" viewBox="0 0 24 24">
+                                <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
+                            </svg>
+                            <p><strong>Klikk for å velge fil</strong> eller dra og slipp her</p>
+                            <p class="supported-formats">Støttede formater: PDF, Excel (XLSX/XLS), CSV</p>
+                        </div>
+                        <div class="file-info" id="fileInfo">
+                            <p>Valgt fil: <span class="file-name" id="fileName"></span></p>
+                        </div>
+                    </div>
+
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full btn-large" id="submitBtn">
+                        <span>Send til prosessering</span>
+                        <div class="loading-spinner" id="loadingSpinner"></div>
+                    </button>
+
+                    <button type="button" class="btn btn-secondary btn-full mt-lg" id="resetBtn">
+                        Nullstill
+                    </button>
+                </form>
+
+                <div class="message" id="message"></div>
+
+                <!-- Debug-seksjon -->
+                <div style="margin-top: var(--spacing-xxxl); padding-top: var(--spacing-xl); border-top: 1px solid var(--color-gray-border);">
+                    <p style="font-size: var(--font-size-small); color: var(--color-gray-medium); text-align: center;">
+                        Åpne konsollen (F12) for å se debug-informasjon og filnavn som sendes
+                    </p>
+                    <button type="button" onclick="testWebhook()" class="btn btn-secondary" style="margin-top: var(--spacing-md); padding: var(--spacing-sm) var(--spacing-lg); font-size: var(--font-size-small); width: auto; min-height: auto;">
+                        Test webhook med 3 unike filer
+                    </button>
+                    
+                    <details style="margin-top: var(--spacing-md);">
+                        <summary style="cursor: pointer; font-size: var(--font-size-small); color: var(--color-gray-medium);">Feilsøking: Samme fil sendes flere ganger?</summary>
+                        <div style="font-size: var(--font-size-small); color: var(--color-gray-medium); margin-top: var(--spacing-md); padding: var(--spacing-md); background: var(--color-gray-light); border-radius: var(--radius-sm);">
+                            <p><strong>Sjekk i konsollen (F12):</strong></p>
+                            <ul style="margin-left: var(--spacing-xl); margin-top: var(--spacing-xs);">
+                                <li>Se etter "Adding file X: filnavn.pdf"</li>
+                                <li>Hver fil skal ha unikt navn og nummer</li>
+                                <li>Transaction ID skal være forskjellig for hver fil</li>
+                            </ul>
+                            <p style="margin-top: var(--spacing-md);"><strong>I Make.com webhook history:</strong></p>
+                            <ul style="margin-left: var(--spacing-xl); margin-top: var(--spacing-xs);">
+                                <li>Sjekk fileName eller fileName_0, fileName_1, etc.</li>
+                                <li>Se etter transactionId eller batchId</li>
+                                <li>Verifiser at filnavn er forskjellige</li>
+                            </ul>
+                        </div>
+                    </details>
+                </div>
+
+                <!-- Info-seksjon -->
+                <div style="margin-top: var(--spacing-xl); padding: var(--spacing-lg); background: var(--color-gray-light); border-radius: var(--radius-md);">
+                    <h4 style="color: var(--color-gray-dark); margin-bottom: var(--spacing-md); font-size: var(--font-size-medium);">Automatisk prosessering</h4>
+                    <ul style="color: var(--color-gray-medium); font-size: var(--font-size-normal); margin-left: var(--spacing-lg);">
+                        <li>AI identifiserer dokumenttype automatisk</li>
+                        <li>Ekstraherer alle relevante data og verdier</li>
+                        <li>Strukturerer informasjonen i Excel-format</li>
+                        <li>Sender prosessert fil til din e-post</li>
+                        <li>Støtter alle større transportører og formater</li>
+                    </ul>
+                </div>
+
+                <!-- Transportør-logoer -->
+                <div class="brand-logos" style="margin-top: var(--spacing-xl);">
+                    <!-- Her kan dere legge til logoer for transportørene -->
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Last inn konfigurasjon og delt funksjonalitet -->
+    <script src="../config.js"></script>
+    <script src="../shared.js"></script>
+    
     <script>
+        // Initialiser TopLogic App
+        const app = new TopLogicApp();
+        const config = window.TopLogicConfig;
+
         console.log('Script loaded successfully');
         console.log('Current URL:', window.location.href);
         
-        // Check if running from file:// protocol
-        if (window.location.protocol === 'file:') {
-            console.warn('WARNING: Running from file:// protocol. This may cause issues with webhooks. Please use a local server or upload to a web server.');
-            document.getElementById('statusCheck').style.display = 'block';
-            document.getElementById('statusMessage').textContent = 'Filen kjører lokalt (file://). Dette kan forårsake problemer med opplasting. Vennligst bruk en webserver.';
-        }
-        
-        // Webhook URLs - erstatt disse med faktiske Make.com webhooks
-        const webhooks = {
-            'test': 'https://hook.eu2.make.com/0dr1p19z7s77nc34gntj7satvrejip2u',
-            'faktura_bring': 'https://hook.eu2.make.com/your-bring-webhook',
-            'faktura_postnord': 'https://hook.eu2.make.com/your-postnord-webhook',
-            'faktura_ups': 'https://hook.eu2.make.com/your-ups-webhook',
-            'faktura_dhl': 'https://hook.eu2.make.com/your-dhl-webhook',
-            'faktura_fedex': 'https://hook.eu2.make.com/your-fedex-webhook',
-            'faktura_schenker': 'https://hook.eu2.make.com/your-schenker-webhook',
-            'faktura_ntg': 'https://hook.eu2.make.com/your-ntg-webhook',
-            'faktura_other': 'https://hook.eu2.make.com/your-other-webhook',
-            'prisliste_drivstoff': 'https://hook.eu2.make.com/your-fuel-webhook',
-            'prisliste_valuta': 'https://hook.eu2.make.com/your-currency-webhook',
-            'prisliste_miljo': 'https://hook.eu2.make.com/your-environment-webhook',
-            'bring_transport': 'https://hook.eu2.make.com/mwmlrm2esor86r8w3dnyr7elo557rc2j',
-            'rapport_frakt': 'https://hook.eu2.make.com/your-freight-report-webhook',
-            'rapport_analyse': 'https://hook.eu2.make.com/your-analysis-webhook',
-            'dokument_annet': 'https://hook.eu2.make.com/your-other-doc-webhook'
-        };
-
-        const dropZone = document.getElementById('dropZone');
-        const fileInput = document.getElementById('pdfFile');
-        const fileInfo = document.getElementById('fileInfo');
-        const fileName = document.getElementById('fileName');
-        const form = document.getElementById('uploadForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const loadingSpinner = document.getElementById('loadingSpinner');
-        const message = document.getElementById('message');
-        const progressBar = document.getElementById('progressBar');
-        const progressFill = document.getElementById('progressFill');
-
-        // Drag and drop functionality
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, preventDefaults, false);
-        });
-
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone.addEventListener(eventName, highlight, false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, unhighlight, false);
-        });
-
-        function highlight(e) {
-            dropZone.classList.add('drag-over');
-        }
-
-        function unhighlight(e) {
-            dropZone.classList.remove('drag-over');
-        }
-
-        dropZone.addEventListener('drop', handleDrop, false);
-
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            fileInput.files = files;
-            handleFiles(files);
-        }
-
-        fileInput.addEventListener('change', function(e) {
-            handleFiles(this.files);
-        });
-
-        function handleFiles(files) {
-            if (files.length > 0) {
-                const file = files[0];
-                fileName.textContent = file.name;
-                fileInfo.classList.add('show');
+        // Setup file upload med auto dokumenttype-gjenkjenning
+        app.setupFileUpload('pdfFile', {
+            allowedTypes: 'excel', // Støtter både PDF, Excel og CSV
+            onFileSelect: (file) => {
+                console.log('Dokument valgt:', file.name);
+                // Auto-detect dokumenttype basert på filnavn
+                app.autoSelectDocumentType(file.name, 'documentType');
+            },
+            onValidationError: (error) => {
+                app.showMessage(error, 'error');
             }
-        }
+        });
 
-        form.addEventListener('submit', async function(e) {
+        // Form submission
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             console.log('Form submit triggered');
             
             const documentType = document.getElementById('documentType').value;
-            const file = fileInput.files[0];
+            const file = document.getElementById('pdfFile').files[0];
             
             console.log('Document type:', documentType);
             console.log('File:', file);
             
             if (!documentType) {
-                showMessage('Vennligst velg dokumenttype', 'error');
+                app.showMessage(config.APP_CONFIG.messages.error.noDocumentType, 'error');
                 return;
             }
             
             if (!file) {
-                showMessage('Vennligst velg en fil', 'error');
+                app.showMessage(config.APP_CONFIG.messages.error.noFile, 'error');
                 return;
             }
 
-            // Validate file size (max 10MB)
-            if (file.size > 10 * 1024 * 1024) {
-                showMessage('Filen er for stor. Maksimal størrelse er 10MB.', 'error');
+            // Valider fil
+            if (!config.CONFIG_HELPERS.isValidFileSize(file)) {
+                app.showMessage(config.APP_CONFIG.messages.error.fileTooBig, 'error');
                 return;
             }
 
@@ -469,7 +186,7 @@
             formData.append('file', file);
             formData.append('documentType', documentType);
             formData.append('fileName', file.name);
-            formData.append('timestamp', new Date().toISOString());
+            formData.append('timestamp', config.CONFIG_HELPERS.getTimestamp());
 
             // Log FormData contents
             console.log('FormData contents:');
@@ -477,154 +194,50 @@
                 console.log(key + ':', value);
             }
 
-            const webhookUrl = webhooks[documentType];
-            console.log('Webhook URL:', webhookUrl);
+            console.log('Webhook type:', documentType);
             
-            if (!webhookUrl) {
-                showMessage('Ugyldig dokumenttype valgt', 'error');
-                return;
-            }
-
-            // Start loading state
-            submitBtn.disabled = true;
-            loadingSpinner.style.display = 'block';
-            progressBar.classList.add('show');
-            message.classList.remove('show');
-            
-            showMessage('Sender fil til Make.com...', 'success');
-
-            // Simulate progress
-            let progress = 0;
-            const progressInterval = setInterval(() => {
-                progress += 10;
-                progressFill.style.width = Math.min(progress, 90) + '%';
-            }, 200);
-
-            try {
-                console.log('Sending request to:', webhookUrl);
-                const response = await fetch(webhookUrl, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                clearInterval(progressInterval);
-                progressFill.style.width = '100%';
-                
-                console.log('Fetch response status:', response.status);
-                if (!response.ok) {
-                    throw new Error(`Server svarte ${response.status}`);
-                }
-                if (documentType === 'test') {
-                    showMessage('TEST MODUS: Dokumentet er sendt til test-webhook! Sjekk Make.com scenarioet for å se om data kom frem.', 'success');
-                } else {
-                    showMessage('Dokumentet er sendt til prosessering! Du vil motta resultatet på e-post.', 'success');
-                }
-                form.reset();
-                fileInfo.classList.remove('show');
-                setTimeout(() => {
-                    progressBar.classList.remove('show');
-                    progressFill.style.width = '0%';
-                }, 1000);
-                
-                // Alternativ: Prøv å sende som base64-enkodet JSON hvis FormData feiler
-                const reader = new FileReader();
-                reader.onload = async function(e) {
-                    const base64File = e.target.result.split(',')[1];
-                    const jsonPayload = {
-                        file: base64File,
-                        fileName: file.name,
-                        fileType: file.type,
-                        documentType: documentType,
-                        timestamp: new Date().toISOString()
-                    };
-                    
-                    console.log('Prøver alternativ metode med JSON payload');
-                    
-                    try {
-                        const jsonResponse = await fetch(webhookUrl, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify(jsonPayload)
-                        });
-                        console.log('JSON response status:', jsonResponse.status);
-                    } catch (jsonError) {
-                        console.error('JSON-metode feilet også:', jsonError);
+            // Send til Make.com
+            await app.submitForm(formData, documentType, {
+                onStart: () => {
+                    app.setLoadingState(true);
+                    app.showMessage(config.APP_CONFIG.messages.info.uploading, 'success');
+                },
+                onProgress: (progress) => {
+                    app.setProgress(progress);
+                },
+                onSuccess: (message) => {
+                    if (documentType === 'test') {
+                        app.showMessage(config.APP_CONFIG.messages.success.testMode, 'success');
+                    } else {
+                        app.showMessage(config.APP_CONFIG.messages.success.documentUploaded, 'success');
                     }
-                };
-                reader.readAsDataURL(file);
-                
-                // Alternativ metode 2: Bruk XMLHttpRequest
-                console.log('Prøver XMLHttpRequest-metode...');
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', webhookUrl, true);
-                xhr.onload = function() {
-                    console.log('XHR ferdig, status:', xhr.status);
-                };
-                xhr.onerror = function() {
-                    console.error('XHR-feil');
-                };
-                const xhrFormData = new FormData();
-                xhrFormData.append('file', file);
-                xhrFormData.append('test', 'true');
-                xhr.send(xhrFormData);
-                
-            } catch (error) {
-                clearInterval(progressInterval);
-                console.error('Feil ved sending:', error);
-                showMessage(`Feil: ${error.message}. Sjekk konsollen for detaljer.`, 'error');
-                progressBar.classList.remove('show');
-                progressFill.style.width = '0%';
-            } finally {
-                submitBtn.disabled = false;
-                loadingSpinner.style.display = 'none';
-            }
-        });
-
-        function showMessage(text, type) {
-            if (message) {
-                message.textContent = text;
-                message.className = `message ${type} show`;
-                
-                if (type === 'success') {
+                    // Reset form etter vellykket opplasting
                     setTimeout(() => {
-                        if (message) message.classList.remove('show');
-                    }, 5000);
+                        document.getElementById('uploadForm').reset();
+                        document.getElementById('fileInfo').classList.remove('show');
+                        app.setProgress(0, false);
+                    }, 2000);
+                },
+                onError: (error) => {
+                    app.showMessage(error, 'error');
+                },
+                onComplete: () => {
+                    app.setLoadingState(false);
                 }
-            }
-        }
-
-        // Auto-select document type based on filename
-        fileInput.addEventListener('change', function() {
-            const filename = this.files[0]?.name.toLowerCase() || '';
-            const typeSelect = document.getElementById('documentType');
-            
-            if (filename.includes('test')) {
-                typeSelect.value = 'test';
-            } else if (filename.includes('bring')) {
-                typeSelect.value = 'faktura_bring';
-            } else if (filename.includes('ups')) {
-                typeSelect.value = 'faktura_ups';
-            } else if (filename.includes('dhl')) {
-                typeSelect.value = 'faktura_dhl';
-            } else if (filename.includes('postnord')) {
-                typeSelect.value = 'faktura_postnord';
-            } else if (filename.includes('fedex')) {
-                typeSelect.value = 'faktura_fedex';
-            } else if (filename.includes('schenker')) {
-                typeSelect.value = 'faktura_schenker';
-            } else if (filename.includes('ntg')) {
-                typeSelect.value = 'faktura_ntg';
-            }
+            });
         });
-        // Test webhook directly
+
+        // Reset button
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            app.resetForm('uploadForm');
+        });
+
+        // Test webhook functionality (bevarer eksisterende logikk)
         window.testWebhook = async function() {
             console.log('Testing webhook directly...');
-            const testUrl = 'https://hook.eu2.make.com/0dr1p19z7s77nc34gntj7satvrejip2u';
+            const testUrl = config.CONFIG_HELPERS.getWebhookUrl('test');
             
             try {
-                // Test with unique file data
                 console.log('Test: Sending 3 different files');
                 
                 for (let i = 0; i < 3; i++) {
@@ -639,8 +252,9 @@
                     formData.append('fileName', `testfile_${i + 1}.txt`);
                     formData.append('fileContent', `This is file number ${i + 1}`);
                     formData.append('uniqueId', uniqueId);
-                    formData.append('timestamp', new Date().toISOString());
+                    formData.append('timestamp', config.CONFIG_HELPERS.getTimestamp());
                     
+                    console.log(`Adding file ${i + 1}: testfile_${i + 1}.txt`);
                     console.log(`Sending test file ${i + 1} with ID: ${uniqueId}`);
                     
                     await fetch(testUrl, {
@@ -656,20 +270,16 @@
                 }
                 
                 console.log('All test files sent');
-                showMessage('3 test-filer sendt! Sjekk Make.com for å se om alle er unike.', 'success');
+                app.showMessage('3 test-filer sendt! Sjekk Make.com for å se om alle er unike.', 'success');
                 
             } catch (error) {
                 console.error('Webhook test failed:', error);
-                showMessage('Webhook test feilet: ' + error.message, 'error');
+                app.showMessage('Webhook test feilet: ' + error.message, 'error');
             }
         };
         
-        // Test button functionality
-        submitBtn.addEventListener('click', function() {
-            console.log('Submit button clicked directly');
-        });
-        
         console.log('Event listeners attached');
+        console.log('🗂️ TopLogic Dokumenthåndtering er lastet');
     </script>
 </body>
 </html>

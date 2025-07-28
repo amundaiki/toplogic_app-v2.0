@@ -4,141 +4,126 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TopLogic AI-Apper</title>
-    <style>
-        :root {
-            --color-red: #c72027;
-            --color-red-dark: #a51a1e;
-            --color-white: #ffffff;
-            --color-black: #000000;
-            --color-gray-dark: #4a4a4a;
-            --color-gray-light: #f8f8f8;
-            --max-width: 1200px;
-        }
-        body {
-            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-            background: var(--color-gray-light);
-            color: var(--color-gray-dark);
-            margin: 0;
-            min-height: 100vh;
-        }
-        .container {
-            background: var(--color-white);
-            max-width: 500px;
-            margin: 48px auto;
-            border-radius: 16px;
-            box-shadow: 0 6px 24px rgba(0,0,0,0.08);
-            padding: 48px 24px;
-            text-align: center;
-        }
-        h1 {
-            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-            font-size: 2.6rem;
-            font-weight: 300;
-            color: var(--color-white);
-            background: linear-gradient(90deg, var(--color-red) 0%, var(--color-red-dark) 100%);
-            padding: 32px 0 24px 0;
-            margin: -48px -24px 32px -24px;
-            border-radius: 16px 16px 0 0;
-            letter-spacing: -1px;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.10);
-        }
-        ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        li {
-            margin-bottom: 20px;
-        }
-        a {
-            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-            text-decoration: none;
-            color: var(--color-white);
-            background-color: var(--color-red);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 14px 28px;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            border: none;
-            transition: background 0.2s, color 0.2s, opacity 0.2s;
-        }
-        a:hover {
-            background-color: var(--color-red-dark);
-            color: var(--color-white);
-        }
-        a::before {
-            content: attr(data-icon);
-            font-size: 1.5rem;
-            margin-right: 15px;
-        }
-        /* Låste lenker */
-        a[style*="opacity: 0.5"] {
-            background-color: var(--color-gray-dark) !important;
-            color: var(--color-white) !important;
-            cursor: not-allowed !important;
-            opacity: 0.5 !important;
-            box-shadow: none;
-        }
-        hr {
-            margin: 40px 0 32px 0;
-            border: none;
-            border-top: 1px solid var(--color-gray-light);
-        }
-        @media (max-width: 800px) {
-            .container {
-                padding: 18px;
-            }
-            h1 {
-                font-size: 1.5rem;
-                padding: 18px 0 12px 0;
-                margin: -18px -18px 24px -18px;
-            }
-            a {
-                font-size: 1rem;
-                padding: 12px 10px;
-            }
-        }
-    </style>
+    <link rel="icon" type="image/png" href="https://images.squarespace-cdn.com/content/v1/67a10d12887082593bb5d293/d39dc0a0-5a17-4ef9-88a4-2d0edb45fd5e/LOGO+l.png?format=500w">
+    <link rel="stylesheet" href="shared.css">
 </head>
 <body>
+    <div class="page-container">
+        <div class="toplogic-container" style="max-width: 600px;">
+            <div class="toplogic-header-home">
+                <img src="https://www.toplogic.no/wp-content/uploads/2023/01/Toplogic_norge_logo.svg" alt="TopLogic logo" class="header-logo" style="max-width: 180px; margin-bottom: 24px;" />
+                <h1>TopLogic AI-Apper</h1>
+                <p>Intelligente løsninger for bedre forretningsprosesser</p>
+            </div>
+            
+            <div class="toplogic-content">
+                <!-- Aktive apper -->
+                <div class="form-group">
+                    <h3 style="color: var(--color-gray-dark); margin-bottom: var(--spacing-lg); font-size: var(--font-size-medium); text-transform: uppercase; letter-spacing: 0.5px;">Tilgjengelige Apper</h3>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: var(--spacing-lg);">
+                            <a href="faktura-opplaster/" class="btn btn-primary btn-full btn-large" data-icon="📑">
+                                <span>PDF faktura til EXCEL</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
 
-    <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-        <img src="https://www.toplogic.no/wp-content/uploads/2023/01/Toplogic_norge_logo.svg" alt="Toplogic logo" style="max-width: 180px; margin-bottom: 32px; margin-top: 32px; display: block;" />
-        <div class="container">
-            <h1>Toplogic AI-Apper</h1>
-            <ul>
-                <li><a href="faktura-opplaster/" data-icon="📑">PDF faktura til EXCEL</a></li>
-            </ul>
-            <hr style="margin: 32px 0; border: none; border-top: 1px solid #e2e8f0;">
-            <ul>
-                <li><a href="#" data-icon="📈" id="prisliste-link" style="opacity: 0.5; cursor: not-allowed;">Prislister til EXCEL (låst)</a></li>
-                <li><a href="#" data-icon="📤" id="dokumentbehandler-link" style="opacity: 0.5; cursor: not-allowed;">Dokumentbehandler (låst)</a></li>
-                <li><a href="#" data-icon="📊" id="kostnadsanalyse-link" style="opacity: 0.5; cursor: not-allowed;">Kostnadsanalyse (låst)</a></li>
-            </ul>
+                <hr style="margin: var(--spacing-xxxl) 0; border: none; border-top: 1px solid var(--color-gray-border);">
+
+                <!-- Låste apper -->
+                <div class="form-group">
+                    <h3 style="color: var(--color-gray-medium); margin-bottom: var(--spacing-lg); font-size: var(--font-size-medium); text-transform: uppercase; letter-spacing: 0.5px;">Låste Apper</h3>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: var(--spacing-lg);">
+                            <a href="#" class="btn btn-primary btn-full btn-large btn-locked" id="prisliste-link" data-icon="📈">
+                                <span>Prislister til EXCEL</span>
+                            </a>
+                        </li>
+                        <li style="margin-bottom: var(--spacing-lg);">
+                            <a href="#" class="btn btn-primary btn-full btn-large btn-locked" id="dokumentbehandler-link" data-icon="📤">
+                                <span>Dokumentbehandler</span>
+                            </a>
+                        </li>
+                        <li style="margin-bottom: var(--spacing-lg);">
+                            <a href="#" class="btn btn-primary btn-full btn-large btn-locked" id="kostnadsanalyse-link" data-icon="📊">
+                                <span>Kostnadsanalyse</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- AIKI Logo-seksjon -->
+                <div style="margin-top: var(--spacing-xxxl); text-align: center;">
+                    <p style="font-size: var(--font-size-small); color: var(--color-gray-medium); margin-bottom: var(--spacing-md); font-weight: 600;">Powered by</p>
+                    <div style="display: flex; justify-content: center; align-items: center;">
+                        <a href="https://www.aiki.as" target="_blank" style="text-decoration: none; transition: transform 0.2s ease, opacity 0.2s ease;" onmouseover="this.style.transform='scale(1.05)'; this.style.opacity='0.8';" onmouseout="this.style.transform='scale(1)'; this.style.opacity='1';">
+                            <img src="https://images.squarespace-cdn.com/content/v1/67a10d12887082593bb5d293/d39dc0a0-5a17-4ef9-88a4-2d0edb45fd5e/LOGO+l.png?format=500w" alt="AIKI - AI & Automatisering" title="Besøk AIKI.as - AI & Automatisering" style="height: 50px; cursor: pointer;">
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Info-seksjon -->
+                <div style="margin-top: var(--spacing-xxxl); padding: var(--spacing-lg); background: var(--color-gray-light); border-radius: var(--radius-md); text-align: center;">
+                    <p style="font-size: var(--font-size-small); color: var(--color-gray-medium); margin-bottom: var(--spacing-sm);">
+                        Våre apper bruker avansert AI for å automatisere dine forretningsprosesser
+                    </p>
+                    <p style="font-size: var(--font-size-small); color: var(--color-gray-medium);">
+                        <strong>Support:</strong> amund@aiki.as | <strong>Web:</strong> www.aiki.as
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 
-<script>
-    function enableLinkOnPass(linkId, promptText, url) {
-        const link = document.getElementById(linkId);
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const passord = prompt(promptText);
-            if (passord === '1') {
-                link.style.opacity = '1';
-                link.style.cursor = 'pointer';
-                window.location.href = url;
-            }
+    <!-- Last inn konfigurasjon og delt funksjonalitet -->
+    <script src="config.js"></script>
+    <script src="shared.js"></script>
+    
+    <script>
+        // Initialiser TopLogic App (uten navigasjon på hovedsiden)
+        const app = new TopLogicApp({
+            enableNavigation: false,
+            enableStatusCheck: true
         });
-    }
-    enableLinkOnPass('prisliste-link', 'Skriv inn passord for å åpne Prislister til EXCEL:', 'prisliste-app/');
-    enableLinkOnPass('dokumentbehandler-link', 'Skriv inn passord for å åpne Dokumentbehandler:', 'dokument-uploader/');
-    enableLinkOnPass('kostnadsanalyse-link', 'Skriv inn passord for å åpne Kostnadsanalyse:', 'kostnadsanalyse/');
-</script>
 
+        // Setup password-beskyttede lenker
+        const config = window.TopLogicConfig;
+        const navigation = config.NAVIGATION.apps;
+
+        // Prisliste app
+        AppPasswordManager.enablePasswordProtection(
+            'prisliste-link',
+            navigation.prislisteApp.password,
+            'prisliste-app/',
+            'Skriv inn passord for å åpne Prislister til EXCEL:'
+        );
+
+        // Dokumentbehandler
+        AppPasswordManager.enablePasswordProtection(
+            'dokumentbehandler-link',
+            navigation.dokumentUploader.password,
+            'dokument-uploader/',
+            'Skriv inn passord for å åpne Dokumentbehandler:'
+        );
+
+        // Kostnadsanalyse
+        AppPasswordManager.enablePasswordProtection(
+            'kostnadsanalyse-link',
+            navigation.kostnadsAnalyse.password,
+            'kostnadsanalyse/',
+            'Skriv inn passord for å åpne Kostnadsanalyse:'
+        );
+
+        // Log info til konsoll
+        console.log('🚀 TopLogic AI-Apper er lastet');
+        console.log('Tilgjengelige konfigurasjoner:', Object.keys(config));
+        
+        // Vis debug info hvis i development mode
+        if (config.ENVIRONMENT.isDevelopment()) {
+            console.log('🛠️ Development mode aktiv');
+            console.log('Debug info:', config.CONFIG_HELPERS.getDebugInfo());
+        }
+    </script>
 </body>
 </html>
