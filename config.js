@@ -68,9 +68,7 @@ const APP_CONFIG = {
     // Leverandører (for faktura-opplaster)
     suppliers: [
         { value: 'ingen', label: 'Ingen normal leverandør – hent alle parameter' },
-        { value: 'fast1', label: 'Fast 1' },
-        { value: 'fast2', label: 'Fast 2' },
-        { value: 'fast3', label: 'Fast 3' }
+        { value: 'standardisert_mal', label: 'Standardisert mal' }
     ],
     
     // Meldinger
