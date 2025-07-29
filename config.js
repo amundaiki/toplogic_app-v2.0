@@ -67,8 +67,8 @@ const APP_CONFIG = {
     
     // Leverandører (for faktura-opplaster)
     suppliers: [
-        { value: 'ingen', label: 'Ingen normal leverandør – hent alle parameter' },
-        { value: 'standardisert_mal', label: 'Standardisert mal' }
+        { value: 'standardisert_mal', label: 'Standardisert mal' },
+        { value: 'ingen', label: 'Ingen normal leverandør – hent alle parameter' }
     ],
     
     // Meldinger
@@ -206,5 +206,5 @@ window.TopLogicConfig = {
 };
 
 // Debug: Vis leverandører i konsollen
-console.log('🔄 TopLogic Config v2 lastet - Leverandører:', APP_CONFIG.suppliers);
-console.log('✅ Fast1,2,3 erstattet med standardisert mal!'); 
+console.log('🔄 TopLogic Config v5 lastet - Leverandører:', APP_CONFIG.suppliers);
+console.log('✅ Standardisert mal øverst i listen!'); 
