@@ -1,4 +1,4 @@
-// TopLogic Applikasjonskonfigurasjon
+// TopLogic Applikasjonskonfigurasjon - Oppdatert med standardisert mal
 
 // Miljøkonfigurasjon
 const ENVIRONMENT = {
@@ -203,4 +203,7 @@ window.TopLogicConfig = {
     NAVIGATION,
     CONFIG_HELPERS,
     STATUS_CHECK
-}; 
+};
+
+// Debug: Vis leverandører i konsollen
+console.log('TopLogic Config lastet - Leverandører:', APP_CONFIG.suppliers); 
