@@ -47,6 +47,48 @@
                         <input type="hidden" id="paramMode" name="paramMode" value="inkluder">
                     </div>
 
+                    <div class="form-group" id="standardMalInfo" style="display:none;">
+                        <div style="padding: var(--spacing-md); background: var(--color-blue-light); border-radius: var(--radius-md); border-left: 4px solid var(--color-blue);">
+                            <h4 style="color: var(--color-blue-dark); margin: 0 0 var(--spacing-sm) 0; font-size: var(--font-size-medium);">📋 Standardisert mal - 133 parametre</h4>
+                            <p style="color: var(--color-gray-dark); margin: 0 0 var(--spacing-sm) 0; font-size: var(--font-size-small);">
+                                AI-en vil automatisk hente ut alle disse parametrene fra fakturaen:
+                            </p>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-sm); font-size: var(--font-size-small); color: var(--color-gray-medium);">
+                                <div>
+                                    <strong>📄 Grunnleggende:</strong><br>
+                                    • Leverandør & kunde<br>
+                                    • Fakturanr & dato<br>
+                                    • Valuta & beløp<br>
+                                    • Referansenummer
+                                </div>
+                                <div>
+                                    <strong>🚚 Transport:</strong><br>
+                                    • Avgang/ankomst dato<br>
+                                    • Fra/til adresser<br>
+                                    • Transportmåte<br>
+                                    • Leveringsvillkor
+                                </div>
+                                <div>
+                                    <strong>📦 Gods:</strong><br>
+                                    • Vekt (netto/brutto)<br>
+                                    • Volum & lastmeter<br>
+                                    • Antall kolli<br>
+                                    • Farligt gods (ADR)
+                                </div>
+                                <div>
+                                    <strong>💰 Kostnader (30 typer):</strong><br>
+                                    • Frakt & bränslekostnad<br>
+                                    • Hantering & försäkring<br>
+                                    • Tull & dokumentavgift<br>
+                                    • Moms & rabatter
+                                </div>
+                            </div>
+                            <p style="color: var(--color-gray-medium); margin: var(--spacing-sm) 0 0 0; font-size: var(--font-size-xs); font-style: italic;">
+                                Malen känner igen olika transportörers terminologi (FedEx, DHL, Bring, PostNord, UPS, etc.)
+                            </p>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label for="fakturaFile" class="form-label">Last opp faktura</label>
                         <div class="file-upload-area" id="dropZone">
@@ -93,7 +135,7 @@
     </div>
 
     <!-- Last inn konfigurasjon og delt funksjonalitet -->
-    <script src="../config.js?v=2"></script>
+    <script src="../config.js?v=3"></script>
     <script src="../shared.js"></script>
     
     <script>
@@ -136,11 +178,19 @@
 
         // Vis/skjul parameterfelt basert på leverandørvalg
         leverandorSelect.addEventListener('change', function() {
+            const standardMalInfo = document.getElementById('standardMalInfo');
+            
             if (this.value === 'ingen') {
                 paramGroup.style.display = 'block';
+                if (standardMalInfo) standardMalInfo.style.display = 'none';
+            } else if (this.value === 'standardisert_mal') {
+                paramGroup.style.display = 'none';
+                parametre.value = '';
+                if (standardMalInfo) standardMalInfo.style.display = 'block';
             } else {
                 paramGroup.style.display = 'none';
                 parametre.value = '';
+                if (standardMalInfo) standardMalInfo.style.display = 'none';
             }
         });
 
@@ -246,6 +296,8 @@
                 onReset: () => {
                     // Reset custom visibility og toggle states
                     paramGroup.style.display = 'none';
+                    const standardMalInfo = document.getElementById('standardMalInfo');
+                    if (standardMalInfo) standardMalInfo.style.display = 'none';
                     inkluderBtn.classList.add('active');
                     ekskluderBtn.classList.remove('active');
                     paramModeInput.value = 'inkluder';
@@ -255,8 +307,14 @@
 
         // Vis parameterfelt ved lasting hvis "ingen" er valgt (f.eks. ved refresh)
         window.addEventListener('DOMContentLoaded', function() {
+            const standardMalInfo = document.getElementById('standardMalInfo');
+            
             if (leverandorSelect.value === 'ingen') {
                 paramGroup.style.display = 'block';
+                if (standardMalInfo) standardMalInfo.style.display = 'none';
+            } else if (leverandorSelect.value === 'standardisert_mal') {
+                paramGroup.style.display = 'none';
+                if (standardMalInfo) standardMalInfo.style.display = 'block';
             }
         });
 
