@@ -206,4 +206,5 @@ window.TopLogicConfig = {
 };
 
 // Debug: Vis leverandører i konsollen
-console.log('TopLogic Config lastet - Leverandører:', APP_CONFIG.suppliers); 
+console.log('🔄 TopLogic Config v2 lastet - Leverandører:', APP_CONFIG.suppliers);
+console.log('✅ Fast1,2,3 erstattet med standardisert mal!'); 
