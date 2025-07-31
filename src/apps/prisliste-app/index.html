@@ -116,25 +116,20 @@
     <!-- Last inn konfigurasjon og delt funksjonalitet -->
         <!-- Last inn konfigurasjon og delt funksjonalitet (ES6 modules) -->
     <script type="module" src="../../legacy.js"></script>
-    <script type="module" src="../../utils/scroll-animations.js"></script>
+    <!-- <script type="module" src="../../utils/scroll-animations.js"></script> -->
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Vent litt ekstra for at ES6 modules skal være helt klare
             setTimeout(() => {
-                console.log('🔍 DEBUG: Sjekker TopLogicConfig...', window.TopLogicConfig);
-                
                 // Initialiser TopLogic App
                 const app = new TopLogicApp();
                 const config = window.TopLogicConfig;
 
                 if (!config || !config.APP_CONFIG) {
-                    console.error('❌ TopLogicConfig not loaded yet');
-                    console.log('Available on window:', Object.keys(window).filter(key => key.includes('TopLogic')));
+                    console.error('TopLogicConfig not loaded yet');
                     return;
                 }
-                
-                console.log('✅ Config loaded successfully:', config.APP_CONFIG.users);
 
                 // Populer dropdown-menyer fra config
                 function populateDropdowns() {
@@ -275,13 +270,12 @@
 
 
 
-                // Initialize Lucide icons
-                if (typeof lucide !== 'undefined') {
+                // Initialize Lucide icons kun en gang
+                if (typeof lucide !== 'undefined' && !window.lucideInitialized) {
                     lucide.createIcons();
+                    window.lucideInitialized = true;
                 }
-
-                console.log('TopLogic Prislisteopplasting er lastet');
-            }, 300); // Økt timeout for module loading
+            }, 100); // Redusert timeout
         });
     </script>
 </body>
