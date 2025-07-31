@@ -1,0 +1,404 @@
+/* TopLogic Micro-interactions - Subtile og profesjonelle animasjoner */
+
+/* Smooth scroll for hele siden */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Gentle hover effects på knapper */
+.btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(0px);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(199, 32, 39, 0.25);
+}
+
+.btn:active {
+    transform: translateY(0px);
+    transition: all 0.1s ease;
+}
+
+/* Subtle glow effect på primary buttons */
+.btn-primary {
+    box-shadow: 0 0 0 rgba(199, 32, 39, 0);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-primary:hover {
+    box-shadow: 
+        0 8px 25px rgba(199, 32, 39, 0.25),
+        0 0 20px rgba(199, 32, 39, 0.15);
+    animation: subtleGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes subtleGlow {
+    0% { box-shadow: 0 8px 25px rgba(199, 32, 39, 0.25), 0 0 20px rgba(199, 32, 39, 0.15); }
+    100% { box-shadow: 0 8px 25px rgba(199, 32, 39, 0.35), 0 0 25px rgba(199, 32, 39, 0.25); }
+}
+
+/* Smooth hover på lenker */
+a {
+    transition: color 0.25s ease, transform 0.25s ease;
+}
+
+a:hover {
+    transform: translateX(2px);
+}
+
+/* Containers - ingen hover effect (fjernet tilt) */
+.toplogic-container {
+    transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Smooth hover på form elementer */
+.form-select, .form-input, .form-textarea {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.form-select:hover, .form-input:hover, .form-textarea:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.form-select:focus, .form-input:focus, .form-textarea:focus {
+    transform: translateY(-2px);
+}
+
+/* File upload hover effect */
+.file-upload-area {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.file-upload-area:hover {
+    transform: scale(1.02);
+    border-color: var(--color-red);
+    background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+}
+
+.file-upload-area.drag-over {
+    transform: scale(1.05);
+    animation: gentlePulse 0.6s ease-in-out;
+}
+
+@keyframes gentlePulse {
+    0%, 100% { transform: scale(1.05); }
+    50% { transform: scale(1.08); }
+}
+
+/* Smooth message animations */
+.message {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(10px);
+    opacity: 0;
+}
+
+.message.show {
+    transform: translateY(0px);
+    opacity: 1;
+    animation: slideInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0px);
+        opacity: 1;
+    }
+}
+
+/* Smooth progress bar animation */
+.progress-fill {
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Loading spinner smooth rotation */
+.loading-spinner {
+    animation: smoothSpin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes smoothSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* Subtle scroll-based animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0px);
+    }
+}
+
+.toplogic-content > * {
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    animation-fill-mode: both;
+}
+
+.toplogic-content > *:nth-child(1) { animation-delay: 0.1s; }
+.toplogic-content > *:nth-child(2) { animation-delay: 0.2s; }
+.toplogic-content > *:nth-child(3) { animation-delay: 0.3s; }
+.toplogic-content > *:nth-child(4) { animation-delay: 0.4s; }
+.toplogic-content > *:nth-child(5) { animation-delay: 0.5s; }
+
+/* Enkel logo hover effect - overskrevet av cleanup-overrides.css */
+.header-logo {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header-logo:hover {
+    transform: scale(1.05);
+    animation: none !important; /* Overskriver glitch */
+}
+
+/* Smooth toggle button animations */
+.toggle-btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.toggle-btn::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toggle-btn:hover::before {
+    left: 100%;
+}
+
+.toggle-btn.active {
+    transform: scale(1.05);
+}
+
+/* Subtle glitch effect (meget diskret for profesjonalitet) */
+@keyframes subtleGlitch {
+    0%, 100% { 
+        transform: translateX(0px);
+        filter: hue-rotate(0deg);
+    }
+    20% { 
+        transform: translateX(1px);
+        filter: hue-rotate(5deg);
+    }
+    40% { 
+        transform: translateX(-1px);
+        filter: hue-rotate(-3deg);
+    }
+    60% { 
+        transform: translateX(0.5px);
+        filter: hue-rotate(2deg);
+    }
+    80% { 
+        transform: translateX(-0.5px);
+        filter: hue-rotate(-1deg);
+    }
+}
+
+/* Kun på logo ved hover (meget subtilt) */
+.header-logo:hover {
+    animation: subtleGlitch 0.3s ease-in-out;
+}
+
+/* Smooth card interactions */
+.form-group {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.form-group:hover {
+    transform: translateX(3px);
+}
+
+/* Smooth navigation hover */
+.nav-logo {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-logo:hover {
+    transform: scale(1.1);
+    filter: brightness(1.1) drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+}
+
+/* Navigation bar subtle animations */
+.toplogic-navigation {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toplogic-navigation:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Breadcrumb smooth transitions */
+.breadcrumb a {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.breadcrumb a::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--color-red);
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.breadcrumb a:hover::after {
+    width: 100%;
+}
+
+/* Smooth back link animation */
+.back-link {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.back-link:hover {
+    transform: translateX(-5px);
+    color: var(--color-red-dark);
+}
+
+.back-link::before {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.back-link:hover::before {
+    transform: translateX(-3px);
+}
+
+/* Inertia-based scroll (smooth momentum) */
+* {
+    scroll-behavior: smooth;
+}
+
+/* Smooth page transitions */
+.page-container {
+    animation: pageLoad 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes pageLoad {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0px);
+    }
+}
+
+/* Hover på locked buttons (subtil feedback) */
+.btn-locked:hover {
+    animation: gentleShake 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: not-allowed;
+}
+
+@keyframes gentleShake {
+    0%, 100% { transform: translateX(0px); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+}
+
+/* Performance optimalisering */
+.btn, .form-select, .form-input, .toplogic-container, .file-upload-area {
+    will-change: transform;
+}
+
+/* Redusert bevegelse for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    
+    .btn:hover,
+    .header-logo:hover {
+        transform: none;
+    }
+}
+
+/* Success state animasjoner */
+.message.success.show {
+    animation: successPulse 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes successPulse {
+    0% { transform: scale(1) translateY(0px); }
+    50% { transform: scale(1.05) translateY(-2px); }
+    100% { transform: scale(1) translateY(0px); }
+}
+
+/* Floating animation fjernet - var for mye */
+
+/* Focus ring animasjoner */
+.form-select:focus, .form-input:focus, .form-textarea:focus {
+    animation: focusRing 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes focusRing {
+    0% { box-shadow: 0 0 0 0 rgba(199, 32, 39, 0.5); }
+    100% { box-shadow: 0 0 0 3px rgba(199, 32, 39, 0.1); }
+}
+
+/* Subtle text reveal animation for headers */
+.toplogic-header h1, .toplogic-header-home h1 {
+    animation: textReveal 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes textReveal {
+    0% { 
+        opacity: 0;
+        transform: translateY(20px);
+        letter-spacing: 3px;
+    }
+    100% { 
+        opacity: 1;
+        transform: translateY(0px);
+        letter-spacing: normal;
+    }
+}
+
+/* Smooth error shake */
+.message.error.show {
+    animation: errorShake 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes errorShake {
+    0%, 100% { transform: translateX(0px); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+}
+
+/* Mobile optimalisering - mindre animasjoner */
+@media (max-width: 768px) {
+    /* Container tilt fjernet helt */
+    
+    .btn:hover {
+        transform: translateY(-1px); /* Mindre hover-effekt */
+    }
+    
+    .file-upload-area:hover {
+        transform: scale(1.01); /* Mindre scale */
+    }
+    
+    /* Floating fjernet helt */
+}

@@ -1,0 +1,40 @@
+/* Cleanup - fjerner effekter som var for mye */
+
+/* Fjerner glitch effect helt */
+@keyframes subtleGlitch {
+    0%, 100% { transform: none; }
+}
+
+/* Sørger for at logoen ALLTID er hvit og holder seg hvit på hover */
+.header-logo {
+    filter: brightness(0) invert(1) !important; /* Tvinger logoen til å være hvit */
+}
+
+.header-logo:hover {
+    animation: none !important;
+    transform: scale(1.05) !important;
+    filter: brightness(0) invert(1) !important; /* Holder seg helt hvit på hover */
+}
+
+/* ALTERNATIV: Hvis du vil ha svart logo på hover, bytt ut linjen over med denne:
+.header-logo:hover {
+    animation: none !important;
+    transform: scale(1.05) !important;
+    filter: brightness(0) invert(0) !important; // Gjør logoen svart på hover
+}
+*/
+
+/* Fjerner container tilt */
+.toplogic-container:hover {
+    transform: none !important;
+}
+
+/* Fjerner floating på knapper */
+.btn-primary:not(:hover) {
+    animation: none !important;
+}
+
+/* Forenkler staggered animations */
+.toplogic-content > *:nth-child(n+6) {
+    animation-delay: 0s !important;
+}

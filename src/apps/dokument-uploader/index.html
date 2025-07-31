@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TopLogic - Dokumenthåndtering</title>
     <link rel="icon" type="image/png" href="https://images.squarespace-cdn.com/content/v1/67a10d12887082593bb5d293/d39dc0a0-5a17-4ef9-88a4-2d0edb45fd5e/LOGO+l.png?format=500w">
-    <link rel="stylesheet" href="../shared.css">
+    <link rel="stylesheet" href="../../styles/shared.css">
+    <link rel="stylesheet" href="../../styles/advanced-paths.css">
+    <link rel="stylesheet" href="../../styles/micro-interactions.css">
+    <link rel="stylesheet" href="../../styles/cleanup-overrides.css">
 </head>
 <body>
     <div class="page-container">
@@ -131,8 +134,9 @@
     </div>
 
     <!-- Last inn konfigurasjon og delt funksjonalitet -->
-    <script src="../config.js?v=2"></script>
-    <script src="../shared.js"></script>
+        <!-- Last inn konfigurasjon og delt funksjonalitet (ES6 modules) -->
+    <script type="module" src="../../legacy.js"></script>
+    <script type="module" src="../../utils/scroll-animations.js"></script>
     
     <script>
         // Initialiser TopLogic App

@@ -1,0 +1,116 @@
+/* Forenklet bakgrunnsanimasjoner for TopLogic */
+
+/* Enklere stier - ikke for komplekse */
+.toplogic-header-advanced::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" fill="none"><path d="M20,30 Q60,20 100,30 Q140,40 180,30" stroke="white" stroke-width="1" stroke-opacity="0.08" fill="none"/><path d="M10,60 Q50,50 90,60 Q130,70 170,60" stroke="white" stroke-width="0.8" stroke-opacity="0.06" fill="none"/><circle cx="60" cy="30" r="1.5" fill="white" opacity="0.1"/><circle cx="120" cy="60" r="1" fill="white" opacity="0.08"/></svg>') repeat-x;
+    animation: simplePaths 30s linear infinite;
+    pointer-events: none;
+}
+
+.toplogic-header-advanced::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 80" fill="none"><path d="M15,25 Q45,15 75,25 Q105,35 135,25" stroke="white" stroke-width="0.6" stroke-opacity="0.05" fill="none"/><circle cx="45" cy="25" r="1" fill="white" opacity="0.06"/></svg>') repeat;
+    background-size: 200px 100px;
+    animation: simplePaths 25s linear infinite reverse;
+    pointer-events: none;
+}
+
+@keyframes simplePaths {
+    0% { 
+        transform: translateX(0px);
+        opacity: 0.8;
+    }
+    50% { 
+        transform: translateX(-10px);
+        opacity: 0.6;
+    }
+    100% { 
+        transform: translateX(0px);
+        opacity: 0.8;
+    }
+}
+
+/* Tydelige AI-stier for faktura-app */
+.toplogic-header-ai::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="none"><path d="M30,40 Q70,30 110,40 Q150,50 190,40" stroke="white" stroke-width="1.5" stroke-opacity="0.15" fill="none"/><path d="M20,70 Q60,60 100,70 Q140,80 180,70" stroke="white" stroke-width="1.2" stroke-opacity="0.12" fill="none"/><path d="M40,25 Q80,15 120,25 Q160,35 200,25" stroke="white" stroke-width="0.8" stroke-opacity="0.08" fill="none"/><circle cx="70" cy="40" r="2" fill="white" opacity="0.18"/><circle cx="130" cy="70" r="1.5" fill="white" opacity="0.15"/><circle cx="50" cy="25" r="1" fill="white" opacity="0.12"/></svg>') repeat-x;
+    background-size: 250px 120px;
+    animation: aiPaths 25s linear infinite;
+    pointer-events: none;
+}
+
+.toplogic-header-ai::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 100" fill="none"><path d="M25,60 Q65,50 105,60 Q145,70 185,60" stroke="white" stroke-width="1" stroke-opacity="0.1" fill="none"/><circle cx="85" cy="60" r="1.5" fill="white" opacity="0.12"/><circle cx="45" cy="55" r="1" fill="white" opacity="0.08"/></svg>') repeat;
+    background-size: 200px 100px;
+    animation: aiPaths 30s linear infinite reverse;
+    pointer-events: none;
+}
+
+@keyframes aiPaths {
+    0% { 
+        transform: translateX(0px);
+        opacity: 0.8;
+    }
+    25% { 
+        transform: translateX(-15px);
+        opacity: 1;
+    }
+    50% { 
+        transform: translateX(-5px);
+        opacity: 0.9;
+    }
+    75% { 
+        transform: translateX(-20px);
+        opacity: 1;
+    }
+    100% { 
+        transform: translateX(0px);
+        opacity: 0.8;
+    }
+}
+
+/* Performance optimalisering og responsive design */
+@media (max-width: 768px) {
+    .toplogic-header-advanced::before,
+    .toplogic-header-advanced::after,
+    .toplogic-header-ai::before,
+    .toplogic-header-ai::after {
+        animation-duration: 60s; /* Langsommere på mobil for bedre ytelse */
+        background-size: 300px 150px; /* Mindre bakgrunnsstørrelse */
+    }
+}
+
+/* Redusert bevegelse for brukere som foretrekker det */
+@media (prefers-reduced-motion: reduce) {
+    .toplogic-header-advanced::before,
+    .toplogic-header-advanced::after,
+    .toplogic-header-ai::before,
+    .toplogic-header-ai::after {
+        animation: none;
+        opacity: 0.3;
+    }
+}
+
+/* Gamle komplekse animasjoner fjernet */
