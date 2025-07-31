@@ -71,7 +71,7 @@ export class TopLogicApp {
         
         // Logo
         const logoLink = document.createElement('a');
-        logoLink.href = '/home.html';
+                        logoLink.href = '/';
         logoLink.innerHTML = `<img src="${this.config.LOGOS.toplogic}" alt="TopLogic" class="nav-logo">`;
         
         // Breadcrumb
@@ -93,7 +93,7 @@ export class TopLogicApp {
         
         // Hjem lenke
         const homeLink = document.createElement('a');
-        homeLink.href = '/home.html';
+                        homeLink.href = '/';
         homeLink.textContent = this.config.NAVIGATION.home.title;
         breadcrumb.appendChild(homeLink);
         
@@ -128,12 +128,12 @@ export class TopLogicApp {
 
     createBackLink() {
         // Sjekk om vi ikke er på hovedsiden
-        if (window.location.pathname === '/' || window.location.pathname === '/index.html' || window.location.pathname === '/home.html') {
+                    if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
             return;
         }
 
         const backLink = document.createElement('a');
-        backLink.href = '/home.html';
+                        backLink.href = '/';
         backLink.className = 'back-link';
         backLink.textContent = 'Tilbake til hovedside';
         

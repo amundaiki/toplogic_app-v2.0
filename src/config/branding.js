@@ -8,7 +8,7 @@ export const LOGOS = {
 export const NAVIGATION = {
     home: {
         title: 'TopLogic AI-Apper',
-        url: '/home.html',
+        url: '/',
         icon: 'home'
     },
     apps: {

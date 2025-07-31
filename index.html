@@ -5,12 +5,98 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TopLogic AI-Apper</title>
     <link rel="icon" type="image/png" href="https://images.squarespace-cdn.com/content/v1/67a10d12887082593bb5d293/d39dc0a0-5a17-4ef9-88a4-2d0edb45fd5e/LOGO+l.png?format=500w">
-    <script>
-        // Redirect til home.html
-        window.location.replace('home.html');
-    </script>
+    <link rel="stylesheet" href="src/styles/shared.css">
+    <link rel="stylesheet" href="src/styles/advanced-paths.css">
+    <link rel="stylesheet" href="src/styles/micro-interactions.css">
+    <link rel="stylesheet" href="src/styles/cleanup-overrides.css">
 </head>
 <body>
-    <p>Omdirigerer til hjemmesiden...</p>
+    <div class="page-container">
+        <div class="toplogic-container">
+            <div class="toplogic-header-home">
+                <img src="https://www.toplogic.no/wp-content/uploads/2023/01/Toplogic_norge_logo.svg" alt="TopLogic logo" class="header-logo" style="max-width: 180px; margin-bottom: 24px;" />
+                <h1>TopLogic AI-Apper</h1>
+                <p>Intelligente løsninger for bedre forretningsprosesser</p>
+            </div>
+            
+            <div class="toplogic-content">
+                <!-- Aktive apper -->
+                <div class="form-group">
+                    <h3 style="color: var(--color-gray-dark); margin-bottom: var(--spacing-lg); font-size: var(--font-size-medium); text-transform: uppercase; letter-spacing: 0.5px;">Tilgjengelige Apper</h3>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: var(--spacing-lg);">
+                            <a href="src/apps/faktura-opplaster/" class="btn btn-primary btn-full btn-large animate-child" data-icon="📑">
+                                <span>PDF faktura til EXCEL</span>
+                            </a>
+                        </li>
+                        <li style="margin-bottom: var(--spacing-lg);">
+                            <a href="src/apps/prisliste-app/" class="btn btn-primary btn-full btn-large animate-child" data-icon="📈">
+                                <span>Prislister til EXCEL</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <hr style="margin: var(--spacing-xxxl) 0; border: none; border-top: 1px solid var(--color-gray-border);">
+
+                <!-- Låste apper -->
+                <div class="form-group">
+                    <h3 style="color: var(--color-gray-medium); margin-bottom: var(--spacing-lg); font-size: var(--font-size-medium); text-transform: uppercase; letter-spacing: 0.5px;">Låste Apper</h3>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+
+                        <li style="margin-bottom: var(--spacing-lg);">
+                            <a href="#" class="btn btn-primary btn-full btn-large btn-locked animate-child" id="dokumentbehandler-link" data-icon="📤">
+                                <span>Dokumentbehandler</span>
+                            </a>
+                        </li>
+                        <li style="margin-bottom: var(--spacing-lg);">
+                            <a href="#" class="btn btn-primary btn-full btn-large btn-locked animate-child" id="kostnadsanalyse-link" data-icon="💰">
+                                <span>Kostnadsanalyse</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Footer -->
+                <div style="text-align: center; margin-top: var(--spacing-xxxl); padding-top: var(--spacing-xl); border-top: 1px solid var(--color-gray-border); color: var(--color-gray-medium);">
+                    <p style="margin-bottom: var(--spacing-sm); font-size: var(--font-size-small);">Powered by</p>
+                    <p style="font-weight: bold; color: var(--color-red); font-size: var(--font-size-medium); margin-bottom: var(--spacing-lg);">AIKI - AI & Automatisering</p>
+                    <p style="font-size: var(--font-size-small); line-height: 1.4; margin-bottom: var(--spacing-sm);">
+                        Våre apper bruker avansert AI for å automatisere dine forretningsprosesser
+                    </p>
+                    <p style="font-size: var(--font-size-small); color: var(--color-gray-medium);">
+                        <strong>Support:</strong> amund@aiki.as | <strong>Web:</strong> www.aiki.as
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Last inn konfigurasjon og delt funksjonalitet (ES6 modules) -->
+    <script type="module" src="src/legacy.js"></script>
+    <script type="module" src="src/utils/scroll-animations.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Vent litt ekstra for at ES6 modules skal være helt klare
+            setTimeout(() => {
+                // Initialiser TopLogic App (uten passord for hjemmesiden)
+                const app = new TopLogicApp(false); // false = ikke krev passord
+                
+                // Vis melding for låste apper
+                document.getElementById('dokumentbehandler-link').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    app.showMessage('📤 Dokumentbehandler vil bli tilgjengelig snart. Vi jobber med å ferdigstille denne funksjonen.', 'info');
+                });
+
+                document.getElementById('kostnadsanalyse-link').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    app.showMessage('💰 Kostnadsanalyse vil bli tilgjengelig snart. Vi jobber med å ferdigstille denne funksjonen.', 'info');
+                });
+
+                console.log('🏠 TopLogic Hjemmeside er lastet');
+            }, 100);
+        });
+    </script>
 </body>
 </html>
