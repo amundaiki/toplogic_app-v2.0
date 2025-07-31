@@ -9,6 +9,11 @@
     <link rel="stylesheet" href="../../styles/advanced-paths.css">
     <link rel="stylesheet" href="../../styles/micro-interactions.css">
     <link rel="stylesheet" href="../../styles/cleanup-overrides.css">
+    <link rel="stylesheet" href="../../styles/enhanced-selects.css">
+    <!-- <link rel="stylesheet" href="../../styles/custom-dropdown.css"> -->
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- <script src="../../utils/custom-dropdown.js"></script> -->
 </head>
 <body>
     <div class="page-container">
@@ -22,18 +27,30 @@
             <div class="toplogic-content">
                 <form id="uploadForm">
                     <div class="form-group">
-                        <label for="opplaster" class="form-label">Hvem laster opp?</label>
-                        <select id="opplaster" name="opplaster" class="form-select" required>
-                            <option value="">Velg opplaster...</option>
-                            <!-- Vil bli populert via JavaScript -->
-                        </select>
+                        <label for="opplaster" class="form-label">
+                            <i data-lucide="user" class="form-label-icon"></i>
+                            Hvem laster opp?
+                        </label>
+                        <div class="custom-select-wrapper">
+                            <select id="opplaster" name="opplaster" class="form-select enhanced-select" required>
+                                <option value="">Velg opplaster...</option>
+                                <!-- Vil bli populert via JavaScript -->
+                            </select>
+                            <i data-lucide="chevron-down" class="select-arrow"></i>
+                        </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="leverandor" class="form-label">Leverandør</label>
-                        <select id="leverandor" name="leverandor" class="form-select" required>
-                            <!-- Vil bli populert via JavaScript -->
-                        </select>
+                        <label for="leverandor" class="form-label">
+                            <i data-lucide="building-2" class="form-label-icon"></i>
+                            Leverandør
+                        </label>
+                        <div class="custom-select-wrapper">
+                            <select id="leverandor" name="leverandor" class="form-select enhanced-select" required>
+                                <!-- Vil bli populeret via JavaScript -->
+                            </select>
+                            <i data-lucide="chevron-down" class="select-arrow"></i>
+                        </div>
                     </div>
 
                     <div class="form-group" id="paramGroup" style="display:none;">
@@ -120,14 +137,19 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Vent litt ekstra for at ES6 modules skal være helt klare
             setTimeout(() => {
+                console.log('🔍 DEBUG: Sjekker TopLogicConfig...', window.TopLogicConfig);
+                
                 // Initialiser TopLogic App
                 const app = new TopLogicApp();
                 const config = window.TopLogicConfig;
 
                 if (!config || !config.APP_CONFIG) {
-                    console.error('TopLogicConfig not loaded yet');
+                    console.error('❌ TopLogicConfig not loaded yet');
+                    console.log('Available on window:', Object.keys(window).filter(key => key.includes('TopLogic')));
                     return;
                 }
+                
+                console.log('✅ Config loaded successfully:', config.APP_CONFIG.users);
 
                 // Populer dropdown-menyer fra config
                 function populateDropdowns() {
@@ -153,6 +175,15 @@
 
                 // Initialiser komponenter
                 populateDropdowns();
+
+                // Custom dropdowns midlertidig deaktivert
+                // const opplasterDropdown = new CustomDropdown(document.getElementById('opplaster'), {
+                //     placeholder: 'Velg opplaster...'
+                // });
+                
+                // const leverandorDropdown = new CustomDropdown(document.getElementById('leverandor'), {
+                //     placeholder: 'Velg leverandør...'
+                // });
 
                 // DOM elementer
                 const leverandorSelect = document.getElementById('leverandor');
@@ -302,9 +333,16 @@
                     if (standardMalInfo) standardMalInfo.style.display = 'block';
                 }
 
+
+
+                // Initialize Lucide icons
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+
                 console.log('📄 TopLogic Fakturaopplasting er lastet');
                 
-            }, 100); // Vent 100ms for at modules skal laste
+            }, 300); // Økt timeout for module loading
         });
     </script>
 </body>

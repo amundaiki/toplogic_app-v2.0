@@ -9,6 +9,11 @@
     <link rel="stylesheet" href="../../styles/advanced-paths.css">
     <link rel="stylesheet" href="../../styles/micro-interactions.css">
     <link rel="stylesheet" href="../../styles/cleanup-overrides.css">
+    <link rel="stylesheet" href="../../styles/enhanced-selects.css">
+    <!-- <link rel="stylesheet" href="../../styles/custom-dropdown.css"> -->
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- <script src="../../utils/custom-dropdown.js"></script> -->
 </head>
 <body>
     <div class="page-container">
@@ -22,19 +27,31 @@
             <div class="toplogic-content">
                 <form id="uploadForm">
                     <div class="form-group">
-                        <label for="opplaster" class="form-label">Hvem laster opp?</label>
-                        <select id="opplaster" name="opplaster" class="form-select" required>
-                            <option value="">Velg opplaster...</option>
-                            <!-- Vil bli populert via JavaScript -->
-                        </select>
+                        <label for="opplaster" class="form-label">
+                            <i data-lucide="user" class="form-label-icon"></i>
+                            Hvem laster opp?
+                        </label>
+                        <div class="custom-select-wrapper">
+                            <select id="opplaster" name="opplaster" class="form-select enhanced-select" required>
+                                <option value="">Velg opplaster...</option>
+                                <!-- Vil bli populert via JavaScript -->
+                            </select>
+                            <i data-lucide="chevron-down" class="select-arrow"></i>
+                        </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="prislisteType" class="form-label">Prisliste</label>
-                        <select id="prislisteType" name="prislisteType" class="form-select" required>
-                            <option value="">Velg prisliste...</option>
-                            <option value="bring_transport">Bring Transportguide</option>
-                        </select>
+                        <label for="prislisteType" class="form-label">
+                            <i data-lucide="truck" class="form-label-icon"></i>
+                            Prisliste
+                        </label>
+                        <div class="custom-select-wrapper">
+                            <select id="prislisteType" name="prislisteType" class="form-select enhanced-select" required>
+                                <option value="">Velg prisliste...</option>
+                                <option value="bring_transport">🚚 Bring Transportguide</option>
+                            </select>
+                            <i data-lucide="chevron-down" class="select-arrow"></i>
+                        </div>
                     </div>
 
                     <div class="form-group" id="bringInfo" style="display:none;">
@@ -105,14 +122,19 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Vent litt ekstra for at ES6 modules skal være helt klare
             setTimeout(() => {
+                console.log('🔍 DEBUG: Sjekker TopLogicConfig...', window.TopLogicConfig);
+                
                 // Initialiser TopLogic App
                 const app = new TopLogicApp();
                 const config = window.TopLogicConfig;
 
                 if (!config || !config.APP_CONFIG) {
-                    console.error('TopLogicConfig not loaded yet');
+                    console.error('❌ TopLogicConfig not loaded yet');
+                    console.log('Available on window:', Object.keys(window).filter(key => key.includes('TopLogic')));
                     return;
                 }
+                
+                console.log('✅ Config loaded successfully:', config.APP_CONFIG.users);
 
                 // Populer dropdown-menyer fra config
                 function populateDropdowns() {
@@ -242,8 +264,24 @@
                     });
                 });
 
+                // Custom dropdowns midlertidig deaktivert
+                // const opplasterDropdown = new CustomDropdown(document.getElementById('opplaster'), {
+                //     placeholder: 'Velg opplaster...'
+                // });
+                
+                // const prislisteDropdown = new CustomDropdown(document.getElementById('prislisteType'), {
+                //     placeholder: 'Velg prisliste...'
+                // });
+
+
+
+                // Initialize Lucide icons
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+
                 console.log('📊 TopLogic Prislisteopplasting er lastet');
-            }, 100);
+            }, 300); // Økt timeout for module loading
         });
     </script>
 </body>

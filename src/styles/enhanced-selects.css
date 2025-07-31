@@ -1,0 +1,166 @@
+/* Enhanced Select Styling - Inspirert av shadcn/ui */
+
+.form-label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-weight: 600;
+    color: var(--color-gray-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: var(--font-size-small);
+    margin-bottom: var(--spacing-md);
+}
+
+.form-label-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--color-red);
+    stroke-width: 2;
+}
+
+.custom-select-wrapper {
+    position: relative;
+    display: block;
+}
+
+.enhanced-select {
+    appearance: none;
+    background: var(--color-white);
+    border: 2px solid var(--color-gray-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg) var(--spacing-xl);
+    padding-right: calc(var(--spacing-xl) + 24px); /* Space for arrow */
+    font-size: var(--font-size-normal);
+    font-weight: 500;
+    color: var(--color-gray-dark);
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    background-color: var(--color-white);
+}
+
+.enhanced-select:hover {
+    border-color: var(--color-red);
+    box-shadow: 0 0 0 2px rgba(199, 32, 39, 0.1);
+}
+
+.enhanced-select:focus {
+    outline: none;
+    border-color: var(--color-red);
+    box-shadow: 0 0 0 3px rgba(199, 32, 39, 0.1);
+}
+
+.enhanced-select:invalid {
+    border-color: var(--color-gray-border);
+    color: var(--color-gray-medium);
+}
+
+.enhanced-select option {
+    padding: var(--spacing-md);
+    font-weight: 500;
+    background: var(--color-white);
+    color: var(--color-gray-dark);
+}
+
+.enhanced-select option:hover,
+.enhanced-select option:checked {
+    background: var(--color-red-light);
+    color: var(--color-red-dark);
+}
+
+.select-arrow {
+    position: absolute;
+    right: var(--spacing-lg);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    color: var(--color-gray-medium);
+    pointer-events: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.custom-select-wrapper:hover .select-arrow {
+    color: var(--color-red);
+}
+
+.enhanced-select:focus + .select-arrow {
+    color: var(--color-red);
+    transform: translateY(-50%) rotate(180deg);
+}
+
+/* Enhanced option styling with better spacing */
+.enhanced-select option {
+    font-size: var(--font-size-normal);
+    line-height: 1.5;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+}
+
+/* Hover state for select wrapper */
+.custom-select-wrapper {
+    position: relative;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.custom-select-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-lg);
+    padding: 2px;
+    background: linear-gradient(135deg, transparent, rgba(199, 32, 39, 0.1), transparent);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: exclude;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.custom-select-wrapper:hover::before {
+    opacity: 1;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .enhanced-select {
+        padding: var(--spacing-md) var(--spacing-lg);
+        padding-right: calc(var(--spacing-lg) + 20px);
+        font-size: var(--font-size-normal);
+    }
+    
+    .select-arrow {
+        right: var(--spacing-md);
+        width: 18px;
+        height: 18px;
+    }
+    
+    .form-label-icon {
+        width: 14px;
+        height: 14px;
+    }
+}
+
+/* Loading state */
+.enhanced-select:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: var(--color-gray-light);
+}
+
+.enhanced-select:disabled + .select-arrow {
+    opacity: 0.6;
+}
+
+/* Success state when option is selected */
+.enhanced-select:valid:not(:placeholder-shown) {
+    border-color: var(--color-success);
+    background-color: var(--color-success-bg);
+}
+
+.enhanced-select:valid:not(:placeholder-shown) + .select-arrow {
+    color: var(--color-success);
+}
