@@ -93,8 +93,19 @@
                             <p><strong>Klikk for å velge filer</strong> eller dra og slipp her</p>
                             <p class="supported-formats">Støttet format: PDF • Du kan velge flere fakturaer samtidig</p>
                         </div>
-                        <div class="file-info" id="fileInfo">
-                            <p>Valgte filer: <span class="file-name" id="fileName"></span></p>
+                        <div class="file-info" id="fileInfo" style="display: none;">
+                            <div style="background: var(--color-gray-light); padding: var(--spacing-md); border-radius: var(--radius-md); margin-top: var(--spacing-sm);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-sm);">
+                                    <h4 style="margin: 0; color: var(--color-gray-dark); font-size: var(--font-size-small); font-weight: 600;">Valgte fakturaer</h4>
+                                    <span id="fileCount" style="background: var(--color-blue); color: white; padding: 2px 8px; border-radius: var(--radius-sm); font-size: var(--font-size-xs); font-weight: 500;">0 filer</span>
+                                </div>
+                                <div id="fileList" style="max-height: 150px; overflow-y: auto;">
+                                    <!-- Fil-liste vil bli populert via JavaScript -->
+                                </div>
+                                <button type="button" id="clearFiles" style="margin-top: var(--spacing-sm); background: none; border: 1px solid var(--color-gray-border); color: var(--color-gray-medium); padding: 4px 12px; border-radius: var(--radius-sm); font-size: var(--font-size-xs); cursor: pointer; transition: all 0.2s ease;">
+                                    Fjern alle filer
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -227,10 +238,27 @@
                     onFileSelect: (files) => {
                         selectedFiles = Array.isArray(files) ? files : [files];
                         console.log('Fakturaer valgt:', selectedFiles.map(f => f.name));
+                        
+                        // Oppdater knapp-tekst basert på antall filer
+                        const submitBtn = document.querySelector('#submitBtn span');
+                        if (selectedFiles.length === 1) {
+                            submitBtn.textContent = 'Send faktura';
+                        } else {
+                            submitBtn.textContent = `Send ${selectedFiles.length} fakturaer`;
+                        }
                     },
                     onValidationError: (error) => {
                         app.showMessage(error, 'error');
                     }
+                });
+
+                // Håndter "Fjern alle filer" knapp
+                document.getElementById('clearFiles').addEventListener('click', function() {
+                    selectedFiles = [];
+                    document.getElementById('fakturaFile').value = '';
+                    document.getElementById('fileInfo').style.display = 'none';
+                    document.querySelector('#submitBtn span').textContent = 'Send fakturaer';
+                    app.showMessage('Alle filer fjernet', 'info', 2000);
                 });
 
                 // Form submission for flere fakturaer
@@ -266,7 +294,7 @@
                     let failedFiles = [];
                     let successfulFiles = [];
 
-                    app.showMessage(`Laster opp ${totalFiles} fakturaer...`, 'success');
+                    app.showMessage(`Laster opp ${totalFiles} fakturaer... Hver faktura sendes individuelt til behandling.`, 'success');
 
                     // Send hver faktura separat
                     for (let i = 0; i < selectedFiles.length; i++) {
@@ -288,6 +316,9 @@
                                 formData.append('paramMode', paramMode);
                             }
 
+                            // Oppdater melding for hvilken fil som behandles
+                            app.showMessage(`Behandler faktura ${i + 1} av ${totalFiles}: ${file.name}`, 'success');
+
                             // Send til Make.com
                             await app.submitForm(formData, 'faktura', {
                                 onStart: () => {
@@ -300,10 +331,12 @@
                                 onSuccess: (message) => {
                                     successfulFiles.push(file.name);
                                     completedFiles++;
+                                    console.log(`✅ Faktura ${i + 1}/${totalFiles} sendt: ${file.name}`);
                                 },
                                 onError: (error) => {
                                     failedFiles.push({name: file.name, error: error});
                                     completedFiles++;
+                                    console.log(`❌ Faktura ${i + 1}/${totalFiles} feilet: ${file.name} - ${error}`);
                                 }
                             });
 
@@ -342,6 +375,8 @@
                             paramModeInput.value = 'inkluder';
                             // Reset selected files
                             selectedFiles = [];
+                            document.getElementById('fileInfo').style.display = 'none';
+                            document.querySelector('#submitBtn span').textContent = 'Send fakturaer';
                         }
                     });
                 });

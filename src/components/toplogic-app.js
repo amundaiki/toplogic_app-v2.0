@@ -205,6 +205,14 @@ export class TopLogicApp {
         e.stopPropagation();
     }
 
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
     handleFileSelection(files, settings, fileInfo, fileName) {
         if (files.length === 0) return;
 
@@ -242,14 +250,28 @@ export class TopLogicApp {
         if (validFiles.length === 0) return;
 
         // Oppdater UI for flere filer
-        if (fileName && fileInfo) {
-            if (validFiles.length === 1) {
-                fileName.textContent = validFiles[0].name;
-            } else {
-                fileName.innerHTML = `<strong>${validFiles.length} fakturaer valgt:</strong><br>` + 
-                    validFiles.map(f => `• ${f.name}`).join('<br>');
+        if (fileInfo) {
+            fileInfo.style.display = 'block';
+            
+            // Oppdater fil-teller
+            const fileCount = document.getElementById('fileCount');
+            if (fileCount) {
+                fileCount.textContent = validFiles.length === 1 ? '1 fil' : `${validFiles.length} filer`;
             }
-            fileInfo.classList.add('show');
+            
+            // Opprett fil-liste
+            const fileList = document.getElementById('fileList');
+            if (fileList) {
+                fileList.innerHTML = validFiles.map((file, index) => 
+                    `<div style="display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-xs) 0; border-bottom: 1px solid var(--color-gray-border);">
+                        <div style="display: flex; align-items: center;">
+                            <span style="background: var(--color-blue-light); color: var(--color-blue-dark); padding: 2px 6px; border-radius: var(--radius-sm); font-size: var(--font-size-xs); margin-right: var(--spacing-xs); min-width: 20px; text-align: center;">${index + 1}</span>
+                            <span style="font-size: var(--font-size-small); color: var(--color-gray-dark);">${file.name}</span>
+                        </div>
+                        <span style="font-size: var(--font-size-xs); color: var(--color-gray-medium);">${this.formatFileSize(file.size)}</span>
+                    </div>`
+                ).join('');
+            }
         }
 
         // Callback med alle gyldige filer
