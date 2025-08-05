@@ -21,7 +21,7 @@
             <div class="toplogic-header toplogic-header-ai">
                 <img src="https://www.toplogic.no/wp-content/uploads/2023/01/Toplogic_norge_logo.svg" alt="TopLogic logo" class="header-logo" />
                 <h1>Fakturaopplasting</h1>
-                <p>Velg hvem som laster opp, velg leverandør og eventuelt hvilke parametre du ønsker å hente ut. Last deretter opp en PDF-faktura. Du vil motta en e-post med Excel-filen når prosesseringen er ferdig.</p>
+                <p>Velg hvem som laster opp, velg leverandør og eventuelt hvilke parametre du ønsker å hente ut. Last deretter opp én eller flere PDF-fakturaer. Du vil motta en e-post med Excel-filen(e) når prosesseringen er ferdig.</p>
             </div>
             
             <div class="toplogic-content">
@@ -84,17 +84,17 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="fakturaFile" class="form-label">Last opp faktura</label>
+                        <label for="fakturaFile" class="form-label">Last opp fakturaer</label>
                         <div class="file-upload-area" id="dropZone">
-                            <input type="file" id="fakturaFile" name="fakturaFile" accept=".pdf" required>
+                            <input type="file" id="fakturaFile" name="fakturaFile" accept=".pdf" multiple required>
                             <svg class="upload-icon" viewBox="0 0 24 24">
                                 <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
                             </svg>
-                            <p><strong>Klikk for å velge fil</strong> eller dra og slipp her</p>
-                            <p class="supported-formats">Støttet format: PDF</p>
+                            <p><strong>Klikk for å velge filer</strong> eller dra og slipp her</p>
+                            <p class="supported-formats">Støttet format: PDF • Du kan velge flere fakturaer samtidig</p>
                         </div>
                         <div class="file-info" id="fileInfo">
-                            <p>Valgt fil: <span class="file-name" id="fileName"></span></p>
+                            <p>Valgte filer: <span class="file-name" id="fileName"></span></p>
                         </div>
                     </div>
 
@@ -103,7 +103,7 @@
                     </div>
 
                     <button type="submit" class="btn btn-primary btn-full btn-large" id="submitBtn">
-                        <span>Send faktura</span>
+                        <span>Send fakturaer</span>
                         <div class="loading-spinner" id="loadingSpinner"></div>
                     </button>
 
@@ -118,10 +118,11 @@
                 <div style="margin-top: var(--spacing-xxxl); padding: var(--spacing-lg); background: var(--color-gray-light); border-radius: var(--radius-md);">
                     <h4 style="color: var(--color-gray-dark); margin-bottom: var(--spacing-md); font-size: var(--font-size-medium);">Hva skjer?</h4>
                     <ul style="color: var(--color-gray-medium); font-size: var(--font-size-normal); margin-left: var(--spacing-lg);">
-                        <li>AI analyserer PDF-fakturaen automatisk</li>
+                        <li>AI analyserer hver PDF-faktura automatisk</li>
                         <li>Ekstraherer alle relevante data og parametre</li>
                         <li>Konverterer til strukturert Excel-format</li>
-                        <li>Sender resultatet til din e-post</li>
+                        <li>Sender resultatet til din e-post (separate filer eller samlet)</li>
+                        <li>✨ <strong>Nytt:</strong> Du kan nå laste opp flere fakturaer samtidig!</li>
                     </ul>
                 </div>
             </div>
@@ -219,25 +220,25 @@
                     paramModeInput.value = 'ekskluder';
                 });
 
-                // Setup file upload
+                // Setup file upload med støtte for flere filer
+                let selectedFiles = [];
                 app.setupFileUpload('fakturaFile', {
                     allowedTypes: 'pdf',
-                    onFileSelect: (file) => {
-                        console.log('Faktura valgt:', file.name);
+                    onFileSelect: (files) => {
+                        selectedFiles = Array.isArray(files) ? files : [files];
+                        console.log('Fakturaer valgt:', selectedFiles.map(f => f.name));
                     },
                     onValidationError: (error) => {
                         app.showMessage(error, 'error');
                     }
                 });
 
-                // Form submission
+                // Form submission for flere fakturaer
                 document.getElementById('uploadForm').addEventListener('submit', async function(e) {
                     e.preventDefault();
 
-                    const formData = new FormData();
                     const opplaster = document.getElementById('opplaster').value;
                     const leverandor = document.getElementById('leverandor').value;
-                    const file = document.getElementById('fakturaFile').files[0];
                     const parametreValue = document.getElementById('parametre').value;
                     const paramMode = document.getElementById('paramMode').value;
 
@@ -252,54 +253,80 @@
                         return;
                     }
 
-                    if (!file) {
+                    if (!selectedFiles || selectedFiles.length === 0) {
                         app.showMessage(config.APP_CONFIG.messages.error.noFile, 'error');
                         return;
                     }
 
-                    // Valider fil
-                    if (!config.CONFIG_HELPERS.isValidFileSize(file)) {
-                        app.showMessage(config.APP_CONFIG.messages.error.fileTooBig, 'error');
-                        return;
-                    }
+                    // Start loading state
+                    app.setLoadingState(true);
+                    
+                    const totalFiles = selectedFiles.length;
+                    let completedFiles = 0;
+                    let failedFiles = [];
+                    let successfulFiles = [];
 
-                    if (!config.CONFIG_HELPERS.isValidFileType(file, 'pdf')) {
-                        app.showMessage(config.APP_CONFIG.messages.error.invalidFileType, 'error');
-                        return;
-                    }
+                    app.showMessage(`Laster opp ${totalFiles} fakturaer...`, 'success');
 
-                    // Bygg FormData
-                    formData.append('file', file);
-                    formData.append('opplaster', opplaster);
-                    formData.append('leverandor', leverandor);
-                    formData.append('fileName', file.name);
-                    formData.append('timestamp', config.CONFIG_HELPERS.getTimestamp());
+                    // Send hver faktura separat
+                    for (let i = 0; i < selectedFiles.length; i++) {
+                        const file = selectedFiles[i];
+                        
+                        try {
+                            const formData = new FormData();
+                            
+                            // Bygg FormData for denne filen
+                            formData.append('file', file);
+                            formData.append('opplaster', opplaster);
+                            formData.append('leverandor', leverandor);
+                            formData.append('fileName', file.name);
+                            formData.append('timestamp', config.CONFIG_HELPERS.getTimestamp());
+                            formData.append('fileNumber', `${i + 1} av ${totalFiles}`);
 
-                    if (leverandor === 'ingen') {
-                        formData.append('parametre', parametreValue);
-                        formData.append('paramMode', paramMode);
-                    }
+                            if (leverandor === 'ingen') {
+                                formData.append('parametre', parametreValue);
+                                formData.append('paramMode', paramMode);
+                            }
 
-                    // Send til Make.com
-                    await app.submitForm(formData, 'faktura', {
-                        onStart: () => {
-                            app.setLoadingState(true);
-                            app.showMessage(config.APP_CONFIG.messages.info.uploading, 'success');
-                        },
-                        onProgress: (progress) => {
-                            app.setProgress(progress);
-                        },
-                        onSuccess: (message) => {
-                            app.showMessage(config.APP_CONFIG.messages.success.fakturaUploaded, 'success');
-                            // Ikke nullstill automatisk - la brukeren bestemme
-                        },
-                        onError: (error) => {
-                            app.showMessage(error, 'error');
-                        },
-                        onComplete: () => {
-                            app.setLoadingState(false);
+                            // Send til Make.com
+                            await app.submitForm(formData, 'faktura', {
+                                onStart: () => {
+                                    console.log(`Sender faktura ${i + 1}/${totalFiles}: ${file.name}`);
+                                },
+                                onProgress: (progress) => {
+                                    const overallProgress = ((completedFiles * 100) + progress) / totalFiles;
+                                    app.setProgress(overallProgress);
+                                },
+                                onSuccess: (message) => {
+                                    successfulFiles.push(file.name);
+                                    completedFiles++;
+                                },
+                                onError: (error) => {
+                                    failedFiles.push({name: file.name, error: error});
+                                    completedFiles++;
+                                }
+                            });
+
+                        } catch (error) {
+                            failedFiles.push({name: file.name, error: error.message});
+                            completedFiles++;
                         }
-                    });
+                    }
+
+                    // Vis resultat
+                    app.setLoadingState(false);
+                    app.setProgress(100);
+
+                    if (failedFiles.length === 0) {
+                        app.showMessage(`✅ Alle ${totalFiles} fakturaer ble lastet opp!`, 'success');
+                    } else if (successfulFiles.length === 0) {
+                        app.showMessage(`❌ Ingen fakturaer ble lastet opp. Sjekk filene og prøv igjen.`, 'error');
+                    } else {
+                        const message = `📊 ${successfulFiles.length} av ${totalFiles} fakturaer ble lastet opp.\n\n` +
+                            `✅ Vellykkede: ${successfulFiles.join(', ')}\n\n` +
+                            `❌ Feilet: ${failedFiles.map(f => f.name).join(', ')}`;
+                        app.showMessage(message, 'success');
+                    }
                 });
 
                 // Reset button
@@ -313,6 +340,8 @@
                             inkluderBtn.classList.add('active');
                             ekskluderBtn.classList.remove('active');
                             paramModeInput.value = 'inkluder';
+                            // Reset selected files
+                            selectedFiles = [];
                         }
                     });
                 });

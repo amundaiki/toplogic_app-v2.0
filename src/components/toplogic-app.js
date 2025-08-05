@@ -208,33 +208,53 @@ export class TopLogicApp {
     handleFileSelection(files, settings, fileInfo, fileName) {
         if (files.length === 0) return;
 
-        const file = files[0];
-        
-        // Valider filtype
-        if (!this.config.CONFIG_HELPERS.isValidFileType(file, settings.allowedTypes)) {
-            const error = this.config.APP_CONFIG.messages.error.invalidFileType;
+        const validFiles = [];
+        const invalidFiles = [];
+
+        // Valider alle filer
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            
+            // Valider filtype
+            if (!this.config.CONFIG_HELPERS.isValidFileType(file, settings.allowedTypes)) {
+                invalidFiles.push(`${file.name}: Ugyldig filtype`);
+                continue;
+            }
+
+            // Valider filstørrelse
+            if (!this.config.CONFIG_HELPERS.isValidFileSize(file)) {
+                invalidFiles.push(`${file.name}: Filen er for stor`);
+                continue;
+            }
+
+            validFiles.push(file);
+        }
+
+        // Vis feilmeldinger for ugyldige filer
+        if (invalidFiles.length > 0) {
+            const error = `Følgende filer kan ikke lastes opp:\n${invalidFiles.join('\n')}`;
             if (settings.onValidationError) {
                 settings.onValidationError(error);
             }
-            return;
         }
 
-        // Valider filstørrelse
-        if (!this.config.CONFIG_HELPERS.isValidFileSize(file)) {
-            const error = this.config.APP_CONFIG.messages.error.fileTooBig;
-            if (settings.onValidationError) {
-                settings.onValidationError(error);
+        // Hvis ingen gyldige filer, returner
+        if (validFiles.length === 0) return;
+
+        // Oppdater UI for flere filer
+        if (fileName && fileInfo) {
+            if (validFiles.length === 1) {
+                fileName.textContent = validFiles[0].name;
+            } else {
+                fileName.innerHTML = `<strong>${validFiles.length} fakturaer valgt:</strong><br>` + 
+                    validFiles.map(f => `• ${f.name}`).join('<br>');
             }
-            return;
+            fileInfo.classList.add('show');
         }
 
-        // Oppdater UI
-        if (fileName) fileName.textContent = file.name;
-        if (fileInfo) fileInfo.classList.add('show');
-
-        // Callback
+        // Callback med alle gyldige filer
         if (settings.onFileSelect) {
-            settings.onFileSelect(file);
+            settings.onFileSelect(validFiles.length === 1 ? validFiles[0] : validFiles);
         }
     }
 
