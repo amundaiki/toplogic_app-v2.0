@@ -40,18 +40,7 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="leverandor" class="form-label">
-                            <i data-lucide="building-2" class="form-label-icon"></i>
-                            Leverandør
-                        </label>
-                        <div class="custom-select-wrapper">
-                            <select id="leverandor" name="leverandor" class="form-select enhanced-select" required>
-                                <!-- Vil bli populeret via JavaScript -->
-                            </select>
-                            <i data-lucide="chevron-down" class="select-arrow"></i>
-                        </div>
-                    </div>
+
 
                     <div class="form-group" id="standardMalInfo">
                         <div style="padding: var(--spacing-md); background: var(--color-blue-light); border-radius: var(--radius-md); border-left: 4px solid var(--color-blue);">
@@ -147,7 +136,6 @@
                 // Populer dropdown-menyer fra config
                 function populateDropdowns() {
                     const opplasterSelect = document.getElementById('opplaster');
-                    const leverandorSelect = document.getElementById('leverandor');
 
                     // Populer brukere
                     config.APP_CONFIG.users.forEach(user => {
@@ -155,14 +143,6 @@
                         option.value = user.value;
                         option.textContent = user.label;
                         opplasterSelect.appendChild(option);
-                    });
-
-                    // Populer leverandører
-                    config.APP_CONFIG.suppliers.forEach(supplier => {
-                        const option = document.createElement('option');
-                        option.value = supplier.value;
-                        option.textContent = supplier.label;
-                        leverandorSelect.appendChild(option);
                     });
                 }
 
@@ -173,13 +153,8 @@
                 // const opplasterDropdown = new CustomDropdown(document.getElementById('opplaster'), {
                 //     placeholder: 'Velg opplaster...'
                 // });
-                
-                // const leverandorDropdown = new CustomDropdown(document.getElementById('leverandor'), {
-                //     placeholder: 'Velg leverandør...'
-                // });
 
                 // DOM elementer
-                const leverandorSelect = document.getElementById('leverandor');
 
                 // Setup file upload med støtte for flere filer
                 let selectedFiles = [];
@@ -216,16 +191,11 @@
                     e.preventDefault();
 
                     const opplaster = document.getElementById('opplaster').value;
-                    const leverandor = document.getElementById('leverandor').value;
+                    const leverandor = 'standardisert_mal'; // Alltid bruk standardisert mal
 
                     // Valider required felter med config-meldinger
                     if (!opplaster) {
                         app.showMessage(config.APP_CONFIG.messages.error.noUser, 'error');
-                        return;
-                    }
-
-                    if (!leverandor) {
-                        app.showMessage(config.APP_CONFIG.messages.error.noSupplier, 'error');
                         return;
                     }
 
