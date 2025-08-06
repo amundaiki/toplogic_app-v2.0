@@ -251,17 +251,15 @@ export class TopLogicApp {
 
         // Oppdater UI for flere filer
         if (fileInfo) {
-            fileInfo.style.display = 'block';
-            
-            // Oppdater fil-teller
+            // Ny multi-file UI (for faktura-opplaster)
             const fileCount = document.getElementById('fileCount');
-            if (fileCount) {
-                fileCount.textContent = validFiles.length === 1 ? '1 fil' : `${validFiles.length} filer`;
-            }
-            
-            // Opprett fil-liste
             const fileList = document.getElementById('fileList');
-            if (fileList) {
+            
+            if (fileCount && fileList) {
+                // Multi-file mode (faktura-opplaster)
+                fileInfo.style.display = 'block';
+                fileCount.textContent = validFiles.length === 1 ? '1 fil' : `${validFiles.length} filer`;
+                
                 fileList.innerHTML = validFiles.map((file, index) => 
                     `<div style="display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-xs) 0; border-bottom: 1px solid var(--color-gray-border);">
                         <div style="display: flex; align-items: center;">
@@ -271,6 +269,13 @@ export class TopLogicApp {
                         <span style="font-size: var(--font-size-xs); color: var(--color-gray-medium);">${this.formatFileSize(file.size)}</span>
                     </div>`
                 ).join('');
+            } else {
+                // Single-file mode (prisliste-app og andre)
+                const fileName = document.getElementById('fileName');
+                if (fileName) {
+                    fileName.textContent = validFiles[0].name;
+                    fileInfo.classList.add('show');
+                }
             }
         }
 
@@ -425,20 +430,8 @@ export class TopLogicApp {
         
         if (lowerFilename.includes('test')) {
             select.value = 'test';
-        } else if (lowerFilename.includes('bring')) {
-            select.value = 'faktura_bring';
-        } else if (lowerFilename.includes('ups')) {
-            select.value = 'faktura_ups';
-        } else if (lowerFilename.includes('dhl')) {
-            select.value = 'faktura_dhl';
-        } else if (lowerFilename.includes('postnord')) {
-            select.value = 'faktura_postnord';
-        } else if (lowerFilename.includes('fedex')) {
-            select.value = 'faktura_fedex';
-        } else if (lowerFilename.includes('schenker')) {
-            select.value = 'faktura_schenker';
-        } else if (lowerFilename.includes('ntg')) {
-            select.value = 'faktura_ntg';
+        } else if (lowerFilename.includes('bring') && lowerFilename.includes('transport')) {
+            select.value = 'bring_transport';
         }
     }
 }

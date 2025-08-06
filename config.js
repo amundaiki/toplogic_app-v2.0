@@ -19,7 +19,7 @@ const ENVIRONMENT = {
 // Webhook URLs - Make.com integrasjoner
 const WEBHOOKS = {
     // Faktura-opplaster
-    faktura: 'https://hook.eu2.make.com/kul69xvao6hb000u0u4vqpvfk48e5el2',
+    faktura: 'https://hook.eu2.make.com/yw40zeiqe1j1dwcrcls3su39mme9j4zu',
     
     // Prisliste-apper
     prisliste_bring_transport: 'https://hook.eu2.make.com/mwmlrm2esor86r8w3dnyr7elo557rc2j',
@@ -67,8 +67,7 @@ const APP_CONFIG = {
     
     // Leverandører (for faktura-opplaster)
     suppliers: [
-        { value: 'standardisert_mal', label: 'Standardisert mal' },
-        { value: 'ingen', label: 'Ingen normal leverandør – hent alle parameter' }
+        { value: 'standardisert_mal', label: 'Standardisert mal' }
     ],
     
     // Meldinger

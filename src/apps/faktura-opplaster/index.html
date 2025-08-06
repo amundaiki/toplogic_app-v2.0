@@ -53,21 +53,7 @@
                         </div>
                     </div>
 
-                    <div class="form-group" id="paramGroup" style="display:none;">
-                        <label for="parametre" class="form-label">Parametermodus</label>
-                        <div class="toggle-group">
-                            <button type="button" class="toggle-btn active" id="inkluderBtn">Inkluder</button>
-                            <button type="button" class="toggle-btn" id="ekskluderBtn">Ekskluder</button>
-                        </div>
-                        <textarea id="parametre" name="parametre" class="form-textarea" rows="3" placeholder="f.eks. volum, antall, osv"></textarea>
-                        <small style="color: var(--color-gray-medium); display: block; margin-top: var(--spacing-xs);">
-                            Skriv inn hvilke parameter du ønsker å inkludere eller ekskludere fra analysen.<br>
-                            Hvis du lar feltet stå tomt, hentes alle parametre.
-                        </small>
-                        <input type="hidden" id="paramMode" name="paramMode" value="inkluder">
-                    </div>
-
-                    <div class="form-group" id="standardMalInfo" style="display:none;">
+                    <div class="form-group" id="standardMalInfo">
                         <div style="padding: var(--spacing-md); background: var(--color-blue-light); border-radius: var(--radius-md); border-left: 4px solid var(--color-blue);">
                             <h4 style="color: var(--color-blue-dark); margin: 0 0 var(--spacing-sm) 0; font-size: var(--font-size-medium);">TopLogic Standardisert mal</h4>
                             <p style="color: var(--color-gray-dark); margin: 0 0 var(--spacing-sm) 0; font-size: var(--font-size-small);">
@@ -194,42 +180,6 @@
 
                 // DOM elementer
                 const leverandorSelect = document.getElementById('leverandor');
-                const paramGroup = document.getElementById('paramGroup');
-                const parametre = document.getElementById('parametre');
-                const paramModeInput = document.getElementById('paramMode');
-                const inkluderBtn = document.getElementById('inkluderBtn');
-                const ekskluderBtn = document.getElementById('ekskluderBtn');
-
-                // Vis/skjul parameterfelt basert på leverandørvalg
-                leverandorSelect.addEventListener('change', function() {
-                    const standardMalInfo = document.getElementById('standardMalInfo');
-                    
-                    if (this.value === 'ingen') {
-                        paramGroup.style.display = 'block';
-                        if (standardMalInfo) standardMalInfo.style.display = 'none';
-                    } else if (this.value === 'standardisert_mal') {
-                        paramGroup.style.display = 'none';
-                        parametre.value = '';
-                        if (standardMalInfo) standardMalInfo.style.display = 'block';
-                    } else {
-                        paramGroup.style.display = 'none';
-                        parametre.value = '';
-                        if (standardMalInfo) standardMalInfo.style.display = 'none';
-                    }
-                });
-
-                // Toggle-knapper for parametermodus
-                inkluderBtn.addEventListener('click', function() {
-                    inkluderBtn.classList.add('active');
-                    ekskluderBtn.classList.remove('active');
-                    paramModeInput.value = 'inkluder';
-                });
-
-                ekskluderBtn.addEventListener('click', function() {
-                    ekskluderBtn.classList.add('active');
-                    inkluderBtn.classList.remove('active');
-                    paramModeInput.value = 'ekskluder';
-                });
 
                 // Setup file upload med støtte for flere filer
                 let selectedFiles = [];
@@ -267,8 +217,6 @@
 
                     const opplaster = document.getElementById('opplaster').value;
                     const leverandor = document.getElementById('leverandor').value;
-                    const parametreValue = document.getElementById('parametre').value;
-                    const paramMode = document.getElementById('paramMode').value;
 
                     // Valider required felter med config-meldinger
                     if (!opplaster) {
@@ -310,11 +258,6 @@
                             formData.append('fileName', file.name);
                             formData.append('timestamp', config.CONFIG_HELPERS.getTimestamp());
                             formData.append('fileNumber', `${i + 1} av ${totalFiles}`);
-
-                            if (leverandor === 'ingen') {
-                                formData.append('parametre', parametreValue);
-                                formData.append('paramMode', paramMode);
-                            }
 
                             // Oppdater melding for hvilken fil som behandles
                             app.showMessage(`Behandler faktura ${i + 1} av ${totalFiles}: ${file.name}`, 'success');
@@ -366,13 +309,6 @@
                 document.getElementById('resetBtn').addEventListener('click', function() {
                     app.resetForm('uploadForm', {
                         onReset: () => {
-                            // Reset custom visibility og toggle states
-                            paramGroup.style.display = 'none';
-                            const standardMalInfo = document.getElementById('standardMalInfo');
-                            if (standardMalInfo) standardMalInfo.style.display = 'none';
-                            inkluderBtn.classList.add('active');
-                            ekskluderBtn.classList.remove('active');
-                            paramModeInput.value = 'inkluder';
                             // Reset selected files
                             selectedFiles = [];
                             document.getElementById('fileInfo').style.display = 'none';
@@ -381,16 +317,7 @@
                     });
                 });
 
-                // Vis parameterfelt ved lasting hvis "ingen" er valgt (f.eks. ved refresh)
-                const standardMalInfo = document.getElementById('standardMalInfo');
-                
-                if (leverandorSelect.value === 'ingen') {
-                    paramGroup.style.display = 'block';
-                    if (standardMalInfo) standardMalInfo.style.display = 'none';
-                } else if (leverandorSelect.value === 'standardisert_mal') {
-                    paramGroup.style.display = 'none';
-                    if (standardMalInfo) standardMalInfo.style.display = 'block';
-                }
+                // Standardisert mal info er alltid synlig siden det er eneste valg
 
 
 

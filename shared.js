@@ -383,20 +383,8 @@ class TopLogicApp {
         
         if (lowerFilename.includes('test')) {
             select.value = 'test';
-        } else if (lowerFilename.includes('bring')) {
-            select.value = 'faktura_bring';
-        } else if (lowerFilename.includes('ups')) {
-            select.value = 'faktura_ups';
-        } else if (lowerFilename.includes('dhl')) {
-            select.value = 'faktura_dhl';
-        } else if (lowerFilename.includes('postnord')) {
-            select.value = 'faktura_postnord';
-        } else if (lowerFilename.includes('fedex')) {
-            select.value = 'faktura_fedex';
-        } else if (lowerFilename.includes('schenker')) {
-            select.value = 'faktura_schenker';
-        } else if (lowerFilename.includes('ntg')) {
-            select.value = 'faktura_ntg';
+        } else if (lowerFilename.includes('bring') && lowerFilename.includes('transport')) {
+            select.value = 'bring_transport';
         }
     }
 }

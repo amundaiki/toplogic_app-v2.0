@@ -20,8 +20,7 @@ export const APP_CONFIG = {
     
     // Leverandører (for faktura-opplaster)
     suppliers: [
-        { value: 'standardisert_mal', label: 'Standardisert mal' },
-        { value: 'ingen', label: 'Ingen normal leverandør – hent alle parameter' }
+        { value: 'standardisert_mal', label: 'Standardisert mal' }
     ],
     
     // Meldinger
