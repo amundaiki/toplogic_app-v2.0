@@ -93,7 +93,7 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" id="shipmentCountSection" style="display: none !important;">
                         <label class="form-label">
                             <i data-lucide="package" class="form-label-icon"></i>
                             Anslått antall sendinger i fakturaen
@@ -108,7 +108,7 @@
                             <button type="button" class="shipment-btn" data-count="101-150">101-150</button>
                             <button type="button" class="shipment-btn" data-count="150+">150+</button>
                         </div>
-                        <input type="hidden" id="shipmentCount" name="shipmentCount" required>
+                        <input type="hidden" id="shipmentCount" name="shipmentCount">
                     </div>
 
                     <div class="form-group" id="standardMalInfo">
@@ -234,6 +234,45 @@
                 
                 setupShipmentCountButtons();
 
+                // Setup opplaster change event for conditional shipment count
+                function setupOpplasterConditionalLogic() {
+                    const opplasterSelect = document.getElementById('opplaster');
+                    const shipmentSection = document.getElementById('shipmentCountSection');
+                    const shipmentInput = document.getElementById('shipmentCount');
+                    
+                    opplasterSelect.addEventListener('change', function() {
+                        const selectedUser = this.value;
+                        console.log('Opplaster endret til:', selectedUser);
+                        
+                        if (selectedUser === 'Amund') {
+                            // Vis sendinger-seksjonen og gjør den obligatorisk
+                            shipmentSection.style.setProperty('display', 'block', 'important');
+                            shipmentInput.setAttribute('required', 'required');
+                        } else {
+                            // Skjul sendinger-seksjonen og fjern required
+                            shipmentSection.style.setProperty('display', 'none', 'important');
+                            shipmentInput.removeAttribute('required');
+                            
+                            // Reset valg hvis skjult
+                            document.querySelectorAll('.shipment-btn').forEach(btn => btn.classList.remove('selected'));
+                            shipmentInput.value = '';
+                        }
+                    });
+                }
+                
+                setupOpplasterConditionalLogic();
+                
+                // Sørg for at sendinger-seksjonen er skjult ved oppstart
+                function initializeShipmentCountVisibility() {
+                    const shipmentSection = document.getElementById('shipmentCountSection');
+                    if (shipmentSection) {
+                        shipmentSection.style.setProperty('display', 'none', 'important');
+                        console.log('Sendinger-seksjon skjult ved oppstart');
+                    }
+                }
+                
+                initializeShipmentCountVisibility();
+
                 // Custom dropdowns midlertidig deaktivert
                 // const opplasterDropdown = new CustomDropdown(document.getElementById('opplaster'), {
                 //     placeholder: 'Velg opplaster...'
@@ -285,7 +324,8 @@
                         return;
                     }
 
-                    if (!shipmentCount) {
+                    // Valider shipment count kun hvis Amund er valgt
+                    if (opplaster === 'Amund' && !shipmentCount) {
                         app.showMessage('Vennligst velg anslått antall sendinger i fakturaen', 'error');
                         return;
                     }
@@ -316,7 +356,12 @@
                             formData.append('file', file);
                             formData.append('opplaster', opplaster);
                             formData.append('leverandor', leverandor);
-                            formData.append('shipmentCount', shipmentCount);
+                            
+                            // Kun legg til shipmentCount hvis Amund er valgt
+                            if (opplaster === 'Amund' && shipmentCount) {
+                                formData.append('shipmentCount', shipmentCount);
+                            }
+                            
                             formData.append('fileName', file.name);
                             formData.append('timestamp', config.CONFIG_HELPERS.getTimestamp());
                             formData.append('fileNumber', `${i + 1} av ${totalFiles}`);
