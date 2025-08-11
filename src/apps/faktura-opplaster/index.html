@@ -93,6 +93,20 @@
                         </div>
                     </div>
 
+                    <div class="form-group">
+                        <label for="leverandor" class="form-label">
+                            <i data-lucide="truck" class="form-label-icon"></i>
+                            Leverandør
+                        </label>
+                        <div class="custom-select-wrapper">
+                            <select id="leverandor" name="leverandor" class="form-select enhanced-select">
+                                <option value="ikke_valgt" selected>Ikke valgt (annet)</option>
+                                <option value="postnord">PostNord</option>
+                            </select>
+                            <i data-lucide="chevron-down" class="select-arrow"></i>
+                        </div>
+                    </div>
+
                     <div class="form-group" id="shipmentCountSection">
                         <label class="form-label">
                             <i data-lucide="package" class="form-label-icon"></i>
@@ -150,6 +164,14 @@
                                     Fjern alle filer
                                 </button>
                             </div>
+                        </div>
+                        
+                        <!-- Liste over valgte filer med per-fil antall sendinger -->
+                        <div class="form-group" id="multiFileSection" style="display:none; margin-top: var(--spacing-md);">
+                            <div id="multiFileWarningBox" style="display:none; padding: var(--spacing-md); background: var(--color-blue-light); border-radius: var(--radius-md); border-left: 4px solid var(--color-blue); color: var(--color-gray-dark); margin-bottom: var(--spacing-md);">
+                                Hvis du ikke angir «antall sendinger» per fil, må alle fakturaene være omtrent like lange når du laster opp flere samtidig.
+                            </div>
+                            <div id="fileListContainer" class="file-list"></div>
                         </div>
                     </div>
 
@@ -249,21 +271,49 @@
 
                 // DOM elementer
 
-                // Setup file upload med støtte for flere filer
+                // Aktiver flerfilsopplasting og per-fil liste
                 let selectedFiles = [];
+                const multiFileSection = document.getElementById('multiFileSection');
+                const multiFileWarningBox = document.getElementById('multiFileWarningBox');
+                const fileListContainer = document.getElementById('fileListContainer');
+
+                function renderFileRows(files) {
+                    if (!fileListContainer) return;
+                    fileListContainer.innerHTML = '';
+                    files.forEach((file, idx) => {
+                        const row = document.createElement('div');
+                        row.className = 'file-row';
+                        row.innerHTML = `
+                            <div class="file-row-main">
+                                <div class="file-row-name">${file.name}</div>
+                                <div class="file-row-size">${TopLogicUtils.formatFileSize(file.size)}</div>
+                            </div>
+                            <div class="file-row-controls">
+                                <label class="form-label" for="shipments_${idx}" style="margin-right: var(--spacing-sm);">Antall sendinger</label>
+                                <input type="number" min="1" step="1" inputmode="numeric" pattern="[0-9]*" id="shipments_${idx}" class="form-input" placeholder="f.eks. 1" style="max-width: 140px;">
+                            </div>
+                        `;
+                        fileListContainer.appendChild(row);
+                    });
+                    if (multiFileSection) multiFileSection.style.display = files.length > 1 ? 'block' : 'none';
+                    if (multiFileWarningBox) multiFileWarningBox.style.display = files.length > 1 ? 'block' : 'none';
+                }
+
                 app.setupFileUpload('fakturaFile', {
                     allowedTypes: 'pdf',
-                    onFileSelect: (files) => {
-                        selectedFiles = Array.isArray(files) ? files : [files];
-                        console.log('Fakturaer valgt:', selectedFiles.map(f => f.name));
-                        
-                        // Oppdater knapp-tekst basert på antall filer
+                    enableMultiple: true,
+                    fileListContainerId: 'fileListContainer',
+                    onFilesSelect: (files) => {
+                        selectedFiles = files;
+                        renderFileRows(files);
                         const submitBtn = document.querySelector('#submitBtn span');
-                        if (selectedFiles.length === 1) {
-                            submitBtn.textContent = 'Send faktura';
-                        } else {
-                            submitBtn.textContent = `Send ${selectedFiles.length} fakturaer`;
-                        }
+                        if (submitBtn) submitBtn.textContent = files.length === 1 ? 'Send faktura' : `Send ${files.length} fakturaer`;
+                    },
+                    onFileSelect: (file) => {
+                        selectedFiles = [file];
+                        renderFileRows([file]);
+                        const submitBtn = document.querySelector('#submitBtn span');
+                        if (submitBtn) submitBtn.textContent = 'Send faktura';
                     },
                     onValidationError: (error) => {
                         app.showMessage(error, 'error');
@@ -284,8 +334,9 @@
                     e.preventDefault();
 
                     const opplaster = document.getElementById('opplaster').value;
-                    const leverandor = 'standardisert_mal'; // Alltid bruk standardisert mal
-                    const shipmentCount = document.getElementById('shipmentCount').value;
+                    const leverandor = (document.getElementById('leverandor')?.value) || 'ikke_valgt';
+                    const inputEl = document.getElementById('fakturaFile');
+                    const files = selectedFiles.length ? selectedFiles : Array.from(inputEl.files || []);
 
                     // Valider required felter med config-meldinger
                     if (!opplaster) {
@@ -295,85 +346,61 @@
 
                     // Antall sendinger er valgfritt for alle brukere
 
-                    if (!selectedFiles || selectedFiles.length === 0) {
+                    if (!files || files.length === 0) {
                         app.showMessage(config.APP_CONFIG.messages.error.noFile, 'error');
                         return;
                     }
 
-                    // Start loading state
+                    // Valider fil
+                    // Hvis flere filer: send hver for seg med opsjon for antall sendinger per fil
+                    const total = files.length;
+                    let sent = 0;
                     app.setLoadingState(true);
-                    
-                    const totalFiles = selectedFiles.length;
-                    let completedFiles = 0;
-                    let failedFiles = [];
-                    let successfulFiles = [];
+                    app.showMessage(config.APP_CONFIG.messages.info.uploading, 'success');
 
-                    app.showMessage(`Laster opp ${totalFiles} fakturaer... Hver faktura sendes individuelt til behandling.`, 'success');
+                    for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
 
-                    // Send hver faktura separat
-                    for (let i = 0; i < selectedFiles.length; i++) {
-                        const file = selectedFiles[i];
-                        
-                        try {
-                            const formData = new FormData();
-                            
-                            // Bygg FormData for denne filen
-                            formData.append('file', file);
-                            formData.append('opplaster', opplaster);
-                            formData.append('leverandor', leverandor);
-                            
-                            // Legg til shipmentCount hvis valgt
-                            if (shipmentCount) {
-                                formData.append('shipmentCount', shipmentCount);
-                            }
-                            
-                            formData.append('fileName', file.name);
-                            formData.append('timestamp', config.CONFIG_HELPERS.getTimestamp());
-                            formData.append('fileNumber', `${i + 1} av ${totalFiles}`);
-
-                            // Oppdater melding for hvilken fil som behandles
-                            app.showMessage(`Behandler faktura ${i + 1} av ${totalFiles}: ${file.name}`, 'success');
-
-                            // Send til Make.com
-                            await app.submitForm(formData, 'faktura', {
-                                onStart: () => {
-                                    console.log(`Sender faktura ${i + 1}/${totalFiles}: ${file.name}`);
-                                },
-                                onProgress: (progress) => {
-                                    const overallProgress = ((completedFiles * 100) + progress) / totalFiles;
-                                    app.setProgress(overallProgress);
-                                },
-                                onSuccess: (message) => {
-                                    successfulFiles.push(file.name);
-                                    completedFiles++;
-                                    console.log(`✅ Faktura ${i + 1}/${totalFiles} sendt: ${file.name}`);
-                                },
-                                onError: (error) => {
-                                    failedFiles.push({name: file.name, error: error});
-                                    completedFiles++;
-                                    console.log(`❌ Faktura ${i + 1}/${totalFiles} feilet: ${file.name} - ${error}`);
-                                }
-                            });
-
-                        } catch (error) {
-                            failedFiles.push({name: file.name, error: error.message});
-                            completedFiles++;
+                        if (!config.CONFIG_HELPERS.isValidFileSize(file)) {
+                            app.showMessage(config.APP_CONFIG.messages.error.fileTooBig, 'error');
+                            continue;
                         }
+                        if (!config.CONFIG_HELPERS.isValidFileType(file, 'pdf')) {
+                            app.showMessage(config.APP_CONFIG.messages.error.invalidFileType, 'error');
+                            continue;
+                        }
+
+                        const perFileFormData = new FormData();
+                        perFileFormData.append('file', file);
+                        perFileFormData.append('opplaster', opplaster);
+                        perFileFormData.append('leverandor', leverandor);
+                        perFileFormData.append('fileName', file.name);
+                        perFileFormData.append('timestamp', config.CONFIG_HELPERS.getTimestamp());
+
+                        // Les per-fil antall sendinger dersom angitt
+                        const shipmentsInput = document.getElementById(`shipments_${i}`);
+                        const shipmentsVal = shipmentsInput && shipmentsInput.value ? parseInt(shipmentsInput.value, 10) : null;
+                        if (Number.isFinite(shipmentsVal) && shipmentsVal > 0) {
+                            perFileFormData.append('antall_sendinger', String(shipmentsVal));
+                        }
+
+                        await app.submitForm(perFileFormData, 'faktura', {
+                            onProgress: (progress) => {
+                                app.setProgress(Math.min(100, Math.round(((sent + progress / 100) / total) * 100)));
+                            },
+                            onSuccess: () => {
+                                sent += 1;
+                                app.setProgress(Math.round((sent / total) * 100));
+                            },
+                            onError: (error) => {
+                                app.showMessage(error, 'error');
+                            }
+                        });
                     }
 
-                    // Vis resultat
                     app.setLoadingState(false);
-                    app.setProgress(100);
-
-                    if (failedFiles.length === 0) {
-                        app.showMessage(`✅ Alle ${totalFiles} fakturaer ble lastet opp!`, 'success');
-                    } else if (successfulFiles.length === 0) {
-                        app.showMessage(`❌ Ingen fakturaer ble lastet opp. Sjekk filene og prøv igjen.`, 'error');
-                    } else {
-                        const message = `📊 ${successfulFiles.length} av ${totalFiles} fakturaer ble lastet opp.\n\n` +
-                            `✅ Vellykkede: ${successfulFiles.join(', ')}\n\n` +
-                            `❌ Feilet: ${failedFiles.map(f => f.name).join(', ')}`;
-                        app.showMessage(message, 'success');
+                    if (sent > 0) {
+                        app.showMessage(config.APP_CONFIG.messages.success.fakturaUploaded, 'success');
                     }
                 });
 
@@ -381,14 +408,19 @@
                 document.getElementById('resetBtn').addEventListener('click', function() {
                     app.resetForm('uploadForm', {
                         onReset: () => {
-                            // Reset selected files
+                            // Flerfil reset
                             selectedFiles = [];
-                            document.getElementById('fileInfo').style.display = 'none';
-                            document.querySelector('#submitBtn span').textContent = 'Send fakturaer';
-                            
-                            // Reset shipment count selection
+                            const fileInfoEl = document.getElementById('fileInfo');
+                            if (fileInfoEl) fileInfoEl.style.display = 'none';
+                            const submitBtn = document.querySelector('#submitBtn span');
+                            if (submitBtn) submitBtn.textContent = 'Send fakturaer';
+                            if (multiFileSection) multiFileSection.style.display = 'none';
+                            if (multiFileWarningBox) multiFileWarningBox.style.display = 'none';
+                            if (fileListContainer) fileListContainer.innerHTML = '';
+                            // Reset shipment count buttons (om brukt)
                             document.querySelectorAll('.shipment-btn').forEach(btn => btn.classList.remove('selected'));
-                            document.getElementById('shipmentCount').value = '';
+                            const shipmentHidden = document.getElementById('shipmentCount');
+                            if (shipmentHidden) shipmentHidden.value = '';
                         }
                     });
                 });

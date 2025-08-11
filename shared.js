@@ -154,7 +154,10 @@ class TopLogicApp {
         const defaults = {
             allowedTypes: 'pdf',
             enableDragDrop: true,
+            enableMultiple: false,
             onFileSelect: null,
+            onFilesSelect: null,
+            fileListContainerId: null,
             onValidationError: null
         };
         
@@ -167,6 +170,15 @@ class TopLogicApp {
         if (!fileInput) {
             console.error(`File input with id '${fileInputId}' not found`);
             return;
+        }
+
+        // Aktiver flerfilsvalg dersom konfigurert
+        try {
+            if (settings.enableMultiple) {
+                fileInput.setAttribute('multiple', 'multiple');
+            }
+        } catch (_) {
+            // Ignorer dersom browser ikke støtter
         }
 
         // File input change handler
@@ -206,36 +218,71 @@ class TopLogicApp {
     }
 
     handleFileSelection(files, settings, fileInfo, fileName) {
-        if (files.length === 0) return;
+        if (!files || files.length === 0) return;
 
+        // Håndter flerfilsvalg
+        if (settings.enableMultiple) {
+            const validatedFiles = [];
+
+            for (const f of files) {
+                if (!this.config.CONFIG_HELPERS.isValidFileType(f, settings.allowedTypes)) {
+                    const error = this.config.APP_CONFIG.messages.error.invalidFileType;
+                    if (settings.onValidationError) settings.onValidationError(error);
+                    return;
+                }
+                if (!this.config.CONFIG_HELPERS.isValidFileSize(f)) {
+                    const error = this.config.APP_CONFIG.messages.error.fileTooBig;
+                    if (settings.onValidationError) settings.onValidationError(error);
+                    return;
+                }
+                validatedFiles.push(f);
+            }
+
+            // Oppdater UI for liste eller oppsummering
+            if (fileInfo) fileInfo.classList.add('show');
+            if (fileName) fileName.textContent = `${validatedFiles.length} fil${validatedFiles.length === 1 ? '' : 'er'} valgt`;
+
+            // Render i egen container dersom oppgitt
+            if (settings.fileListContainerId) {
+                const container = document.getElementById(settings.fileListContainerId);
+                if (container) {
+                    container.innerHTML = '';
+                    validatedFiles.forEach((vf, index) => {
+                        const row = document.createElement('div');
+                        row.className = 'file-row';
+                        row.dataset.fileIndex = String(index);
+                        row.innerHTML = `
+                            <div class="file-row-name">${vf.name}</div>
+                            <div class="file-row-meta">${TopLogicUtils.formatFileSize(vf.size)}</div>
+                        `;
+                        container.appendChild(row);
+                    });
+                    container.classList.add('show');
+                }
+            }
+
+            if (settings.onFilesSelect) settings.onFilesSelect(validatedFiles);
+            return;
+        }
+
+        // Enkeltfil som før
         const file = files[0];
-        
-        // Valider filtype
+
         if (!this.config.CONFIG_HELPERS.isValidFileType(file, settings.allowedTypes)) {
             const error = this.config.APP_CONFIG.messages.error.invalidFileType;
-            if (settings.onValidationError) {
-                settings.onValidationError(error);
-            }
+            if (settings.onValidationError) settings.onValidationError(error);
             return;
         }
-
-        // Valider filstørrelse
         if (!this.config.CONFIG_HELPERS.isValidFileSize(file)) {
             const error = this.config.APP_CONFIG.messages.error.fileTooBig;
-            if (settings.onValidationError) {
-                settings.onValidationError(error);
-            }
+            if (settings.onValidationError) settings.onValidationError(error);
             return;
         }
 
-        // Oppdater UI
         if (fileName) fileName.textContent = file.name;
         if (fileInfo) fileInfo.classList.add('show');
 
-        // Callback
-        if (settings.onFileSelect) {
-            settings.onFileSelect(file);
-        }
+        if (settings.onFileSelect) settings.onFileSelect(file);
     }
 
     // Generisk form submission

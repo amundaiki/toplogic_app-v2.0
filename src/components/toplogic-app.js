@@ -154,7 +154,10 @@ export class TopLogicApp {
         const defaults = {
             allowedTypes: 'pdf',
             enableDragDrop: true,
+            enableMultiple: false,
             onFileSelect: null,
+            onFilesSelect: null,
+            fileListContainerId: null,
             onValidationError: null
         };
         
@@ -167,6 +170,15 @@ export class TopLogicApp {
         if (!fileInput) {
             console.error(`File input with id '${fileInputId}' not found`);
             return;
+        }
+
+        // Aktiver flerfilsvalg dersom konfigurert
+        try {
+            if (settings.enableMultiple) {
+                fileInput.setAttribute('multiple', 'multiple');
+            }
+        } catch (_) {
+            // Ignorer dersom ikke støttet
         }
 
         // File input change handler
@@ -214,75 +226,67 @@ export class TopLogicApp {
     }
 
     handleFileSelection(files, settings, fileInfo, fileName) {
-        if (files.length === 0) return;
+        if (!files || files.length === 0) return;
 
-        const validFiles = [];
-        const invalidFiles = [];
+        // Håndter flerfilsvalg
+        if (settings.enableMultiple) {
+            const validatedFiles = [];
 
-        // Valider alle filer
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            
-            // Valider filtype
-            if (!this.config.CONFIG_HELPERS.isValidFileType(file, settings.allowedTypes)) {
-                invalidFiles.push(`${file.name}: Ugyldig filtype`);
-                continue;
+            for (const f of files) {
+                if (!this.config.CONFIG_HELPERS.isValidFileType(f, settings.allowedTypes)) {
+                    const error = this.config.APP_CONFIG.messages.error.invalidFileType;
+                    if (settings.onValidationError) settings.onValidationError(error);
+                    return;
+                }
+                if (!this.config.CONFIG_HELPERS.isValidFileSize(f)) {
+                    const error = this.config.APP_CONFIG.messages.error.fileTooBig;
+                    if (settings.onValidationError) settings.onValidationError(error);
+                    return;
+                }
+                validatedFiles.push(f);
             }
 
-            // Valider filstørrelse
-            if (!this.config.CONFIG_HELPERS.isValidFileSize(file)) {
-                invalidFiles.push(`${file.name}: Filen er for stor`);
-                continue;
-            }
+            // Oppdater UI for liste eller oppsummering
+            if (fileInfo) fileInfo.classList.add('show');
+            if (fileName) fileName.textContent = `${validatedFiles.length} fil${validatedFiles.length === 1 ? '' : 'er'} valgt`;
 
-            validFiles.push(file);
-        }
-
-        // Vis feilmeldinger for ugyldige filer
-        if (invalidFiles.length > 0) {
-            const error = `Følgende filer kan ikke lastes opp:\n${invalidFiles.join('\n')}`;
-            if (settings.onValidationError) {
-                settings.onValidationError(error);
-            }
-        }
-
-        // Hvis ingen gyldige filer, returner
-        if (validFiles.length === 0) return;
-
-        // Oppdater UI for flere filer
-        if (fileInfo) {
-            // Ny multi-file UI (for faktura-opplaster)
-            const fileCount = document.getElementById('fileCount');
-            const fileList = document.getElementById('fileList');
-            
-            if (fileCount && fileList) {
-                // Multi-file mode (faktura-opplaster)
-                fileInfo.style.display = 'block';
-                fileCount.textContent = validFiles.length === 1 ? '1 fil' : `${validFiles.length} filer`;
-                
-                fileList.innerHTML = validFiles.map((file, index) => 
-                    `<div style="display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-xs) 0; border-bottom: 1px solid var(--color-gray-border);">
-                        <div style="display: flex; align-items: center;">
-                            <span style="background: var(--color-blue-light); color: var(--color-blue-dark); padding: 2px 6px; border-radius: var(--radius-sm); font-size: var(--font-size-xs); margin-right: var(--spacing-xs); min-width: 20px; text-align: center;">${index + 1}</span>
-                            <span style="font-size: var(--font-size-small); color: var(--color-gray-dark);">${file.name}</span>
-                        </div>
-                        <span style="font-size: var(--font-size-xs); color: var(--color-gray-medium);">${this.formatFileSize(file.size)}</span>
-                    </div>`
-                ).join('');
-            } else {
-                // Single-file mode (prisliste-app og andre)
-                const fileName = document.getElementById('fileName');
-                if (fileName) {
-                    fileName.textContent = validFiles[0].name;
-                    fileInfo.classList.add('show');
+            if (settings.fileListContainerId) {
+                const container = document.getElementById(settings.fileListContainerId);
+                if (container) {
+                    container.innerHTML = '';
+                    validatedFiles.forEach((vf, index) => {
+                        const row = document.createElement('div');
+                        row.className = 'file-row';
+                        row.dataset.fileIndex = String(index);
+                        row.innerHTML = `
+                            <div class="file-row-name">${vf.name}</div>
+                            <div class="file-row-meta">${TopLogicUtils.formatFileSize(vf.size)}</div>
+                        `;
+                        container.appendChild(row);
+                    });
+                    container.classList.add('show');
                 }
             }
+
+            if (settings.onFilesSelect) settings.onFilesSelect(validatedFiles);
+            return;
         }
 
-        // Callback med alle gyldige filer
-        if (settings.onFileSelect) {
-            settings.onFileSelect(validFiles.length === 1 ? validFiles[0] : validFiles);
+        // Enkeltfil
+        const file = files[0];
+        if (!this.config.CONFIG_HELPERS.isValidFileType(file, settings.allowedTypes)) {
+            const error = this.config.APP_CONFIG.messages.error.invalidFileType;
+            if (settings.onValidationError) settings.onValidationError(error);
+            return;
         }
+        if (!this.config.CONFIG_HELPERS.isValidFileSize(file)) {
+            const error = this.config.APP_CONFIG.messages.error.fileTooBig;
+            if (settings.onValidationError) settings.onValidationError(error);
+            return;
+        }
+        if (fileName) fileName.textContent = file.name;
+        if (fileInfo) fileInfo.classList.add('show');
+        if (settings.onFileSelect) settings.onFileSelect(file);
     }
 
     // Generisk form submission
