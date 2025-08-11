@@ -121,23 +121,9 @@ const NAVIGATION = {
             title: 'Prislister til EXCEL',
             url: '/prisliste-app/',
             icon: 'chart',
-            locked: true,
-            password: '1'
+            locked: false
         },
-        dokumentUploader: {
-            title: 'Dokumentbehandler',
-            url: '/dokument-uploader/',
-            icon: 'upload',
-            locked: true,
-            password: '1'
-        },
-        kostnadsAnalyse: {
-            title: 'Kostnadsanalyse',
-            url: '/kostnadsanalyse/',
-            icon: 'analytics',
-            locked: true,
-            password: '1'
-        }
+        
     }
 };
 

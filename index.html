@@ -37,25 +37,6 @@
                     </ul>
                 </div>
 
-                <hr style="margin: var(--spacing-xxxl) 0; border: none; border-top: 1px solid var(--color-gray-border);">
-
-                <!-- Låste apper -->
-                <div class="form-group">
-                    <h3 style="color: var(--color-gray-medium); margin-bottom: var(--spacing-lg); font-size: var(--font-size-medium); text-transform: uppercase; letter-spacing: 0.5px;">Låste Apper</h3>
-                    <ul style="list-style: none; padding: 0; margin: 0;">
-
-                        <li style="margin-bottom: var(--spacing-lg);">
-                            <a href="#" class="btn btn-primary btn-full btn-large btn-locked animate-child" id="dokumentbehandler-link" data-icon="📤">
-                                <span>Dokumentbehandler</span>
-                            </a>
-                        </li>
-                        <li style="margin-bottom: var(--spacing-lg);">
-                            <a href="#" class="btn btn-primary btn-full btn-large btn-locked animate-child" id="kostnadsanalyse-link" data-icon="💰">
-                                <span>Kostnadsanalyse</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
 
                 <!-- Footer -->
                 <div style="text-align: center; margin-top: var(--spacing-xxxl); padding-top: var(--spacing-xl); border-top: 1px solid var(--color-gray-border); color: var(--color-gray-medium);">
@@ -85,16 +66,7 @@
                 // Initialiser TopLogic App (uten passord for hjemmesiden)
                 const app = new TopLogicApp(false); // false = ikke krev passord
                 
-                // Vis melding for låste apper
-                document.getElementById('dokumentbehandler-link').addEventListener('click', function(e) {
-                    e.preventDefault();
-                    app.showMessage('📤 Dokumentbehandler vil bli tilgjengelig snart. Vi jobber med å ferdigstille denne funksjonen.', 'info');
-                });
-
-                document.getElementById('kostnadsanalyse-link').addEventListener('click', function(e) {
-                    e.preventDefault();
-                    app.showMessage('💰 Kostnadsanalyse vil bli tilgjengelig snart. Vi jobber med å ferdigstille denne funksjonen.', 'info');
-                });
+                // Ingen låste apper lenger
 
                 console.log('🏠 TopLogic Hjemmeside er lastet');
             }, 100);
