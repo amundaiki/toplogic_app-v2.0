@@ -305,12 +305,20 @@
                     onFilesSelect: (files) => {
                         selectedFiles = files;
                         renderFileRows(files);
+                        const fileInfoEl = document.getElementById('fileInfo');
+                        if (fileInfoEl) fileInfoEl.style.display = 'block';
+                        const fileCountEl = document.getElementById('fileCount');
+                        if (fileCountEl) fileCountEl.textContent = `${files.length} fil${files.length === 1 ? '' : 'er'}`;
                         const submitBtn = document.querySelector('#submitBtn span');
                         if (submitBtn) submitBtn.textContent = files.length === 1 ? 'Send faktura' : `Send ${files.length} fakturaer`;
                     },
                     onFileSelect: (file) => {
                         selectedFiles = [file];
                         renderFileRows([file]);
+                        const fileInfoEl = document.getElementById('fileInfo');
+                        if (fileInfoEl) fileInfoEl.style.display = 'block';
+                        const fileCountEl = document.getElementById('fileCount');
+                        if (fileCountEl) fileCountEl.textContent = '1 fil';
                         const submitBtn = document.querySelector('#submitBtn span');
                         if (submitBtn) submitBtn.textContent = 'Send faktura';
                     },
