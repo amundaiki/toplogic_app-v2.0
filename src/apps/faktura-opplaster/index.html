@@ -82,7 +82,7 @@
                     <div class="form-group">
                         <label for="opplaster" class="form-label">
                             <i data-lucide="user" class="form-label-icon"></i>
-                            Hvem laster opp?
+                            Hvem laster opp? <span style="color: var(--color-error);">*</span>
                         </label>
                         <div class="custom-select-wrapper">
                             <select id="opplaster" name="opplaster" class="form-select enhanced-select" required>
@@ -110,7 +110,7 @@
                     <div class="form-group" id="shipmentCountSection">
                         <label class="form-label">
                             <i data-lucide="package" class="form-label-icon"></i>
-                            Anslått antall sendinger i fakturaen
+                            Anslått antall sendinger i fakturaen <span style="color: var(--color-error);">*</span>
                         </label>
                         <p style="color: var(--color-gray-medium); font-size: var(--font-size-small); margin: var(--spacing-xs) 0;">
                             Hjelper systemet med å prosessere fakturaen optimalt ved å dele den i passende seksjoner.
@@ -345,13 +345,17 @@
                     const inputEl = document.getElementById('fakturaFile');
                     const files = selectedFiles.length ? selectedFiles : Array.from(inputEl.files || []);
 
-                    // Valider required felter med config-meldinger
+                    // Valider obligatoriske felter
                     if (!opplaster) {
                         app.showMessage(config.APP_CONFIG.messages.error.noUser, 'error');
                         return;
                     }
 
-                    // Antall sendinger er valgfritt for alle brukere
+                    const shipmentEstimate = (document.getElementById('shipmentCount') && document.getElementById('shipmentCount').value) ? document.getElementById('shipmentCount').value : '';
+                    if (!shipmentEstimate) {
+                        app.showMessage(config.APP_CONFIG.messages.error.noShipmentCount, 'error');
+                        return;
+                    }
 
                     if (!files || files.length === 0) {
                         app.showMessage(config.APP_CONFIG.messages.error.noFile, 'error');
@@ -365,7 +369,7 @@
                     app.setLoadingState(true);
                     app.showMessage(config.APP_CONFIG.messages.info.uploading, 'success');
 
-                    const globalShipmentEstimate = (document.getElementById('shipmentCount') && document.getElementById('shipmentCount').value) ? document.getElementById('shipmentCount').value : '';
+                    const globalShipmentEstimate = shipmentEstimate;
 
                     for (let i = 0; i < files.length; i++) {
                         const file = files[i];

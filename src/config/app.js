@@ -37,6 +37,7 @@ export const APP_CONFIG = {
             noDocumentType: 'Vennligst velg dokumenttype',
             noPriceType: 'Vennligst velg pristype',
             noFile: 'Vennligst velg en fil',
+            noShipmentCount: 'Vennligst velg anslått antall sendinger',
             fileTooBig: 'Filen er for stor. Maksimal størrelse er 10MB.',
             invalidFileType: 'Ugyldig filtype. Kun PDF-filer er støttet.',
             noDescription: 'Vennligst beskriv hvilken liste dette er og hva som skal hentes.',
