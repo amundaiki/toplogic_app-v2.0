@@ -289,14 +289,13 @@
                                 <div class="file-row-size">${TopLogicUtils.formatFileSize(file.size)}</div>
                             </div>
                             <div class="file-row-controls">
-                                <label class="form-label" for="shipments_${idx}" style="margin-right: var(--spacing-sm);">Antall sendinger</label>
-                                <input type="number" min="1" step="1" inputmode="numeric" pattern="[0-9]*" id="shipments_${idx}" class="form-input" placeholder="f.eks. 1" style="max-width: 140px;">
+                                <span id="status_${idx}" style="margin-left: var(--spacing-md); color: var(--color-gray-medium); font-size: var(--font-size-xs);">Klar</span>
                             </div>
                         `;
                         fileListContainer.appendChild(row);
                     });
-                    if (multiFileSection) multiFileSection.style.display = files.length > 1 ? 'block' : 'none';
-                    if (multiFileWarningBox) multiFileWarningBox.style.display = files.length > 1 ? 'block' : 'none';
+                    if (multiFileSection) multiFileSection.style.display = files.length > 0 ? 'block' : 'none';
+                    if (multiFileWarningBox) multiFileWarningBox.style.display = 'none';
                 }
 
                 app.setupFileUpload('fakturaFile', {
@@ -358,6 +357,8 @@
                     app.setLoadingState(true);
                     app.showMessage(config.APP_CONFIG.messages.info.uploading, 'success');
 
+                    const globalShipmentEstimate = (document.getElementById('shipmentCount') && document.getElementById('shipmentCount').value) ? document.getElementById('shipmentCount').value : '';
+
                     for (let i = 0; i < files.length; i++) {
                         const file = files[i];
 
@@ -378,29 +379,45 @@
                         perFileFormData.append('timestamp', config.CONFIG_HELPERS.getTimestamp());
 
                         // Les per-fil antall sendinger dersom angitt
-                        const shipmentsInput = document.getElementById(`shipments_${i}`);
-                        const shipmentsVal = shipmentsInput && shipmentsInput.value ? parseInt(shipmentsInput.value, 10) : null;
-                        if (Number.isFinite(shipmentsVal) && shipmentsVal > 0) {
-                            perFileFormData.append('antall_sendinger', String(shipmentsVal));
+                        if (globalShipmentEstimate) {
+                            perFileFormData.append('shipmentCount', String(globalShipmentEstimate));
                         }
 
                         await app.submitForm(perFileFormData, 'faktura', {
+                            onStart: () => {
+                                const statusEl = document.getElementById(`status_${i}`);
+                                if (statusEl) {
+                                    statusEl.textContent = 'Sender...';
+                                    statusEl.style.color = 'var(--color-blue)';
+                                }
+                            },
                             onProgress: (progress) => {
                                 app.setProgress(Math.min(100, Math.round(((sent + progress / 100) / total) * 100)));
                             },
                             onSuccess: () => {
                                 sent += 1;
                                 app.setProgress(Math.round((sent / total) * 100));
+                                const statusEl = document.getElementById(`status_${i}`);
+                                if (statusEl) {
+                                    statusEl.textContent = 'Lastet opp';
+                                    statusEl.style.color = 'var(--color-success)';
+                                }
                             },
                             onError: (error) => {
                                 app.showMessage(error, 'error');
+                                const statusEl = document.getElementById(`status_${i}`);
+                                if (statusEl) {
+                                    statusEl.textContent = 'Feil ved opplasting';
+                                    statusEl.style.color = 'var(--color-error)';
+                                }
                             }
                         });
                     }
 
                     app.setLoadingState(false);
                     if (sent > 0) {
-                        app.showMessage(config.APP_CONFIG.messages.success.fakturaUploaded, 'success');
+                        const summary = `${sent} av ${total} faktura${total === 1 ? '' : 'er'} lastet opp.`;
+                        app.showMessage(summary, 'success');
                     }
                 });
 
