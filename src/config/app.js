@@ -2,6 +2,7 @@
 export const APP_CONFIG = {
     // Generelle innstillinger
     maxFileSize: 50 * 1024 * 1024, // 50MB
+    maxFileSizeMB: 50, // For debugging
     allowedFileTypes: {
         pdf: ['application/pdf'],
         excel: [

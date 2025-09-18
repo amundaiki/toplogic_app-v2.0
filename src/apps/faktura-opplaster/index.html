@@ -520,6 +520,8 @@
                 }
 
                 console.log('📄 TopLogic Fakturaopplasting er lastet');
+                console.log('🔧 Debug: maxFileSize =', config.APP_CONFIG.maxFileSize, 'bytes =', Math.round(config.APP_CONFIG.maxFileSize / 1024 / 1024), 'MB');
+                console.log('🔧 Debug: fileTooBig message =', config.APP_CONFIG.messages.error.fileTooBig);
                 
             }, 100); // Redusert timeout
         });
