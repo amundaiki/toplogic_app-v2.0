@@ -71,12 +71,21 @@ const APP_CONFIG = {
     ],
     
     // Meldinger
+    // Kø-innstillinger for dokumentsending
+    queue: {
+        delayBetweenSends: 3000, // 3 sekunder mellom hver sending
+        showCountdown: true // Vis nedtelling til brukeren
+    },
+    
     messages: {
         success: {
             fakturaUploaded: 'Fakturaen er sendt til prosessering! Du vil motta resultatet på e-post.',
             prislisteUploaded: 'Prislisten er sendt til prosessering! Du vil motta resultatet på e-post.',
             documentUploaded: 'Dokumentet er sendt til prosessering! Du vil motta resultatet på e-post.',
-            testMode: 'TEST MODUS: Dokumentet er sendt til test-webhook! Sjekk Make.com scenarioet for å se om data kom frem.'
+            testMode: 'TEST MODUS: Dokumentet er sendt til test-webhook! Sjekk Make.com scenarioet for å se om data kom frem.',
+            queueStarted: 'Sender {count} dokumenter med {delay} sekunder mellom hver...',
+            queueProgress: 'Sender dokument {current} av {total}...',
+            queueCompleted: 'Alle {count} dokumenter er sendt!'
         },
         error: {
             noUser: 'Vennligst velg hvem som laster opp',

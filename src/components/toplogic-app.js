@@ -289,6 +289,112 @@ export class TopLogicApp {
         if (settings.onFileSelect) settings.onFileSelect(file);
     }
 
+    // Kø-basert sending av flere dokumenter med forsinkelse
+    async submitFormsQueue(formDataArray, webhookType, options = {}) {
+        const defaults = {
+            onQueueStart: null,
+            onItemStart: null,
+            onItemProgress: null,
+            onItemSuccess: null,
+            onItemError: null,
+            onQueueProgress: null,
+            onQueueComplete: null,
+            delay: this.config.APP_CONFIG.queue?.delayBetweenSends || 3000,
+            showCountdown: this.config.APP_CONFIG.queue?.showCountdown || true
+        };
+        
+        const settings = { ...defaults, ...options };
+        const total = formDataArray.length;
+        let completed = 0;
+        let successful = 0;
+        let failed = 0;
+
+        // Start køen
+        if (settings.onQueueStart) {
+            const delayInSeconds = Math.round(settings.delay / 1000);
+            const message = this.config.APP_CONFIG.messages.success.queueStarted
+                .replace('{count}', total)
+                .replace('{delay}', delayInSeconds);
+            settings.onQueueStart(message);
+        }
+
+        this.setLoadingState(true);
+
+        for (let i = 0; i < formDataArray.length; i++) {
+            const formData = formDataArray[i];
+            const isFirst = i === 0;
+            
+            // Vis progress for køen
+            if (settings.onQueueProgress) {
+                const message = this.config.APP_CONFIG.messages.success.queueProgress
+                    .replace('{current}', i + 1)
+                    .replace('{total}', total);
+                settings.onQueueProgress(message, i + 1, total);
+            }
+
+            // Vent før sending (bortsett fra første)
+            if (!isFirst && settings.delay > 0) {
+                await this.delayWithCountdown(settings.delay, settings.showCountdown, i + 1, total);
+            }
+
+            // Send dokumentet
+            try {
+                await this.submitForm(formData, webhookType, {
+                    onStart: () => {
+                        if (settings.onItemStart) settings.onItemStart(i, formData);
+                    },
+                    onProgress: (progress) => {
+                        if (settings.onItemProgress) settings.onItemProgress(i, progress);
+                    },
+                    onSuccess: (message) => {
+                        successful++;
+                        if (settings.onItemSuccess) settings.onItemSuccess(i, message);
+                    },
+                    onError: (error) => {
+                        failed++;
+                        if (settings.onItemError) settings.onItemError(i, error);
+                    }
+                });
+            } catch (error) {
+                failed++;
+                if (settings.onItemError) settings.onItemError(i, error.message);
+            }
+
+            completed++;
+        }
+
+        this.setLoadingState(false);
+
+        // Ferdig med køen
+        if (settings.onQueueComplete) {
+            const message = this.config.APP_CONFIG.messages.success.queueCompleted
+                .replace('{count}', successful);
+            settings.onQueueComplete(message, successful, failed, total);
+        }
+
+        return { successful, failed, total };
+    }
+
+    // Hjelpemetode for forsinkelse med nedtelling
+    async delayWithCountdown(delayMs, showCountdown = true, current, total) {
+        const delaySeconds = Math.ceil(delayMs / 1000);
+        
+        if (showCountdown) {
+            for (let sec = delaySeconds; sec > 0; sec--) {
+                const message = `Venter ${sec} sekunder før sending av dokument ${current} av ${total}...`;
+                this.showMessage(message, 'info', 1100);
+                await this.delay(1000);
+            }
+        } else {
+            await this.delay(delayMs);
+        }
+    }
+
+    // Enkel delay-hjelpemetode
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
     // Generisk form submission
     async submitForm(formData, webhookType, options = {}) {
         const defaults = {

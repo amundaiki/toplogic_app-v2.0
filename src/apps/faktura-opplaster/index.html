@@ -143,6 +143,18 @@
 
                     <div class="form-group">
                         <label for="fakturaFile" class="form-label">Last opp fakturaer</label>
+                        
+                        <!-- Info om kø-system for flere filer -->
+                        <div style="padding: var(--spacing-md); background: var(--color-gray-light); border-radius: var(--radius-md); border-left: 4px solid var(--color-blue); margin-bottom: var(--spacing-md);">
+                            <h4 style="color: var(--color-blue-dark); margin: 0 0 var(--spacing-sm) 0; font-size: var(--font-size-normal); font-weight: 600; display: flex; align-items: center;">
+                                <i data-lucide="clock" style="width: 16px; height: 16px; margin-right: var(--spacing-xs);"></i>
+                                Flere dokumenter sendes med forsinkelse
+                            </h4>
+                            <p style="color: var(--color-gray-dark); margin: 0; font-size: var(--font-size-small); line-height: 1.5;">
+                                Når du laster opp flere fakturaer samtidig, sendes de til webhooks hver for seg med 3 sekunders mellomrom for å unngå overbelastning. Du vil se en nedtelling mellom hver sending.
+                            </p>
+                        </div>
+                        
                         <div class="file-upload-area" id="dropZone">
                             <input type="file" id="fakturaFile" name="fakturaFile" accept=".pdf" multiple required>
                             <svg class="upload-icon" viewBox="0 0 24 24">
@@ -336,7 +348,7 @@
                     app.showMessage('Alle filer fjernet', 'info', 2000);
                 });
 
-                // Form submission for flere fakturaer
+                // Form submission for flere fakturaer med kø-system
                 document.getElementById('uploadForm').addEventListener('submit', async function(e) {
                     e.preventDefault();
 
@@ -362,13 +374,8 @@
                         return;
                     }
 
-                    // Valider fil
-                    // Hvis flere filer: send hver for seg med opsjon for antall sendinger per fil
-                    const total = files.length;
-                    let sent = 0;
-                    app.setLoadingState(true);
-                    app.showMessage(config.APP_CONFIG.messages.info.uploading, 'success');
-
+                    // Bygg formData-array for kø-system
+                    const formDataArray = [];
                     const globalShipmentEstimate = shipmentEstimate;
 
                     for (let i = 0; i < files.length; i++) {
@@ -395,41 +402,83 @@
                             perFileFormData.append('shipmentCount', String(globalShipmentEstimate));
                         }
 
-                        await app.submitForm(perFileFormData, 'faktura', {
+                        formDataArray.push(perFileFormData);
+                    }
+
+                    if (formDataArray.length === 0) {
+                        app.showMessage('Ingen gyldige filer å sende', 'error');
+                        return;
+                    }
+
+                    // Hvis bare én fil, bruk vanlig submit. Hvis flere, bruk kø-system
+                    if (formDataArray.length === 1) {
+                        // Enkelfil - send direkte
+                        await app.submitForm(formDataArray[0], 'faktura', {
                             onStart: () => {
-                                const statusEl = document.getElementById(`status_${i}`);
+                                const statusEl = document.getElementById(`status_0`);
                                 if (statusEl) {
                                     statusEl.textContent = 'Sender...';
                                     statusEl.style.color = 'var(--color-blue)';
                                 }
                             },
                             onProgress: (progress) => {
-                                app.setProgress(Math.min(100, Math.round(((sent + progress / 100) / total) * 100)));
+                                app.setProgress(progress);
                             },
                             onSuccess: () => {
-                                sent += 1;
-                                app.setProgress(Math.round((sent / total) * 100));
-                                const statusEl = document.getElementById(`status_${i}`);
+                                const statusEl = document.getElementById(`status_0`);
                                 if (statusEl) {
                                     statusEl.textContent = 'Lastet opp';
                                     statusEl.style.color = 'var(--color-success)';
                                 }
+                                app.showMessage('Fakturaen er sendt til prosessering!', 'success');
                             },
                             onError: (error) => {
                                 app.showMessage(error, 'error');
-                                const statusEl = document.getElementById(`status_${i}`);
+                                const statusEl = document.getElementById(`status_0`);
                                 if (statusEl) {
                                     statusEl.textContent = 'Feil ved opplasting';
                                     statusEl.style.color = 'var(--color-error)';
                                 }
                             }
                         });
-                    }
-
-                    app.setLoadingState(false);
-                    if (sent > 0) {
-                        const summary = `${sent} av ${total} faktura${total === 1 ? '' : 'er'} lastet opp.`;
-                        app.showMessage(summary, 'success');
+                    } else {
+                        // Flere filer - bruk kø-system
+                        await app.submitFormsQueue(formDataArray, 'faktura', {
+                            onQueueStart: (message) => {
+                                app.showMessage(message, 'info');
+                            },
+                            onQueueProgress: (message, current, total) => {
+                                app.setProgress(Math.round((current / total) * 100));
+                            },
+                            onItemStart: (index, formData) => {
+                                const statusEl = document.getElementById(`status_${index}`);
+                                if (statusEl) {
+                                    statusEl.textContent = 'Sender...';
+                                    statusEl.style.color = 'var(--color-blue)';
+                                }
+                            },
+                            onItemSuccess: (index, message) => {
+                                const statusEl = document.getElementById(`status_${index}`);
+                                if (statusEl) {
+                                    statusEl.textContent = 'Lastet opp';
+                                    statusEl.style.color = 'var(--color-success)';
+                                }
+                            },
+                            onItemError: (index, error) => {
+                                const statusEl = document.getElementById(`status_${index}`);
+                                if (statusEl) {
+                                    statusEl.textContent = 'Feil ved opplasting';
+                                    statusEl.style.color = 'var(--color-error)';
+                                }
+                            },
+                            onQueueComplete: (message, successful, failed, total) => {
+                                const summary = `${successful} av ${total} faktura${total === 1 ? '' : 'er'} sendt til prosessering!`;
+                                app.showMessage(summary, 'success');
+                                if (failed > 0) {
+                                    app.showMessage(`${failed} filer feilet under opplasting`, 'error');
+                                }
+                            }
+                        });
                     }
                 });
 
