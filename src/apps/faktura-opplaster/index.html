@@ -110,6 +110,30 @@
             flex-shrink: 0;
         }
         
+        .file-remove-btn {
+            background: none;
+            border: none;
+            color: var(--color-gray-medium);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+        }
+        
+        .file-remove-btn:hover {
+            background: var(--color-error-light, #fee2e2);
+            color: var(--color-error);
+        }
+        
+        .file-remove-btn:active {
+            transform: scale(0.95);
+        }
+        
         @media (max-width: 768px) {
             .file-row {
                 flex-direction: column;
@@ -361,13 +385,59 @@
                                 <div class="file-row-size">${TopLogicUtils.formatFileSize(file.size)}</div>
                             </div>
                             <div class="file-row-controls">
-                                <span id="status_${idx}" style="margin-left: var(--spacing-md); color: var(--color-gray-medium); font-size: var(--font-size-xs);">Klar</span>
+                                <span id="status_${idx}" style="color: var(--color-gray-medium); font-size: var(--font-size-xs);">Klar</span>
+                                <button type="button" class="file-remove-btn" onclick="removeFile(${idx})" title="Fjern fil">
+                                    <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+                                </button>
                             </div>
                         `;
                         fileListContainer.appendChild(row);
                     });
+                    
+                    // Oppdater Lucide icons for nye elementer
+                    if (typeof lucide !== 'undefined') {
+                        lucide.createIcons();
+                    }
+                    
                     if (multiFileSection) multiFileSection.style.display = files.length > 0 ? 'block' : 'none';
                     if (multiFileWarningBox) multiFileWarningBox.style.display = 'none';
+                }
+
+                // Funksjon for å fjerne enkeltfil
+                window.removeFile = function(index) {
+                    if (index >= 0 && index < selectedFiles.length) {
+                        const removedFile = selectedFiles[index];
+                        selectedFiles.splice(index, 1);
+                        
+                        // Oppdater file input
+                        const dt = new DataTransfer();
+                        selectedFiles.forEach(file => dt.items.add(file));
+                        document.getElementById('fakturaFile').files = dt.files;
+                        
+                        // Re-render fillisten
+                        renderFileRows(selectedFiles);
+                        
+                        // Oppdater UI
+                        updateFileDisplayInfo();
+                        
+                        app.showMessage(`Fjernet "${removedFile.name}"`, 'info', 2000);
+                    }
+                };
+
+                // Hjelpefunksjon for å oppdatere fil-display info
+                function updateFileDisplayInfo() {
+                    const fileInfoEl = document.getElementById('fileInfo');
+                    const fileCountEl = document.getElementById('fileCount');
+                    const submitBtn = document.querySelector('#submitBtn span');
+                    
+                    if (selectedFiles.length === 0) {
+                        if (fileInfoEl) fileInfoEl.style.display = 'none';
+                        if (submitBtn) submitBtn.textContent = 'Send fakturaer';
+                    } else {
+                        if (fileInfoEl) fileInfoEl.style.display = 'block';
+                        if (fileCountEl) fileCountEl.textContent = `${selectedFiles.length} fil${selectedFiles.length === 1 ? '' : 'er'}`;
+                        if (submitBtn) submitBtn.textContent = selectedFiles.length === 1 ? 'Send faktura' : `Send ${selectedFiles.length} fakturaer`;
+                    }
                 }
 
                 app.setupFileUpload('fakturaFile', {
@@ -377,22 +447,12 @@
                     onFilesSelect: (files) => {
                         selectedFiles = files;
                         renderFileRows(files);
-                        const fileInfoEl = document.getElementById('fileInfo');
-                        if (fileInfoEl) fileInfoEl.style.display = 'block';
-                        const fileCountEl = document.getElementById('fileCount');
-                        if (fileCountEl) fileCountEl.textContent = `${files.length} fil${files.length === 1 ? '' : 'er'}`;
-                        const submitBtn = document.querySelector('#submitBtn span');
-                        if (submitBtn) submitBtn.textContent = files.length === 1 ? 'Send faktura' : `Send ${files.length} fakturaer`;
+                        updateFileDisplayInfo();
                     },
                     onFileSelect: (file) => {
                         selectedFiles = [file];
                         renderFileRows([file]);
-                        const fileInfoEl = document.getElementById('fileInfo');
-                        if (fileInfoEl) fileInfoEl.style.display = 'block';
-                        const fileCountEl = document.getElementById('fileCount');
-                        if (fileCountEl) fileCountEl.textContent = '1 fil';
-                        const submitBtn = document.querySelector('#submitBtn span');
-                        if (submitBtn) submitBtn.textContent = 'Send faktura';
+                        updateFileDisplayInfo();
                     },
                     onValidationError: (error) => {
                         app.showMessage(error, 'error');
@@ -403,14 +463,15 @@
                 document.getElementById('clearFiles').addEventListener('click', function() {
                     selectedFiles = [];
                     document.getElementById('fakturaFile').value = '';
-                    document.getElementById('fileInfo').style.display = 'none';
-                    document.querySelector('#submitBtn span').textContent = 'Send fakturaer';
                     
-                    // Tøm også multiFileSection og fileListContainer
+                    // Tøm multiFileSection og fileListContainer
                     const multiFileSection = document.getElementById('multiFileSection');
                     if (multiFileSection) multiFileSection.style.display = 'none';
                     const fileListContainer = document.getElementById('fileListContainer');
                     if (fileListContainer) fileListContainer.innerHTML = '';
+                    
+                    // Oppdater UI
+                    updateFileDisplayInfo();
                     
                     app.showMessage('Alle filer fjernet', 'info', 2000);
                 });
