@@ -48,7 +48,7 @@ const WEBHOOKS = {
 // App-konfigurasjon
 const APP_CONFIG = {
     // Generelle innstillinger
-    maxFileSize: 10 * 1024 * 1024, // 10MB
+    maxFileSize: 50 * 1024 * 1024, // 50MB
     allowedFileTypes: {
         pdf: ['application/pdf'],
         excel: [
@@ -93,7 +93,7 @@ const APP_CONFIG = {
             noDocumentType: 'Vennligst velg dokumenttype',
             noPriceType: 'Vennligst velg pristype',
             noFile: 'Vennligst velg en fil',
-            fileTooBig: 'Filen er for stor. Maksimal størrelse er 10MB.',
+            fileTooBig: 'Filen er for stor. Maksimal størrelse er 50MB.',
             invalidFileType: 'Ugyldig filtype. Kun PDF-filer er støttet.',
             noDescription: 'Vennligst beskriv hvilken liste dette er og hva som skal hentes.',
             serverError: 'Server svarte {status}',

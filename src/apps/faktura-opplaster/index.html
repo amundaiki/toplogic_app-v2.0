@@ -345,6 +345,13 @@
                     document.getElementById('fakturaFile').value = '';
                     document.getElementById('fileInfo').style.display = 'none';
                     document.querySelector('#submitBtn span').textContent = 'Send fakturaer';
+                    
+                    // Tøm også multiFileSection og fileListContainer
+                    const multiFileSection = document.getElementById('multiFileSection');
+                    if (multiFileSection) multiFileSection.style.display = 'none';
+                    const fileListContainer = document.getElementById('fileListContainer');
+                    if (fileListContainer) fileListContainer.innerHTML = '';
+                    
                     app.showMessage('Alle filer fjernet', 'info', 2000);
                 });
 
