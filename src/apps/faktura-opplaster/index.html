@@ -262,13 +262,6 @@
                             </div>
                         </div>
                         
-                        <!-- Liste over valgte filer med per-fil antall sendinger -->
-                        <div class="form-group" id="multiFileSection" style="display:none; margin-top: var(--spacing-md);">
-                            <div id="multiFileWarningBox" style="display:none; padding: var(--spacing-md); background: var(--color-blue-light); border-radius: var(--radius-md); border-left: 4px solid var(--color-blue); color: var(--color-gray-dark); margin-bottom: var(--spacing-md);">
-                                Hvis du ikke angir «antall sendinger» per fil, må alle fakturaene være omtrent like lange når du laster opp flere samtidig.
-                            </div>
-                            <div id="fileListContainer" class="file-list"></div>
-                        </div>
                     </div>
 
                     <div class="progress-bar" id="progressBar">
@@ -367,15 +360,14 @@
 
                 // DOM elementer
 
-                // Aktiver flerfilsopplasting og per-fil liste
+                // Aktiver flerfilsopplasting
                 let selectedFiles = [];
-                const multiFileSection = document.getElementById('multiFileSection');
-                const multiFileWarningBox = document.getElementById('multiFileWarningBox');
-                const fileListContainer = document.getElementById('fileListContainer');
 
                 function renderFileRows(files) {
-                    if (!fileListContainer) return;
-                    fileListContainer.innerHTML = '';
+                    const fileList = document.getElementById('fileList');
+                    if (!fileList) return;
+                    
+                    fileList.innerHTML = '';
                     files.forEach((file, idx) => {
                         const row = document.createElement('div');
                         row.className = 'file-row';
@@ -391,16 +383,13 @@
                                 </button>
                             </div>
                         `;
-                        fileListContainer.appendChild(row);
+                        fileList.appendChild(row);
                     });
                     
                     // Oppdater Lucide icons for nye elementer
                     if (typeof lucide !== 'undefined') {
                         lucide.createIcons();
                     }
-                    
-                    if (multiFileSection) multiFileSection.style.display = files.length > 0 ? 'block' : 'none';
-                    if (multiFileWarningBox) multiFileWarningBox.style.display = 'none';
                 }
 
                 // Funksjon for å fjerne enkeltfil
@@ -443,7 +432,6 @@
                 app.setupFileUpload('fakturaFile', {
                     allowedTypes: 'pdf',
                     enableMultiple: true,
-                    fileListContainerId: 'fileListContainer',
                     onFilesSelect: (files) => {
                         selectedFiles = files;
                         renderFileRows(files);
@@ -464,11 +452,9 @@
                     selectedFiles = [];
                     document.getElementById('fakturaFile').value = '';
                     
-                    // Tøm multiFileSection og fileListContainer
-                    const multiFileSection = document.getElementById('multiFileSection');
-                    if (multiFileSection) multiFileSection.style.display = 'none';
-                    const fileListContainer = document.getElementById('fileListContainer');
-                    if (fileListContainer) fileListContainer.innerHTML = '';
+                    // Tøm fillisten
+                    const fileList = document.getElementById('fileList');
+                    if (fileList) fileList.innerHTML = '';
                     
                     // Oppdater UI
                     updateFileDisplayInfo();
@@ -620,9 +606,8 @@
                             if (fileInfoEl) fileInfoEl.style.display = 'none';
                             const submitBtn = document.querySelector('#submitBtn span');
                             if (submitBtn) submitBtn.textContent = 'Send fakturaer';
-                            if (multiFileSection) multiFileSection.style.display = 'none';
-                            if (multiFileWarningBox) multiFileWarningBox.style.display = 'none';
-                            if (fileListContainer) fileListContainer.innerHTML = '';
+                            const fileList = document.getElementById('fileList');
+                            if (fileList) fileList.innerHTML = '';
                             // Reset shipment count buttons (om brukt)
                             document.querySelectorAll('.shipment-btn').forEach(btn => btn.classList.remove('selected'));
                             const shipmentHidden = document.getElementById('shipmentCount');
