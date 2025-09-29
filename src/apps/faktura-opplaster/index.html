@@ -228,14 +228,14 @@
                     <div class="form-group">
                         <label for="fakturaFile" class="form-label">Last opp fakturaer</label>
                         
-                        <!-- Info om webhook-basert forberedelse av flere filer -->
+                        <!-- Info om smart sortert sending av flere filer -->
                         <div style="padding: var(--spacing-md); background: var(--color-gray-light); border-radius: var(--radius-md); border-left: 4px solid var(--color-blue); margin-bottom: var(--spacing-md);">
                             <h4 style="color: var(--color-blue-dark); margin: 0 0 var(--spacing-sm) 0; font-size: var(--font-size-normal); font-weight: 600; display: flex; align-items: center;">
-                                <i data-lucide="settings" style="width: 16px; height: 16px; margin-right: var(--spacing-xs);"></i>
-                                Webhook-basert forberedelse
+                                <i data-lucide="arrow-up-down" style="width: 16px; height: 16px; margin-right: var(--spacing-xs);"></i>
+                                Smart sortert sending
                             </h4>
                             <p style="color: var(--color-gray-dark); margin: 0; font-size: var(--font-size-small); line-height: 1.5;">
-                                Sender først forberedelse-kall som ber Make.com lage Google Sheet, venter på webhook-respons, deretter sendes alle fakturaer samtidig. Alle filer får samme Batch ID.
+                                Forberedelse-kall lager Google Sheet, fakturaer sorteres fra minst til størst, alle unntatt siste sendes parallelt, deretter 30 sek pause før siste med "last_invoice" action.
                             </p>
                         </div>
                         
@@ -610,59 +610,118 @@
                                 }
                             });
                             
-                            // STEG 2: Send alle fakturaer samtidig
-                            console.log('🚀 Steg 2: Google Sheet klar - sender alle fakturaer samtidig...');
-                            app.showMessage(`Sender alle ${formDataArray.length} fakturaer samtidig...`, 'info');
+                            // STEG 2: Sorter fakturaer og send i rekkefølge
+                            console.log('🚀 Steg 2: Google Sheet klar - sorterer og sender fakturaer...');
                             
-                            // Oppdater status for alle filer
-                            for (let i = 0; i < formDataArray.length; i++) {
-                                const statusEl = document.getElementById(`status_${i}`);
+                            // Sorter formDataArray basert på filstørrelse (minst til størst)
+                            const sortedFormDataWithIndex = formDataArray.map((formData, originalIndex) => ({
+                                formData,
+                                originalIndex,
+                                fileSize: files[originalIndex].size,
+                                fileName: files[originalIndex].name
+                            })).sort((a, b) => a.fileSize - b.fileSize);
+                            
+                            console.log('📊 Sortert rekkefølge (minst til størst):');
+                            sortedFormDataWithIndex.forEach((item, sortedIndex) => {
+                                console.log(`${sortedIndex + 1}. ${item.fileName} (${TopLogicUtils.formatFileSize(item.fileSize)}) - opprinnelig indeks ${item.originalIndex}`);
+                            });
+                            
+                            app.showMessage(`Sender fakturaer sortert fra minst til størst...`, 'info');
+                            
+                            // Send alle unntatt den siste parallelt
+                            const allExceptLast = sortedFormDataWithIndex.slice(0, -1);
+                            const lastInvoice = sortedFormDataWithIndex[sortedFormDataWithIndex.length - 1];
+                            
+                            if (allExceptLast.length > 0) {
+                                console.log(`📤 Sender først ${allExceptLast.length} fakturaer parallelt...`);
+                                
+                                // Oppdater status for alle unntatt siste
+                                allExceptLast.forEach(item => {
+                                    const statusEl = document.getElementById(`status_${item.originalIndex}`);
                                 if (statusEl) {
                                     statusEl.textContent = 'Sender...';
                                     statusEl.style.color = 'var(--color-blue)';
                                 }
+                                });
+                                
+                                // Send alle unntatt siste parallelt
+                                const promises = allExceptLast.map((item) => {
+                                    console.log(`Starter sending av fil: ${item.fileName} (${TopLogicUtils.formatFileSize(item.fileSize)})`);
+                                    
+                                    return app.submitForm(item.formData, 'faktura', {
+                                        batchId: batchId,
+                                        onSuccess: () => {
+                                            console.log(`✅ Fil sendt vellykket: ${item.fileName}`);
+                                            const statusEl = document.getElementById(`status_${item.originalIndex}`);
+                                if (statusEl) {
+                                    statusEl.textContent = 'Lastet opp';
+                                    statusEl.style.color = 'var(--color-success)';
+                                }
+                            },
+                                        onError: (error) => {
+                                            console.error(`❌ Fil feilet: ${item.fileName}`, error);
+                                            const statusEl = document.getElementById(`status_${item.originalIndex}`);
+                                            if (statusEl) {
+                                                statusEl.textContent = 'Feil ved opplasting';
+                                                statusEl.style.color = 'var(--color-error)';
+                                            }
+                                        }
+                                    }).then(result => {
+                                        return { success: true, item: item };
+                                    }).catch(error => {
+                                        return { success: false, error, item: item };
+                                    });
+                                });
+                                
+                                // Vent på at alle unntatt siste blir ferdig
+                                const results = await Promise.allSettled(promises);
+                                
+                                // Tell resultater for de første
+                                results.forEach(result => {
+                                    if (result.status === 'fulfilled' && result.value?.success) {
+                                        successful++;
+                                    } else {
+                                        failed++;
+                                    }
+                                });
+                                
+                                console.log(`✅ ${allExceptLast.length} fakturaer sendt. Venter 30 sek før siste faktura...`);
                             }
                             
-                            // Send alle fakturaer parallelt
-                            const promises = formDataArray.map((formData, index) => {
-                                console.log(`Starter sending av fil ${index + 1}: ${formData.get('fileName')}`);
-                                
-                                return app.submitForm(formData, 'faktura', {
-                                    batchId: batchId,
-                                    onSuccess: () => {
-                                        console.log(`✅ Fil ${index + 1} sendt vellykket`);
-                                        const statusEl = document.getElementById(`status_${index}`);
-                                        if (statusEl) {
-                                            statusEl.textContent = 'Lastet opp';
-                                            statusEl.style.color = 'var(--color-success)';
-                                        }
-                                    },
-                                    onError: (error) => {
-                                        console.error(`❌ Fil ${index + 1} feilet:`, error);
-                                        const statusEl = document.getElementById(`status_${index}`);
-                                        if (statusEl) {
-                                            statusEl.textContent = 'Feil ved opplasting';
-                                            statusEl.style.color = 'var(--color-error)';
-                                        }
-                                    }
-                                }).then(result => {
-                                    console.log(`Fil ${index + 1} fullført`);
-                                    return { success: true, index: index };
-                                }).catch(error => {
-                                    console.error(`Fil ${index + 1} kastet feil:`, error);
-                                    return { success: false, error, index: index };
-                                });
-                            });
+                            // Send siste faktura med 30 sek forsinkelse og spesiell action
+                            app.showMessage('Venter 30 sekunder før sending av siste faktura...', 'info');
+                            await new Promise(resolve => setTimeout(resolve, 30000));
                             
-                            // Vent på at alle blir ferdig
-                            const results = await Promise.allSettled(promises);
+                            console.log(`📋 Sender siste faktura med "last_invoice" action: ${lastInvoice.fileName}`);
+                            app.showMessage(`Sender siste faktura: ${lastInvoice.fileName}`, 'info');
                             
-                            // Tell resultater
-                            results.forEach(result => {
-                                if (result.status === 'fulfilled' && result.value?.success) {
+                            // Oppdater status for siste fil
+                            const lastStatusEl = document.getElementById(`status_${lastInvoice.originalIndex}`);
+                            if (lastStatusEl) {
+                                lastStatusEl.textContent = 'Sender siste...';
+                                lastStatusEl.style.color = 'var(--color-blue)';
+                            }
+                            
+                            // Legg til spesiell action for siste faktura
+                            lastInvoice.formData.append('action', 'last_invoice');
+                            
+                            await app.submitForm(lastInvoice.formData, 'faktura', {
+                                batchId: batchId,
+                                onSuccess: () => {
+                                    console.log(`✅ Siste faktura sendt vellykket: ${lastInvoice.fileName}`);
                                     successful++;
-                                } else {
+                                    if (lastStatusEl) {
+                                        lastStatusEl.textContent = 'Lastet opp (siste)';
+                                        lastStatusEl.style.color = 'var(--color-success)';
+                                    }
+                                },
+                                onError: (error) => {
+                                    console.error(`❌ Siste faktura feilet: ${lastInvoice.fileName}`, error);
                                     failed++;
+                                    if (lastStatusEl) {
+                                        lastStatusEl.textContent = 'Feil ved opplasting';
+                                        lastStatusEl.style.color = 'var(--color-error)';
+                                    }
                                 }
                             });
                             
