@@ -38,7 +38,7 @@
             top: var(--spacing-md);
         }
         
-        @media (max-width: 1024px) {
+        @media (max-width: 1400px) {
             .content-grid {
                 grid-template-columns: 1fr;
                 gap: var(--spacing-lg);
@@ -46,7 +46,7 @@
             
             .files-section {
                 position: static;
-                order: -1; /* Vis files øverst på mobil */
+                order: 1; /* Vis files under skjema når det er liten plass */
             }
         }
 
