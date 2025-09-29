@@ -155,7 +155,7 @@ body {
     background: var(--color-white);
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-xl);
-    max-width: 600px; /* Standardisert til 600px for alle sider */
+    max-width: 1200px; /* Økt til 1200px for bedre plass */
     width: 100%;
     overflow: hidden;
     margin-top: 60px; /* Space for fixed nav */
