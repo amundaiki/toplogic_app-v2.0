@@ -16,6 +16,35 @@
     <!-- <script src="../../utils/custom-dropdown.js"></script> -->
     
     <style>
+        /* Grid layout for form og files */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: var(--spacing-xl);
+            align-items: start;
+        }
+        
+        .form-section {
+            min-width: 0; /* Prevents grid item from overflowing */
+        }
+        
+        .files-section {
+            position: sticky;
+            top: var(--spacing-md);
+        }
+        
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-lg);
+            }
+            
+            .files-section {
+                position: static;
+                order: -1; /* Vis files øverst på mobil */
+            }
+        }
+
         .shipment-count-buttons {
             display: flex;
             gap: var(--spacing-sm);
@@ -162,7 +191,9 @@
             </div>
             
             <div class="toplogic-content">
-                <form id="uploadForm">
+                <div class="content-grid">
+                    <div class="form-section">
+                        <form id="uploadForm">
                     <div class="form-group">
                         <label for="opplaster" class="form-label">
                             <i data-lucide="user" class="form-label-icon"></i>
@@ -205,20 +236,6 @@
                             <p><strong>Klikk for å velge filer</strong> eller dra og slipp her</p>
                             <p class="supported-formats">Støttet format: PDF • Du kan velge flere fakturaer samtidig</p>
                         </div>
-                        <div class="file-info" id="fileInfo" style="display: none;">
-                            <div style="background: var(--color-gray-light); padding: var(--spacing-md); border-radius: var(--radius-md); margin-top: var(--spacing-sm);">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-sm);">
-                                    <h4 style="margin: 0; color: var(--color-gray-dark); font-size: var(--font-size-small); font-weight: 600;">Valgte fakturaer</h4>
-                                    <span id="fileCount" style="background: var(--color-blue); color: white; padding: 2px 8px; border-radius: var(--radius-sm); font-size: var(--font-size-xs); font-weight: 500;">0 filer</span>
-                                </div>
-                                <div id="fileList" style="max-height: 150px; overflow-y: auto;">
-                                    <!-- Fil-liste vil bli populert via JavaScript -->
-                                </div>
-                                <button type="button" id="clearFiles" style="margin-top: var(--spacing-sm); background: none; border: 1px solid var(--color-gray-border); color: var(--color-gray-medium); padding: 4px 12px; border-radius: var(--radius-sm); font-size: var(--font-size-xs); cursor: pointer; transition: all 0.2s ease;">
-                                    Fjern alle filer
-                                </button>
-                            </div>
-                        </div>
                         
                     </div>
 
@@ -237,6 +254,25 @@
                 </form>
 
                 <div class="message" id="message"></div>
+                    </div>
+
+                    <div class="files-section">
+                        <div class="file-info" id="fileInfo" style="display: none;">
+                            <div style="background: var(--color-gray-light); padding: var(--spacing-md); border-radius: var(--radius-md);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-sm);">
+                                    <h4 style="margin: 0; color: var(--color-gray-dark); font-size: var(--font-size-small); font-weight: 600;">Valgte fakturaer</h4>
+                                    <span id="fileCount" style="background: var(--color-blue); color: white; padding: 2px 8px; border-radius: var(--radius-sm); font-size: var(--font-size-xs); font-weight: 500;">0 filer</span>
+                                </div>
+                                <div id="fileList" style="max-height: 400px; overflow-y: auto;">
+                                    <!-- Fil-liste vil bli populert via JavaScript -->
+                                </div>
+                                <button type="button" id="clearFiles" style="margin-top: var(--spacing-sm); background: none; border: 1px solid var(--color-gray-border); color: var(--color-gray-medium); padding: 4px 12px; border-radius: var(--radius-sm); font-size: var(--font-size-xs); cursor: pointer; transition: all 0.2s ease; width: 100%;">
+                                    Fjern alle filer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- AI Disclaimer -->
                 <div style="text-align: center; margin-top: var(--spacing-xxxl); padding: var(--spacing-md); color: #6b7280; font-size: 0.75rem; opacity: 0.7;">
