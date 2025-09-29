@@ -235,7 +235,7 @@
                                 Smart sending av flere dokumenter
                             </h4>
                             <p style="color: var(--color-gray-dark); margin: 0; font-size: var(--font-size-small); line-height: 1.5;">
-                                Første faktura sendes for å lage Google Sheet, deretter 1 sekunds pause, så sendes resten samtidig. Alle filer får samme Batch ID for gruppering.
+                                Første faktura sendes for å lage Google Sheet, deretter 10 sekunders pause, så sendes resten samtidig. Alle filer får samme Batch ID for gruppering.
                             </p>
                         </div>
                         
@@ -601,11 +601,11 @@
                                 }
                             });
                             
-                            // STEG 2: Pause i 1 sekund (la Make.com lage Google Sheet)
+                            // STEG 2: Pause i 10 sekunder (la Make.com lage Google Sheet)
                             if (formDataArray.length > 1) {
-                                console.log('⏳ Steg 2: Venter 1 sekund for at Make.com skal lage Google Sheet...');
-                                app.showMessage('Venter 1 sekund for at Google Sheet skal opprettes...', 'info');
-                                await new Promise(resolve => setTimeout(resolve, 1000));
+                                console.log('⏳ Steg 2: Venter 10 sekunder for at Make.com skal lage Google Sheet...');
+                                app.showMessage('Venter 10 sekunder for at Google Sheet skal opprettes...', 'info');
+                                await new Promise(resolve => setTimeout(resolve, 10000));
                                 
                                 // STEG 3: Send resten parallelt
                                 console.log('🚀 Steg 3: Sender resten av fakturaene samtidig...');
