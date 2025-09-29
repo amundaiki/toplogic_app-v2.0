@@ -305,6 +305,11 @@ class TopLogicApp {
         let successful = 0;
         let failed = 0;
 
+        // Generer batch ID for hele køen
+        const batchId = this.generateBatchId();
+        console.log('Batch ID:', batchId);
+        this.showBatchId(batchId);
+
         // Start køen
         if (settings.onQueueStart) {
             const delayInSeconds = Math.round(settings.delay / 1000);
@@ -336,6 +341,7 @@ class TopLogicApp {
             // Send dokumentet
             try {
                 await this.submitForm(formData, webhookType, {
+                    batchId: batchId,
                     onStart: () => {
                         if (settings.onItemStart) settings.onItemStart(i, formData);
                     },
@@ -399,7 +405,8 @@ class TopLogicApp {
             onSuccess: null,
             onError: null,
             onComplete: null,
-            progressInterval: 200
+            progressInterval: 200,
+            batchId: null
         };
         
         const settings = { ...defaults, ...options };
@@ -409,6 +416,13 @@ class TopLogicApp {
             const error = `Webhook URL ikke funnet for type: ${webhookType}`;
             if (settings.onError) settings.onError(error);
             return;
+        }
+
+        // Legg til batchId hvis oppgitt
+        if (settings.batchId) {
+            formData.append('batchId', settings.batchId);
+            console.log('Batch ID:', settings.batchId);
+            console.log('Payload med batchId:', Object.fromEntries(formData.entries()));
         }
 
         // Start loading
@@ -520,11 +534,52 @@ class TopLogicApp {
         const message = document.getElementById('message');
         if (message) message.classList.remove('show');
         
+        // Fjern batch ID display
+        const batchIdDisplay = document.querySelector('.batch-id-display');
+        if (batchIdDisplay) {
+            batchIdDisplay.remove();
+        }
+        
         // Reset progress
         this.setProgress(0, false);
         
         // Tilleggs-reset logikk
         if (options.onReset) options.onReset();
+    }
+
+    // Generer batch ID for gruppert sending av filer
+    generateBatchId() {
+        const now = new Date();
+        const timestamp = now.getFullYear().toString() +
+            (now.getMonth() + 1).toString().padStart(2, '0') +
+            now.getDate().toString().padStart(2, '0') +
+            now.getHours().toString().padStart(2, '0') +
+            now.getMinutes().toString().padStart(2, '0') +
+            now.getSeconds().toString().padStart(2, '0');
+        
+        const randomPart = Math.random().toString(36).substr(2, 6).toUpperCase();
+        
+        return `${timestamp}_${randomPart}`;
+    }
+
+    // Vis batch ID i UI
+    showBatchId(batchId) {
+        // Finn eller opprett batch ID display element
+        let batchIdDisplay = document.querySelector('.batch-id-display');
+        if (!batchIdDisplay) {
+            batchIdDisplay = document.createElement('div');
+            batchIdDisplay.className = 'batch-id-display';
+            batchIdDisplay.style.cssText = 'font-size: 12px; color: #666; font-family: monospace; margin-top: 8px; text-align: center;';
+            
+            // Plasser elementet under progress bar
+            const progressBar = document.getElementById('progressBar');
+            if (progressBar && progressBar.parentNode) {
+                progressBar.parentNode.insertBefore(batchIdDisplay, progressBar.nextSibling);
+            }
+        }
+        
+        batchIdDisplay.textContent = `Batch ID: ${batchId}`;
+        batchIdDisplay.style.display = 'block';
     }
 
     // Auto-detect dokumenttype basert på filnavn

@@ -526,8 +526,13 @@
 
                     // Hvis bare én fil, bruk vanlig submit. Hvis flere, bruk kø-system
                     if (formDataArray.length === 1) {
-                        // Enkelfil - send direkte
+                        // Enkelfil - generer batchId og send direkte
+                        const batchId = app.generateBatchId();
+                        console.log('Batch ID:', batchId);
+                        app.showBatchId(batchId);
+                        
                         await app.submitForm(formDataArray[0], 'faktura', {
+                            batchId: batchId,
                             onStart: () => {
                                 const statusEl = document.getElementById(`status_0`);
                                 if (statusEl) {
