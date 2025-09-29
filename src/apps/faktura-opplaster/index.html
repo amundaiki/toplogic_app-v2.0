@@ -228,14 +228,14 @@
                     <div class="form-group">
                         <label for="fakturaFile" class="form-label">Last opp fakturaer</label>
                         
-                        <!-- Info om samlet sending av flere filer -->
+                        <!-- Info om smart sending av flere filer -->
                         <div style="padding: var(--spacing-md); background: var(--color-gray-light); border-radius: var(--radius-md); border-left: 4px solid var(--color-blue); margin-bottom: var(--spacing-md);">
                             <h4 style="color: var(--color-blue-dark); margin: 0 0 var(--spacing-sm) 0; font-size: var(--font-size-normal); font-weight: 600; display: flex; align-items: center;">
-                                <i data-lucide="package" style="width: 16px; height: 16px; margin-right: var(--spacing-xs);"></i>
-                                Flere dokumenter sendes samlet
+                                <i data-lucide="play-circle" style="width: 16px; height: 16px; margin-right: var(--spacing-xs);"></i>
+                                Smart sending av flere dokumenter
                             </h4>
                             <p style="color: var(--color-gray-dark); margin: 0; font-size: var(--font-size-small); line-height: 1.5;">
-                                Når du laster opp flere fakturaer, sendes alle sammen i én webhook-request slik at de vises samlet i Make.com. Alle filer får samme Batch ID.
+                                Første faktura sendes for å lage Google Sheet, deretter 1 sekunds pause, så sendes resten samtidig. Alle filer får samme Batch ID for gruppering.
                             </p>
                         </div>
                         
@@ -561,92 +561,121 @@
                             }
                         });
                     } else {
-                        // Flere filer - send alle sammen i én webhook-request
+                        // Flere filer - første først, deretter 1 sek pause, så resten samtidig
                         const batchId = app.generateBatchId();
                         console.log('Batch ID:', batchId);
                         app.showBatchId(batchId);
                         
-                        app.showMessage(`Sender ${formDataArray.length} fakturaer sammen...`, 'info');
+                        app.showMessage(`Sender ${formDataArray.length} fakturaer - første først, deretter resten...`, 'info');
                         
-                        // Oppdater status for alle filer
-                        for (let i = 0; i < formDataArray.length; i++) {
-                            const statusEl = document.getElementById(`status_${i}`);
-                            if (statusEl) {
-                                statusEl.textContent = 'Sender...';
-                                statusEl.style.color = 'var(--color-blue)';
-                            }
-                        }
+                        let successful = 0;
+                        let failed = 0;
                         
                         try {
-                            // Bygg én stor FormData med alle filer
-                            const combinedFormData = new FormData();
-                            
-                            // Legg til batch-informasjon
-                            combinedFormData.append('batchId', batchId);
-                            combinedFormData.append('totalFiles', formDataArray.length.toString());
-                            combinedFormData.append('opplaster', opplaster);
-                            combinedFormData.append('leverandor', leverandor);
-                            combinedFormData.append('timestamp', config.CONFIG_HELPERS.getTimestamp());
-                            if (globalShipmentEstimate) {
-                                combinedFormData.append('shipmentCount', String(globalShipmentEstimate));
+                            // STEG 1: Send første faktura
+                            console.log('📋 Steg 1: Sender første faktura for å lage Google Sheet...');
+                            const firstFormData = formDataArray[0];
+                            const statusEl0 = document.getElementById('status_0');
+                            if (statusEl0) {
+                                statusEl0.textContent = 'Sender første...';
+                                statusEl0.style.color = 'var(--color-blue)';
                             }
                             
-                            // Legg til alle filene med indeks
-                            const fileNames = [];
-                            for (let i = 0; i < files.length; i++) {
-                                const file = files[i];
-                                combinedFormData.append(`file_${i}`, file);
-                                combinedFormData.append(`fileName_${i}`, file.name);
-                                fileNames.push(file.name);
-                            }
-                            
-                            // Legg til liste over filnavn
-                            combinedFormData.append('fileNames', JSON.stringify(fileNames));
-                            
-                            console.log('📦 Sender kombinert payload med alle fakturaer:', {
-                                batchId,
-                                totalFiles: formDataArray.length,
-                                fileNames
-                            });
-                            
-                            // Send én enkelt request med alle filer
-                            await app.submitForm(combinedFormData, 'faktura', {
+                            await app.submitForm(firstFormData, 'faktura', {
                                 batchId: batchId,
-                                onStart: () => {
-                                    app.setProgress(10);
-                                },
-                                onProgress: (progress) => {
-                                    app.setProgress(progress);
-                                },
                                 onSuccess: () => {
-                                    console.log('✅ Alle fakturaer sendt vellykket');
-                                    
-                                    // Oppdater status for alle filer
-                                    for (let i = 0; i < formDataArray.length; i++) {
-                                        const statusEl = document.getElementById(`status_${i}`);
-                                        if (statusEl) {
-                                            statusEl.textContent = 'Lastet opp';
-                                            statusEl.style.color = 'var(--color-success)';
-                                        }
+                                    console.log('✅ Første faktura sendt vellykket');
+                                    successful++;
+                                    if (statusEl0) {
+                                        statusEl0.textContent = 'Lastet opp (første)';
+                                        statusEl0.style.color = 'var(--color-success)';
                                     }
-                                    
-                                    app.showMessage(`Alle ${formDataArray.length} fakturaer sendt til prosessering!`, 'success');
                                 },
                                 onError: (error) => {
-                                    console.error('❌ Feil ved sending av fakturaer:', error);
-                                    
-                                    // Oppdater status for alle filer
-                                    for (let i = 0; i < formDataArray.length; i++) {
-                                        const statusEl = document.getElementById(`status_${i}`);
-                                        if (statusEl) {
-                                            statusEl.textContent = 'Feil ved opplasting';
-                                            statusEl.style.color = 'var(--color-error)';
-                                        }
+                                    console.error('❌ Første faktura feilet:', error);
+                                    failed++;
+                                    if (statusEl0) {
+                                        statusEl0.textContent = 'Feil ved opplasting';
+                                        statusEl0.style.color = 'var(--color-error)';
                                     }
-                                    
-                                    app.showMessage('Feil ved sending av fakturaer: ' + error, 'error');
                                 }
                             });
+                            
+                            // STEG 2: Pause i 1 sekund (la Make.com lage Google Sheet)
+                            if (formDataArray.length > 1) {
+                                console.log('⏳ Steg 2: Venter 1 sekund for at Make.com skal lage Google Sheet...');
+                                app.showMessage('Venter 1 sekund for at Google Sheet skal opprettes...', 'info');
+                                await new Promise(resolve => setTimeout(resolve, 1000));
+                                
+                                // STEG 3: Send resten parallelt
+                                console.log('🚀 Steg 3: Sender resten av fakturaene samtidig...');
+                                app.showMessage(`Sender ${formDataArray.length - 1} resterende fakturaer samtidig...`, 'info');
+                                
+                                const remainingFormData = formDataArray.slice(1);
+                                
+                                // Oppdater status for resterende filer
+                                for (let i = 1; i < formDataArray.length; i++) {
+                                    const statusEl = document.getElementById(`status_${i}`);
+                                    if (statusEl) {
+                                        statusEl.textContent = 'Sender...';
+                                        statusEl.style.color = 'var(--color-blue)';
+                                    }
+                                }
+                                
+                                // Send alle resterende parallelt
+                                const promises = remainingFormData.map((formData, index) => {
+                                    const globalIndex = index + 1; // +1 fordi vi startet fra indeks 1
+                                    
+                                    console.log(`Starter sending av fil ${globalIndex + 1}: ${formData.get('fileName')}`);
+                                    
+                                    return app.submitForm(formData, 'faktura', {
+                                        batchId: batchId,
+                                        onSuccess: () => {
+                                            console.log(`✅ Fil ${globalIndex + 1} sendt vellykket`);
+                                            const statusEl = document.getElementById(`status_${globalIndex}`);
+                                            if (statusEl) {
+                                                statusEl.textContent = 'Lastet opp';
+                                                statusEl.style.color = 'var(--color-success)';
+                                            }
+                                        },
+                                        onError: (error) => {
+                                            console.error(`❌ Fil ${globalIndex + 1} feilet:`, error);
+                                            const statusEl = document.getElementById(`status_${globalIndex}`);
+                                            if (statusEl) {
+                                                statusEl.textContent = 'Feil ved opplasting';
+                                                statusEl.style.color = 'var(--color-error)';
+                                            }
+                                        }
+                                    }).then(result => {
+                                        console.log(`Fil ${globalIndex + 1} fullført`);
+                                        return { success: true, index: globalIndex };
+                                    }).catch(error => {
+                                        console.error(`Fil ${globalIndex + 1} kastet feil:`, error);
+                                        return { success: false, error, index: globalIndex };
+                                    });
+                                });
+                                
+                                // Vent på at alle resterende blir ferdig
+                                const results = await Promise.allSettled(promises);
+                                
+                                // Tell resultater
+                                results.forEach(result => {
+                                    if (result.status === 'fulfilled' && result.value?.success) {
+                                        successful++;
+                                    } else {
+                                        failed++;
+                                    }
+                                });
+                            }
+                            
+                            console.log(`🏁 Alle fakturaer prosessert. Totalt vellykket: ${successful}, Feilet: ${failed}`);
+                            
+                            const summary = `${successful} av ${formDataArray.length} faktura${formDataArray.length === 1 ? '' : 'er'} sendt til prosessering!`;
+                            app.showMessage(summary, 'success');
+                            
+                            if (failed > 0) {
+                                app.showMessage(`${failed} filer feilet under opplasting`, 'error');
+                            }
                             
                         } catch (error) {
                             console.error('Feil ved sending av fakturaer:', error);
