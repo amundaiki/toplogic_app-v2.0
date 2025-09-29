@@ -228,14 +228,14 @@
                     <div class="form-group">
                         <label for="fakturaFile" class="form-label">Last opp fakturaer</label>
                         
-                        <!-- Info om parallell sending av flere filer -->
+                        <!-- Info om gruppert sending av flere filer -->
                         <div style="padding: var(--spacing-md); background: var(--color-gray-light); border-radius: var(--radius-md); border-left: 4px solid var(--color-blue); margin-bottom: var(--spacing-md);">
                             <h4 style="color: var(--color-blue-dark); margin: 0 0 var(--spacing-sm) 0; font-size: var(--font-size-normal); font-weight: 600; display: flex; align-items: center;">
-                                <i data-lucide="zap" style="width: 16px; height: 16px; margin-right: var(--spacing-xs);"></i>
-                                Flere dokumenter sendes samtidig
+                                <i data-lucide="layers" style="width: 16px; height: 16px; margin-right: var(--spacing-xs);"></i>
+                                Flere dokumenter sendes i små grupper
                             </h4>
                             <p style="color: var(--color-gray-dark); margin: 0; font-size: var(--font-size-small); line-height: 1.5;">
-                                Når du laster opp flere fakturaer samtidig, sendes alle til prosessering parallelt for rask behandling. Alle filer fra samme opplasting får samme Batch ID.
+                                Når du laster opp flere fakturaer, sendes de i grupper på 3 med kort pause mellom gruppene for optimal levering til webhook. Alle filer får samme Batch ID.
                             </p>
                         </div>
                         
@@ -561,53 +561,94 @@
                             }
                         });
                     } else {
-                        // Flere filer - send alle samtidig
+                        // Flere filer - send i små grupper for å unngå overbelastning
                         const batchId = app.generateBatchId();
                         console.log('Batch ID:', batchId);
                         app.showBatchId(batchId);
                         
-                        app.showMessage(`Sender ${formDataArray.length} fakturaer samtidig...`, 'info');
+                        app.showMessage(`Sender ${formDataArray.length} fakturaer i grupper...`, 'info');
                         
-                        // Send alle filer parallelt
-                        const promises = formDataArray.map((formData, index) => {
-                            const statusEl = document.getElementById(`status_${index}`);
-                            if (statusEl) {
-                                statusEl.textContent = 'Sender...';
-                                statusEl.style.color = 'var(--color-blue)';
-                            }
+                        // Send i grupper på 3 filer med kort pause mellom gruppene
+                        const BATCH_SIZE = 3;
+                        const DELAY_BETWEEN_BATCHES = 500; // 0.5 sekunder
+                        
+                        let successful = 0;
+                        let failed = 0;
+                        
+                        for (let i = 0; i < formDataArray.length; i += BATCH_SIZE) {
+                            const batch = formDataArray.slice(i, i + BATCH_SIZE);
+                            console.log(`Sender gruppe ${Math.floor(i/BATCH_SIZE) + 1}: filer ${i} til ${Math.min(i + BATCH_SIZE - 1, formDataArray.length - 1)}`);
                             
-                            return app.submitForm(formData, 'faktura', {
-                                batchId: batchId,
-                                onSuccess: () => {
-                                    const statusEl = document.getElementById(`status_${index}`);
-                                    if (statusEl) {
-                                        statusEl.textContent = 'Lastet opp';
-                                        statusEl.style.color = 'var(--color-success)';
-                                    }
-                                },
-                                onError: (error) => {
-                                    const statusEl = document.getElementById(`status_${index}`);
-                                    if (statusEl) {
-                                        statusEl.textContent = 'Feil ved opplasting';
-                                        statusEl.style.color = 'var(--color-error)';
-                                    }
+                            // Send denne gruppen parallelt
+                            const promises = batch.map((formData, batchIndex) => {
+                                const globalIndex = i + batchIndex;
+                                const statusEl = document.getElementById(`status_${globalIndex}`);
+                                if (statusEl) {
+                                    statusEl.textContent = 'Sender...';
+                                    statusEl.style.color = 'var(--color-blue)';
                                 }
-                            }).catch(error => ({ error, index }));
-                        });
-                        
-                        try {
-                            const results = await Promise.allSettled(promises);
-                            const successful = results.filter(result => result.status === 'fulfilled' && !result.value?.error).length;
-                            const failed = results.length - successful;
+                                
+                                console.log(`Starter sending av fil ${globalIndex + 1}: ${formData.get('fileName')}`);
+                                
+                                return app.submitForm(formData, 'faktura', {
+                                    batchId: batchId,
+                                    onSuccess: () => {
+                                        console.log(`✅ Fil ${globalIndex + 1} sendt vellykket`);
+                                        const statusEl = document.getElementById(`status_${globalIndex}`);
+                                        if (statusEl) {
+                                            statusEl.textContent = 'Lastet opp';
+                                            statusEl.style.color = 'var(--color-success)';
+                                        }
+                                    },
+                                    onError: (error) => {
+                                        console.error(`❌ Fil ${globalIndex + 1} feilet:`, error);
+                                        const statusEl = document.getElementById(`status_${globalIndex}`);
+                                        if (statusEl) {
+                                            statusEl.textContent = 'Feil ved opplasting';
+                                            statusEl.style.color = 'var(--color-error)';
+                                        }
+                                    }
+                                }).then(result => {
+                                    console.log(`Fil ${globalIndex + 1} fullført`);
+                                    return { success: true, index: globalIndex };
+                                }).catch(error => {
+                                    console.error(`Fil ${globalIndex + 1} kastet feil:`, error);
+                                    return { success: false, error, index: globalIndex };
+                                });
+                            });
                             
-                            const summary = `${successful} av ${formDataArray.length} faktura${formDataArray.length === 1 ? '' : 'er'} sendt til prosessering!`;
-                            app.showMessage(summary, 'success');
-                            
-                            if (failed > 0) {
-                                app.showMessage(`${failed} filer feilet under opplasting`, 'error');
+                            try {
+                                const results = await Promise.allSettled(promises);
+                                
+                                // Tell resultater for denne gruppen
+                                results.forEach(result => {
+                                    if (result.status === 'fulfilled' && result.value?.success) {
+                                        successful++;
+                                    } else {
+                                        failed++;
+                                    }
+                                });
+                                
+                                console.log(`Gruppe ${Math.floor(i/BATCH_SIZE) + 1} fullført. Vellykket: ${successful}, Feilet: ${failed}`);
+                                
+                                // Kort pause før neste gruppe (unntatt siste gruppe)
+                                if (i + BATCH_SIZE < formDataArray.length) {
+                                    await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
+                                }
+                                
+                            } catch (error) {
+                                console.error('Feil ved sending av gruppe:', error);
+                                failed += batch.length;
                             }
-                        } catch (error) {
-                            app.showMessage('Feil ved sending av fakturaer', 'error');
+                        }
+                        
+                        console.log(`🏁 Alle fakturaer prosessert. Totalt vellykket: ${successful}, Feilet: ${failed}`);
+                        
+                        const summary = `${successful} av ${formDataArray.length} faktura${formDataArray.length === 1 ? '' : 'er'} sendt til prosessering!`;
+                        app.showMessage(summary, 'success');
+                        
+                        if (failed > 0) {
+                            app.showMessage(`${failed} filer feilet under opplasting`, 'error');
                         }
                     }
                 });
