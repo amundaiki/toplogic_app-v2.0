@@ -440,6 +440,17 @@ body {
     box-shadow: none;
 }
 
+.btn-success {
+    background: #0f9d58;
+    color: var(--color-white);
+}
+
+.btn-success:hover {
+    background: #0d8a4d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(15, 157, 88, 0.25);
+}
+
 .btn-secondary {
     background: #ccc;
     color: #222;
@@ -508,12 +519,12 @@ body {
 /* Progress Bar */
 .progress-bar {
     width: 100%;
-    height: 4px;
-    background: var(--color-gray-border);
-    border-radius: 2px;
+    background: transparent;
+    border-radius: var(--radius-md);
     margin-top: var(--spacing-xl);
     overflow: hidden;
     display: none;
+    position: relative;
 }
 
 .progress-bar.show {
@@ -521,10 +532,157 @@ body {
 }
 
 .progress-fill {
-    height: 100%;
-    background: var(--color-red);
+    height: 8px;
+    background: linear-gradient(90deg, var(--color-red) 0%, var(--color-red-dark) 100%);
     width: 0%;
     transition: width 0.3s ease;
+    border-radius: var(--radius-md);
+    position: relative;
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+    font-size: var(--font-size-small);
+    color: var(--color-gray-dark);
+    font-weight: 500;
+}
+
+.progress-percentage {
+    color: var(--color-red);
+    font-weight: 600;
+}
+
+.progress-details {
+    margin-top: var(--spacing-sm);
+    font-size: var(--font-size-xs);
+    color: var(--color-gray-medium);
+    text-align: center;
+}
+
+.progress-file-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.progress-current-file {
+    color: var(--color-blue);
+    font-weight: 500;
+    max-width: 60%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.progress-file-size {
+    color: var(--color-gray-medium);
+    font-size: var(--font-size-xs);
+}
+
+/* Animasjon for progressbar-fyll */
+.progress-fill.animate {
+    animation: progressGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes progressGlow {
+    0% {
+        box-shadow: 0 0 5px rgba(199, 32, 39, 0.3);
+    }
+    100% {
+        box-shadow: 0 0 15px rgba(199, 32, 39, 0.6), 0 0 25px rgba(199, 32, 39, 0.3);
+    }
+}
+
+/* Google Sheet Link Button */
+.sheet-link-container {
+    display: none;
+    margin-top: var(--spacing-xl);
+}
+
+.sheet-link-container.show {
+    display: block;
+    animation: slideInFromTop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.sheet-link-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md);
+    background: linear-gradient(135deg, #0f9d58 0%, #0b8043 100%) !important;
+    color: white !important;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: none;
+    cursor: pointer;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(15, 157, 88, 0.25);
+    overflow: hidden;
+}
+
+.sheet-link-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.sheet-link-btn:hover::before {
+    left: 100%;
+}
+
+.sheet-link-btn:hover {
+    background: linear-gradient(135deg, #0b8043 0%, #087f3a 100%) !important;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 24px rgba(15, 157, 88, 0.35);
+    color: white !important;
+    text-decoration: none;
+}
+
+.sheet-link-btn:active {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 4px 12px rgba(15, 157, 88, 0.25);
+}
+
+.sheet-link-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.sheet-link-arrow {
+    width: 20px;
+    height: 20px;
+    margin-left: auto;
+}
+
+.sheet-link-text {
+    text-align: center;
+    font-size: var(--font-size-xs);
+    color: var(--color-gray-medium);
+    margin-top: var(--spacing-sm);
+    font-weight: 500;
+    font-family: monospace;
+    letter-spacing: 0.5px;
+    opacity: 0.7;
+}
+
+@keyframes slideInFromTop {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 /* Messages */

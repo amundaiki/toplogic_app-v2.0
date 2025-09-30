@@ -29,14 +29,6 @@ const WEBHOOKS = {
     
     // Dokument-uploader webhooks
     test: 'https://hook.eu2.make.com/0dr1p19z7s77nc34gntj7satvrejip2u',
-    faktura_bring: 'https://hook.eu2.make.com/your-bring-webhook',
-    faktura_postnord: 'https://hook.eu2.make.com/your-postnord-webhook',
-    faktura_ups: 'https://hook.eu2.make.com/your-ups-webhook',
-    faktura_dhl: 'https://hook.eu2.make.com/your-dhl-webhook',
-    faktura_fedex: 'https://hook.eu2.make.com/your-fedex-webhook',
-    faktura_schenker: 'https://hook.eu2.make.com/your-schenker-webhook',
-    faktura_ntg: 'https://hook.eu2.make.com/your-ntg-webhook',
-    faktura_other: 'https://hook.eu2.make.com/your-other-webhook',
     rapport_frakt: 'https://hook.eu2.make.com/your-freight-report-webhook',
     rapport_analyse: 'https://hook.eu2.make.com/your-analysis-webhook',
     dokument_annet: 'https://hook.eu2.make.com/your-other-doc-webhook',
@@ -66,10 +58,8 @@ const APP_CONFIG = {
         { value: 'Amund', label: 'Amund' }
     ],
     
-    // Leverandører (for faktura-opplaster)
-    suppliers: [
-        { value: 'standardisert_mal', label: 'Standardisert mal' }
-    ],
+    // Leverandører (for faktura-opplaster - hardkodet i HTML)
+    suppliers: [],
     
     // Meldinger
     // Kø-innstillinger for dokumentsending

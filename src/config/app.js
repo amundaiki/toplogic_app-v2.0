@@ -19,10 +19,8 @@ export const APP_CONFIG = {
         { value: 'Amund', label: 'Amund' }
     ],
     
-    // Leverandører (for faktura-opplaster)
-    suppliers: [
-        { value: 'standardisert_mal', label: 'Standardisert mal' }
-    ],
+    // Leverandører (for faktura-opplaster - hardkodet i HTML)
+    suppliers: [],
     
     // Kø-innstillinger for dokumentsending
     queue: {

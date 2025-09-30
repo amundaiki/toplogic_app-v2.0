@@ -18,35 +18,127 @@
     <style>
         /* Override container width for this page */
         .toplogic-container {
-            max-width: 1200px !important;
+            max-width: 1600px !important;
         }
         
         /* Grid layout for form og files */
         .content-grid {
             display: grid;
-            grid-template-columns: 1fr 450px;
-            gap: var(--spacing-xl);
-            align-items: start;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: var(--spacing-lg);
+            align-items: stretch;
         }
         
-        .form-section {
-            min-width: 0; /* Prevents grid item from overflowing */
-        }
-        
+        .input-section,
+        .upload-section,
         .files-section {
-            position: sticky;
-            top: var(--spacing-md);
+            min-width: 0; /* Prevents grid item from overflowing */
+            display: flex;
         }
         
-        @media (max-width: 1400px) {
+        .input-section .section-wrapper {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .input-section form {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .input-section .message {
+            margin-top: auto;
+        }
+        
+        .upload-section .file-upload-area {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .files-section #fileList {
+            flex: 1;
+        }
+        
+        /* Section wrapper styling */
+        .section-wrapper {
+            background: white;
+            border: 1px solid var(--color-gray-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            min-height: 600px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin: 0 0 var(--spacing-md) 0;
+            font-size: var(--font-size-base);
+            font-weight: 600;
+            color: var(--color-gray-dark);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 1px solid var(--color-gray-border);
+        }
+        
+        .section-icon {
+            width: 20px;
+            height: 20px;
+            color: var(--color-blue);
+        }
+        
+        .file-badge {
+            margin-left: auto;
+            color: var(--color-gray-medium);
+            font-size: var(--font-size-small);
+            font-weight: 400;
+        }
+        
+        .upload-section .file-upload-area {
+            flex: 1;
+        }
+        
+        .files-section .file-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .files-section #fileList {
+            flex: 1;
+            margin-bottom: var(--spacing-md);
+            overflow-y: auto;
+        }
+        
+        .files-section #clearFiles {
+            margin-top: 0 !important;
+        }
+        
+        .clear-files-btn {
+            background: none;
+            border: 1px solid var(--color-gray-border);
+            color: var(--color-gray-medium);
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-size: var(--font-size-xs);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+        
+        .clear-files-btn:hover {
+            background: var(--color-gray-light);
+            border-color: var(--color-gray-medium);
+        }
+        
+        @media (max-width: 1200px) {
             .content-grid {
                 grid-template-columns: 1fr;
                 gap: var(--spacing-lg);
-            }
-            
-            .files-section {
-                position: static;
-                order: 1; /* Vis files under skjema når det er liten plass */
             }
         }
 
@@ -197,82 +289,98 @@
             
             <div class="toplogic-content">
                 <div class="content-grid">
-                    <div class="form-section">
-                        <form id="uploadForm">
-                    <div class="form-group">
-                        <label for="opplaster" class="form-label">
-                            <i data-lucide="user" class="form-label-icon"></i>
-                            Hvem laster opp? <span style="color: var(--color-error);">*</span>
-                        </label>
-                        <div class="custom-select-wrapper">
-                            <select id="opplaster" name="opplaster" class="form-select enhanced-select" required>
-                                <option value="">Velg opplaster...</option>
-                                <!-- Vil bli populert via JavaScript -->
-                            </select>
-                            <i data-lucide="chevron-down" class="select-arrow"></i>
+                    <!-- Input Section -->
+                    <div class="input-section">
+                        <div class="section-wrapper">
+                            <h3 class="section-title">
+                                <i data-lucide="settings" class="section-icon"></i>
+                                Innstillinger
+                            </h3>
+                            <form id="uploadForm">
+                                <div class="form-group">
+                                    <label for="opplaster" class="form-label">
+                                        <i data-lucide="user" class="form-label-icon"></i>
+                                        Hvem laster opp? <span style="color: var(--color-error);">*</span>
+                                    </label>
+                                    <div class="custom-select-wrapper">
+                                        <select id="opplaster" name="opplaster" class="form-select enhanced-select" required>
+                                            <option value="">Velg opplaster...</option>
+                                            <!-- Vil bli populert via JavaScript -->
+                                        </select>
+                                        <i data-lucide="chevron-down" class="select-arrow"></i>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="leverandor" class="form-label">
+                                        <i data-lucide="truck" class="form-label-icon"></i>
+                                        Leverandør
+                                    </label>
+                                    <div class="custom-select-wrapper">
+                                        <select id="leverandor" name="leverandor" class="form-select enhanced-select">
+                                            <option value="ikke_valgt" selected>Ikke valgt (annet)</option>
+                                            <option value="postnord">PostNord</option>
+                                            <option value="samtransport">Samtransport</option>
+                                            <option value="sendify">Sendify</option>
+                                            <option value="ntg_road">NTG Road</option>
+                                            <option value="fedex">FedEx</option>
+                                            <option value="freja">Freja</option>
+                                        </select>
+                                        <i data-lucide="chevron-down" class="select-arrow"></i>
+                                    </div>
+                                </div>
+
+                                <div class="progress-bar" id="progressBar">
+                                    <div class="progress-fill" id="progressFill"></div>
+                                </div>
+                                
+                                <div class="batch-id-display" id="batchIdDisplay" style="display: none;"></div>
+
+                                <button type="submit" class="btn btn-primary btn-full btn-large" id="submitBtn">
+                                    <span>Send fakturaer</span>
+                                    <div class="loading-spinner" id="loadingSpinner"></div>
+                                </button>
+
+                                <button type="button" class="btn btn-secondary btn-full mt-lg" id="resetBtn">
+                                    Nullstill
+                                </button>
+                            </form>
+
+                            <div class="message" id="message"></div>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="leverandor" class="form-label">
-                            <i data-lucide="truck" class="form-label-icon"></i>
-                            Leverandør
-                        </label>
-                        <div class="custom-select-wrapper">
-                            <select id="leverandor" name="leverandor" class="form-select enhanced-select">
-                                <option value="ikke_valgt" selected>Ikke valgt (annet)</option>
-                                <option value="postnord">PostNord</option>
-                                <option value="samtransport">Samtransport</option>
-                            </select>
-                            <i data-lucide="chevron-down" class="select-arrow"></i>
+                    <!-- Upload Section -->
+                    <div class="upload-section">
+                        <div class="section-wrapper">
+                            <h3 class="section-title">
+                                <i data-lucide="upload" class="section-icon"></i>
+                                Last opp fakturaer
+                            </h3>
+                            <div class="file-upload-area" id="dropZone">
+                                <input type="file" id="fakturaFile" name="fakturaFile" accept=".pdf" multiple required>
+                                <svg class="upload-icon" viewBox="0 0 24 24">
+                                    <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
+                                </svg>
+                                <p><strong>Klikk for å velge filer</strong> eller dra og slipp her</p>
+                                <p class="supported-formats">Støttet format: PDF • Du kan velge flere fakturaer samtidig</p>
+                            </div>
                         </div>
                     </div>
 
-
-
-                    <div class="form-group">
-                        <label for="fakturaFile" class="form-label">Last opp fakturaer</label>
-                        
-                        
-                        <div class="file-upload-area" id="dropZone">
-                            <input type="file" id="fakturaFile" name="fakturaFile" accept=".pdf" multiple required>
-                            <svg class="upload-icon" viewBox="0 0 24 24">
-                                <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
-                            </svg>
-                            <p><strong>Klikk for å velge filer</strong> eller dra og slipp her</p>
-                            <p class="supported-formats">Støttet format: PDF • Du kan velge flere fakturaer samtidig</p>
-                        </div>
-                        
-                    </div>
-
-                    <div class="progress-bar" id="progressBar">
-                        <div class="progress-fill" id="progressFill"></div>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary btn-full btn-large" id="submitBtn">
-                        <span>Send fakturaer</span>
-                        <div class="loading-spinner" id="loadingSpinner"></div>
-                    </button>
-
-                    <button type="button" class="btn btn-secondary btn-full mt-lg" id="resetBtn">
-                        Nullstill
-                    </button>
-                </form>
-
-                <div class="message" id="message"></div>
-                    </div>
-
+                    <!-- Files Section -->
                     <div class="files-section">
-                        <div class="file-info" id="fileInfo" style="display: none;">
-                            <div style="background: var(--color-gray-light); padding: var(--spacing-md); border-radius: var(--radius-md);">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-sm);">
-                                    <h4 style="margin: 0; color: var(--color-gray-dark); font-size: var(--font-size-small); font-weight: 600;">Valgte fakturaer</h4>
-                                    <span id="fileCount" style="background: var(--color-blue); color: white; padding: 2px 8px; border-radius: var(--radius-sm); font-size: var(--font-size-xs); font-weight: 500;">0 filer</span>
+                        <div class="section-wrapper">
+                            <h3 class="section-title">
+                                <i data-lucide="file-text" class="section-icon"></i>
+                                Valgte fakturaer
+                                <span id="fileCount" class="file-badge">0 filer</span>
+                            </h3>
+                            <div class="file-info" id="fileInfo">
+                                <div id="fileList">
+                                    <!-- Innholdet settes dynamisk av JavaScript -->
                                 </div>
-                                <div id="fileList" style="max-height: 400px; overflow-y: auto;">
-                                    <!-- Fil-liste vil bli populert via JavaScript -->
-                                </div>
-                                <button type="button" id="clearFiles" style="margin-top: var(--spacing-sm); background: none; border: 1px solid var(--color-gray-border); color: var(--color-gray-medium); padding: 4px 12px; border-radius: var(--radius-sm); font-size: var(--font-size-xs); cursor: pointer; transition: all 0.2s ease; width: 100%;">
+                                <button type="button" id="clearFiles" class="clear-files-btn">
                                     Fjern alle filer
                                 </button>
                             </div>
@@ -322,6 +430,27 @@
                 // Initialiser komponenter
                 populateDropdowns();
 
+                // Lytt på endringer i opplaster-dropdown for å vise/skjule Google Sheet-knapp
+                const opplasterSelect = document.getElementById('opplaster');
+                if (opplasterSelect) {
+                    opplasterSelect.addEventListener('change', function() {
+                        const submitBtn = document.getElementById('submitBtn');
+                        if (!submitBtn) return;
+                        
+                        if (this.value === 'Amund') {
+                            // Vis disabled Google Sheet-knapp
+                            app.showDisabledSheetButton();
+                        } else {
+                            // Fjern Google Sheet-knapp og reset submit-knapp til full bredde
+                            const existingContainer = document.querySelector('.sheet-link-container');
+                            if (existingContainer) {
+                                existingContainer.remove();
+                            }
+                            submitBtn.classList.add('btn-full');
+                            submitBtn.style.cssText = '';
+                        }
+                    });
+                }
 
                 // Custom dropdowns midlertidig deaktivert
                 // const opplasterDropdown = new CustomDropdown(document.getElementById('opplaster'), {
@@ -387,14 +516,24 @@
                 function updateFileDisplayInfo() {
                     const fileInfoEl = document.getElementById('fileInfo');
                     const fileCountEl = document.getElementById('fileCount');
+                    const fileListEl = document.getElementById('fileList');
                     const submitBtn = document.querySelector('#submitBtn span');
                     
                     if (selectedFiles.length === 0) {
-                        if (fileInfoEl) fileInfoEl.style.display = 'none';
+                        // Vis alltid boksen, men med placeholder innhold
+                        if (fileInfoEl) fileInfoEl.style.display = 'block';
+                        if (fileCountEl) fileCountEl.textContent = '0 filer';
+                        if (fileListEl) {
+                            fileListEl.innerHTML = 'Ingen fakturaer valgt ennå';
+                            fileListEl.style.cssText = 'overflow-y: auto; min-height: 100px; display: flex; align-items: center; justify-content: center; color: var(--color-gray-medium); font-size: var(--font-size-small);';
+                        }
                         if (submitBtn) submitBtn.textContent = 'Send fakturaer';
                     } else {
                         if (fileInfoEl) fileInfoEl.style.display = 'block';
                         if (fileCountEl) fileCountEl.textContent = `${selectedFiles.length} fil${selectedFiles.length === 1 ? '' : 'er'}`;
+                        if (fileListEl) {
+                            fileListEl.style.cssText = 'overflow-y: auto;';
+                        }
                         if (submitBtn) submitBtn.textContent = selectedFiles.length === 1 ? 'Send faktura' : `Send ${selectedFiles.length} fakturaer`;
                     }
                 }
@@ -403,13 +542,15 @@
                     allowedTypes: 'pdf',
                     enableMultiple: true,
                     onFilesSelect: (files) => {
-                        selectedFiles = files;
-                        renderFileRows(files);
+                        // Legg til nye filer til eksisterende i stedet for å erstatte
+                        selectedFiles = [...selectedFiles, ...files];
+                        renderFileRows(selectedFiles);
                         updateFileDisplayInfo();
                     },
                     onFileSelect: (file) => {
-                        selectedFiles = [file];
-                        renderFileRows([file]);
+                        // Legg til ny fil til eksisterende
+                        selectedFiles = [...selectedFiles, file];
+                        renderFileRows(selectedFiles);
                         updateFileDisplayInfo();
                     },
                     onValidationError: (error) => {
@@ -417,14 +558,13 @@
                     }
                 });
 
+                // Vis boksen med placeholder innhold ved page load
+                updateFileDisplayInfo();
+
                 // Håndter "Fjern alle filer" knapp
                 document.getElementById('clearFiles').addEventListener('click', function() {
                     selectedFiles = [];
                     document.getElementById('fakturaFile').value = '';
-                    
-                    // Tøm fillisten
-                    const fileList = document.getElementById('fileList');
-                    if (fileList) fileList.innerHTML = '';
                     
                     // Oppdater UI
                     updateFileDisplayInfo();
@@ -483,49 +623,151 @@
                         return;
                     }
 
-                    // Hvis bare én fil, bruk vanlig submit. Hvis flere, bruk kø-system
+                    // Send alle filer med kø-system (inkludert enkeltfiler)
+                    const batchId = app.generateBatchId();
+                    console.log('Batch ID:', batchId);
+                    app.showBatchId(batchId);
+                    
+                    // Beregn total filstørrelse for vekting
+                    const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+                    let completedFiles = new Set(); // Holder styr på hvilke filer som er ferdig
+                    
                     if (formDataArray.length === 1) {
-                        // Enkelfil - generer batchId og send direkte
-                        const batchId = app.generateBatchId();
-                        console.log('Batch ID:', batchId);
-                        app.showBatchId(batchId);
+                        // Enkelfil - send forberedelse først, deretter fil
+                        app.showMessage('Forbereder sending av faktura...', 'info');
                         
-                        await app.submitForm(formDataArray[0], 'faktura', {
-                            batchId: batchId,
-                            onStart: () => {
-                                const statusEl = document.getElementById(`status_0`);
-                                if (statusEl) {
-                                    statusEl.textContent = 'Sender...';
-                                    statusEl.style.color = 'var(--color-blue)';
-                                }
-                            },
-                            onProgress: (progress) => {
-                                app.setProgress(progress);
-                            },
-                            onSuccess: () => {
-                                const statusEl = document.getElementById(`status_0`);
-                                if (statusEl) {
-                                    statusEl.textContent = 'Lastet opp';
-                                    statusEl.style.color = 'var(--color-success)';
-                                }
-                                app.showMessage('Fakturaen er sendt til prosessering!', 'success');
-                            },
-                            onError: (error) => {
-                                app.showMessage(error, 'error');
-                                const statusEl = document.getElementById(`status_0`);
-                                if (statusEl) {
-                                    statusEl.textContent = 'Feil ved opplasting';
-                                    statusEl.style.color = 'var(--color-error)';
-                                }
-                            }
+                        // Vis initial progress
+                        app.setProgress(0, true, {
+                            status: 'Forbereder faktura...',
+                            currentFile: files[0].name,
+                            currentFileIndex: 0,
+                            totalFiles: 1,
+                            currentFileSize: files[0].size,
+                            totalSize: files[0].size,
+                            processedSize: 0
                         });
+                        
+                        try {
+                            // STEG 1: Send forberedelse-kall til webhook
+                            console.log('📋 Steg 1: Sender forberedelse-kall for enkelt faktura...');
+                            app.showMessage('Sender forberedelse-kall til Make.com...', 'info');
+                            
+                            // Bygg forberedelse FormData for enkelfil
+                            const prepareFormData = new FormData();
+                            prepareFormData.append('action', 'prepare_batch');
+                            prepareFormData.append('batchId', batchId);
+                            prepareFormData.append('totalFiles', '1');
+                            prepareFormData.append('opplaster', opplaster);
+                            prepareFormData.append('leverandor', leverandor);
+                            prepareFormData.append('timestamp', config.CONFIG_HELPERS.getTimestamp());
+                            prepareFormData.append('fileNames', JSON.stringify([files[0].name]));
+                            
+                            // Vis disabled Google Sheet-knapp mens vi venter
+                            app.showDisabledSheetButton();
+                            
+                            await app.submitForm(prepareFormData, 'faktura', {
+                                onSuccess: () => {
+                                    console.log('✅ Forberedelse-kall sendt vellykket for enkelt faktura');
+                                    // Sett progress til 10% etter forberedelse
+                                    app.setProgress(10, true, {
+                                        status: 'Google Sheet opprettet, starter opplasting...',
+                                        currentFile: files[0].name,
+                                        currentFileIndex: 0,
+                                        totalFiles: 1,
+                                        currentFileSize: files[0].size,
+                                        totalSize: files[0].size,
+                                        processedSize: 0
+                                    });
+                                },
+                                onError: (error) => {
+                                    console.error('❌ Forberedelse-kall feilet:', error);
+                                    throw new Error('Forberedelse feilet: ' + error);
+                                }
+                            });
+                            
+                            // STEG 2: Send fakturaen
+                            console.log('🚀 Steg 2: Google Sheet klar - sender faktura...');
+                            app.showMessage('Sender faktura...', 'info');
+                            
+                            // Legg til spesiell action for enkelt faktura (behandles som siste faktura)
+                            formDataArray[0].append('action', 'last_invoice');
+                            
+                            await app.submitForm(formDataArray[0], 'faktura', {
+                                batchId: batchId,
+                                onStart: () => {
+                                    const statusEl = document.getElementById(`status_0`);
+                                    if (statusEl) {
+                                        statusEl.textContent = 'Sender...';
+                                        statusEl.style.color = 'var(--color-blue)';
+                                    }
+                                },
+                                onProgress: (progress) => {
+                                    // Progress går fra 10% til 100% (etter forberedelse er gjort)
+                                    const actualProgress = 10 + (progress * 0.9);
+                                    app.setProgress(actualProgress, true, {
+                                        status: 'Laster opp faktura...',
+                                        currentFile: files[0].name,
+                                        currentFileIndex: 0,
+                                        totalFiles: 1,
+                                        currentFileSize: files[0].size,
+                                        totalSize: files[0].size,
+                                        processedSize: (progress / 100) * files[0].size
+                                    });
+                                },
+                                onSuccess: () => {
+                                    const statusEl = document.getElementById(`status_0`);
+                                    if (statusEl) {
+                                        statusEl.textContent = 'Lastet opp';
+                                        statusEl.style.color = 'var(--color-success)';
+                                    }
+                                    app.setProgress(100, true, {
+                                        status: 'Faktura sendt!',
+                                        currentFile: files[0].name,
+                                        currentFileIndex: 0,
+                                        totalFiles: 1,
+                                        currentFileSize: files[0].size,
+                                        totalSize: files[0].size,
+                                    processedSize: files[0].size
+                                });
+                                
+                                // Finn opplaster-navn for personlig melding
+                                const opplasterNavn = opplaster.charAt(0).toUpperCase() + opplaster.slice(1);
+                                app.showMessage(`Fakturaen er prosessert! Excel-filen vil bli sendt til ${opplasterNavn} på e-post når prosesseringen er ferdig.`, 'success');
+                                },
+                                onError: (error) => {
+                                    app.showMessage(error, 'error');
+                                    const statusEl = document.getElementById(`status_0`);
+                                    if (statusEl) {
+                                        statusEl.textContent = 'Feil ved opplasting';
+                                        statusEl.style.color = 'var(--color-error)';
+                                    }
+                                }
+                            });
+                            
+                        } catch (error) {
+                            console.error('Feil ved sending av enkelt faktura:', error);
+                            app.showMessage('Feil ved sending av faktura: ' + error.message, 'error');
+                            
+                            const statusEl = document.getElementById(`status_0`);
+                            if (statusEl) {
+                                statusEl.textContent = 'Feil ved opplasting';
+                                statusEl.style.color = 'var(--color-error)';
+                            }
+                        }
                     } else {
                         // Flere filer - forberedelse først, deretter alle samtidig
-                        const batchId = app.generateBatchId();
-                        console.log('Batch ID:', batchId);
-                        app.showBatchId(batchId);
-                        
                         app.showMessage(`Forbereder batch med ${formDataArray.length} fakturaer...`, 'info');
+                        
+                        // Vis initial progress
+                        app.setProgress(0, true, {
+                            status: 'Forbereder batch...',
+                            currentFile: null,
+                            currentFileIndex: 0,
+                            totalFiles: formDataArray.length,
+                            currentFileSize: 0,
+                            totalSize,
+                            processedSize: 0
+                        });
                         
                         let successful = 0;
                         let failed = 0;
@@ -557,10 +799,23 @@
                                 fileNames
                             });
                             
+                            // Vis disabled Google Sheet-knapp mens vi venter
+                            app.showDisabledSheetButton();
+                            
                             // Send forberedelse-kall og vent på respons
                             await app.submitForm(prepareFormData, 'faktura', {
                                 onSuccess: () => {
                                     console.log('✅ Forberedelse-kall sendt vellykket - Google Sheet skal være klar');
+                                    // Sett progress til 10% etter forberedelse
+                                    app.setProgress(10, true, {
+                                        status: 'Google Sheet opprettet, starter opplasting...',
+                                        currentFile: null,
+                                        currentFileIndex: 0,
+                                        totalFiles: formDataArray.length,
+                                        currentFileSize: 0,
+                                        totalSize,
+                                        processedSize: 0
+                                    });
                                 },
                                 onError: (error) => {
                                     console.error('❌ Forberedelse-kall feilet:', error);
@@ -614,14 +869,40 @@
                                     
                                     return app.submitForm(item.formData, 'faktura', {
                                         batchId: batchId,
+                                        onProgress: (progress) => {
+                                            // Beregn kun fremgang for denne filen, ikke legg til i total
+                                            const fileProgress = (progress / 100) * item.fileSize;
+                                            
+                                            // Beregn total prosessert størrelse (kun ferdigstilte filer + current progress)
+                                            const currentProcessedSize = Array.from(completedFiles).reduce((sum, fileIndex) => {
+                                                return sum + files[fileIndex].size;
+                                            }, 0) + fileProgress;
+                                            
+                                            // Progress går fra 10% til 100% (10% er forberedelse)
+                                            const uploadProgress = (currentProcessedSize / totalSize) * 90;
+                                            const actualProgress = 10 + uploadProgress;
+                                            
+                                            // Oppdater progressbar med riktig samlet fremgang
+                                            app.setProgress(actualProgress, true, {
+                                                status: 'Laster opp fakturaer...',
+                                                currentFile: item.fileName,
+                                                currentFileIndex: item.originalIndex,
+                                                totalFiles: formDataArray.length,
+                                                currentFileSize: item.fileSize,
+                                                totalSize,
+                                                processedSize: currentProcessedSize
+                                            });
+                                        },
                                         onSuccess: () => {
                                             console.log(`✅ Fil sendt vellykket: ${item.fileName}`);
+                                            completedFiles.add(item.originalIndex);
+                                            
                                             const statusEl = document.getElementById(`status_${item.originalIndex}`);
-                                if (statusEl) {
-                                    statusEl.textContent = 'Lastet opp';
-                                    statusEl.style.color = 'var(--color-success)';
-                                }
-                            },
+                                            if (statusEl) {
+                                                statusEl.textContent = 'Lastet opp';
+                                                statusEl.style.color = 'var(--color-success)';
+                                            }
+                                        },
                                         onError: (error) => {
                                             console.error(`❌ Fil feilet: ${item.fileName}`, error);
                                             const statusEl = document.getElementById(`status_${item.originalIndex}`);
@@ -653,11 +934,37 @@
                             }
                             
                             // Send siste faktura med 30 sek forsinkelse og spesiell action
-                            app.showMessage('Venter 30 sekunder før sending av siste faktura...', 'info');
-                            await new Promise(resolve => setTimeout(resolve, 30000));
+                        app.showMessage('Venter 30 sekunder før sending av siste faktura...', 'info');
+                        
+                        // Vis countdown med progressbar under venting - vis korrekt fremgang
+                        let waitProgress = 0;
+                        const currentProcessedSize = Array.from(completedFiles).reduce((sum, fileIndex) => {
+                            return sum + files[fileIndex].size;
+                        }, 0);
+                        
+                        const waitInterval = setInterval(() => {
+                            waitProgress += 100/30; // 30 sekunder
+                            // Under venting viser vi ikke extra fremgang, bare status
+                            // Progress går fra 10% til 100% (10% er forberedelse)
+                            const uploadProgress = (currentProcessedSize / totalSize) * 90;
+                            const actualProgress = 10 + uploadProgress;
                             
-                            console.log(`📋 Sender siste faktura med "last_invoice" action: ${lastInvoice.fileName}`);
-                            app.showMessage(`Sender siste faktura: ${lastInvoice.fileName}`, 'info');
+                            app.setProgress(actualProgress, true, {
+                                status: `Venter på siste faktura... (${Math.floor(30 - (waitProgress * 30 / 100))}s)`,
+                                currentFile: lastInvoice.fileName,
+                                currentFileIndex: lastInvoice.originalIndex,
+                                totalFiles: formDataArray.length,
+                                currentFileSize: lastInvoice.fileSize,
+                                totalSize,
+                                processedSize: currentProcessedSize
+                            });
+                        }, 1000);
+                        
+                        await new Promise(resolve => setTimeout(resolve, 30000));
+                        clearInterval(waitInterval);
+                        
+                        console.log(`📋 Sender siste faktura med "last_invoice" action: ${lastInvoice.fileName}`);
+                        app.showMessage(`Sender siste faktura: ${lastInvoice.fileName}`, 'info');
                             
                             // Oppdater status for siste fil
                             const lastStatusEl = document.getElementById(`status_${lastInvoice.originalIndex}`);
@@ -679,9 +986,45 @@
                             
                             await app.submitForm(lastInvoice.formData, 'faktura', {
                                 batchId: batchId,
+                                onProgress: (progress) => {
+                                    const lastFileProgress = (progress / 100) * lastInvoice.fileSize;
+                                    
+                                    // Beregn korrekt total prosessert størrelse
+                                    const completedSize = Array.from(completedFiles).reduce((sum, fileIndex) => {
+                                        return sum + files[fileIndex].size;
+                                    }, 0);
+                                    const totalProgressSize = completedSize + lastFileProgress;
+                                    
+                                    // Progress går fra 10% til 100% (10% er forberedelse)
+                                    const uploadProgress = (totalProgressSize / totalSize) * 90;
+                                    const actualProgress = 10 + uploadProgress;
+                                    
+                                    app.setProgress(actualProgress, true, {
+                                        status: 'Sender siste faktura...',
+                                        currentFile: lastInvoice.fileName,
+                                        currentFileIndex: lastInvoice.originalIndex,
+                                        totalFiles: formDataArray.length,
+                                        currentFileSize: lastInvoice.fileSize,
+                                        totalSize,
+                                        processedSize: totalProgressSize
+                                    });
+                                },
                                 onSuccess: () => {
                                     console.log(`✅ Siste faktura sendt vellykket: ${lastInvoice.fileName}`);
                                     successful++;
+                                    completedFiles.add(lastInvoice.originalIndex);
+                                    
+                                    // Vis komplett status
+                                    app.setProgress(100, true, {
+                                        status: 'Alle fakturaer sendt!',
+                                        currentFile: lastInvoice.fileName,
+                                        currentFileIndex: lastInvoice.originalIndex,
+                                        totalFiles: formDataArray.length,
+                                        currentFileSize: lastInvoice.fileSize,
+                                        totalSize,
+                                        processedSize: totalSize
+                                    });
+                                    
                                     if (lastStatusEl) {
                                         lastStatusEl.textContent = 'Lastet opp (siste)';
                                         lastStatusEl.style.color = 'var(--color-success)';
@@ -699,7 +1042,10 @@
                             
                             console.log(`🏁 Alle fakturaer prosessert. Totalt vellykket: ${successful}, Feilet: ${failed}`);
                             
-                            const summary = `${successful} av ${formDataArray.length} faktura${formDataArray.length === 1 ? '' : 'er'} sendt til prosessering!`;
+                            // Finn opplaster-navn for personlig melding
+                            const opplasterNavn = opplaster.charAt(0).toUpperCase() + opplaster.slice(1);
+                            
+                            const summary = `${successful} av ${formDataArray.length} faktura${formDataArray.length === 1 ? '' : 'er'} er prosessert! Excel-filen vil bli sendt til ${opplasterNavn} på e-post når prosesseringen er ferdig.`;
                             app.showMessage(summary, 'success');
                             
                             if (failed > 0) {
@@ -728,15 +1074,12 @@
                         onReset: () => {
                             // Flerfil reset
                             selectedFiles = [];
-                            const fileInfoEl = document.getElementById('fileInfo');
-                            if (fileInfoEl) fileInfoEl.style.display = 'none';
-                            const submitBtn = document.querySelector('#submitBtn span');
-                            if (submitBtn) submitBtn.textContent = 'Send fakturaer';
-                            const fileList = document.getElementById('fileList');
-                            if (fileList) fileList.innerHTML = '';
+                            // Oppdater visningen med tom liste
+                            updateFileDisplayInfo();
                         }
                     });
                 });
+
 
                 // Standardisert mal info er alltid synlig siden det er eneste valg
 

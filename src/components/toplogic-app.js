@@ -432,15 +432,16 @@ export class TopLogicApp {
         // Start loading
         if (settings.onStart) settings.onStart();
 
-        // Simuler progress hvis aktivert
+        // IKKE simuler progress automatisk - dette håndteres nå manuelt i index.html
+        // Den automatiske simuleringen er deaktivert for bedre kontroll
         let progressInterval;
-        if (settings.onProgress) {
-            let progress = 0;
-            progressInterval = setInterval(() => {
-                progress += 10;
-                settings.onProgress(Math.min(progress, 90));
-            }, settings.progressInterval);
-        }
+        // if (settings.onProgress) {
+        //     let progress = 0;
+        //     progressInterval = setInterval(() => {
+        //         progress += 10;
+        //         settings.onProgress(Math.min(progress, 90));
+        //     }, settings.progressInterval);
+        // }
 
         try {
             const response = await fetch(webhookUrl, {
@@ -450,11 +451,31 @@ export class TopLogicApp {
 
             if (progressInterval) {
                 clearInterval(progressInterval);
-                if (settings.onProgress) settings.onProgress(100);
+                // if (settings.onProgress) settings.onProgress(100);
             }
 
             if (!response.ok) {
                 throw new Error(this.config.APP_CONFIG.messages.error.serverError.replace('{status}', response.status));
+            }
+
+            // Parse response for potential Google Sheet link
+            let responseData = null;
+            try {
+                const responseText = await response.text();
+                
+                if (responseText.trim()) {
+                    responseData = JSON.parse(responseText);
+                }
+            } catch (parseError) {
+                // Response ikke JSON, behandler som vanlig suksess
+            }
+            
+            // Sjekk om vi fikk en Google Sheet URL i responsen
+            if (responseData && responseData.sheetUrl) {
+                console.log('📊 Google Sheet opprettet:', responseData.sheetUrl);
+                
+                const batchId = settings.batchId || 'N/A';
+                this.showSheetLink(responseData.sheetUrl, batchId);
             }
 
             // Success
@@ -488,25 +509,143 @@ export class TopLogicApp {
         }
     }
 
-    // Progress bar kontroll
-    setProgress(percentage, show = true) {
+    // Progress bar kontroll med støtte for detaljert info
+    setProgress(percentage, show = true, options = {}) {
         const progressBar = document.getElementById('progressBar');
         const progressFill = document.getElementById('progressFill');
         
         if (progressBar && show) {
             progressBar.classList.add('show');
+            
+            // Opprett eller oppdater progress info elementer
+            this.updateProgressInfo(progressBar, percentage, options);
         }
         
         if (progressFill) {
             progressFill.style.width = `${Math.min(100, Math.max(0, percentage))}%`;
+            
+            // Legg til animasjon under aktiv opplasting
+            if (percentage > 0 && percentage < 100) {
+                progressFill.classList.add('animate');
+            } else {
+                progressFill.classList.remove('animate');
+            }
         }
         
         if (percentage >= 100 && progressBar) {
             setTimeout(() => {
                 progressBar.classList.remove('show');
-                if (progressFill) progressFill.style.width = '0%';
-            }, 1000);
+                if (progressFill) {
+                    progressFill.style.width = '0%';
+                    progressFill.classList.remove('animate');
+                }
+                // Fjern progress info
+                this.clearProgressInfo(progressBar);
+            }, 2000); // Økt tid for å se fullført status
         }
+    }
+
+    // Oppdater detaljert progress-informasjon
+    updateProgressInfo(progressBar, percentage, options = {}) {
+        let progressInfo = progressBar.querySelector('.progress-info');
+        let progressDetails = progressBar.querySelector('.progress-details');
+        
+        // Opprett progress info container hvis den ikke finnes
+        if (!progressInfo) {
+            progressInfo = document.createElement('div');
+            progressInfo.className = 'progress-info';
+            progressBar.insertBefore(progressInfo, progressBar.firstChild);
+        }
+        
+        // Opprett progress details container hvis den ikke finnes
+        if (!progressDetails) {
+            progressDetails = document.createElement('div');
+            progressDetails.className = 'progress-details';
+            progressBar.appendChild(progressDetails);
+        }
+        
+        // Oppdater hovedinformasjon
+        const {
+            currentFile = null,
+            currentFileIndex = 0,
+            totalFiles = 1,
+            currentFileSize = 0,
+            totalSize = 0,
+            processedSize = 0,
+            status = 'Laster opp...'
+        } = options;
+        
+        // Hovedprogress med prosent
+        progressInfo.innerHTML = `
+            <span>${status}</span>
+            <span class="progress-percentage">${Math.round(percentage)}%</span>
+        `;
+        
+        // Detaljert informasjon
+        let detailsHtml = '';
+        
+        if (totalFiles > 1) {
+            detailsHtml += `
+                <div class="progress-file-info">
+                    <span>Fil ${currentFileIndex + 1} av ${totalFiles}</span>
+                    <span>${TopLogicUtils.formatFileSize(processedSize)} / ${TopLogicUtils.formatFileSize(totalSize)}</span>
+                </div>
+            `;
+        }
+        
+        if (currentFile) {
+            detailsHtml += `
+                <div class="progress-file-info">
+                    <span class="progress-current-file">${currentFile}</span>
+                    <span class="progress-file-size">${TopLogicUtils.formatFileSize(currentFileSize)}</span>
+                </div>
+            `;
+        }
+        
+        progressDetails.innerHTML = detailsHtml;
+    }
+
+    // Fjern progress info elementer
+    clearProgressInfo(progressBar) {
+        const progressInfo = progressBar.querySelector('.progress-info');
+        const progressDetails = progressBar.querySelector('.progress-details');
+        
+        if (progressInfo) progressInfo.remove();
+        if (progressDetails) progressDetails.remove();
+    }
+
+    // Avansert progress for flere filer med vekting basert på størrelse
+    setProgressForMultipleFiles(fileProgressData) {
+        const {
+            files = [],
+            currentFileIndex = 0,
+            currentFileProgress = 0,
+            totalProcessedSize = 0,
+            totalSize = 0
+        } = fileProgressData;
+        
+        // Beregn total fremgang basert på filstørrelse
+        const currentFile = files[currentFileIndex];
+        const currentFileContribution = currentFile ? 
+            (currentFileProgress / 100) * currentFile.size : 0;
+        
+        const totalProgressSize = totalProcessedSize + currentFileContribution;
+        const overallPercentage = totalSize > 0 ? 
+            (totalProgressSize / totalSize) * 100 : 0;
+        
+        // Oppdater progressbar med detaljert info
+        this.setProgress(overallPercentage, true, {
+            currentFile: currentFile?.name,
+            currentFileIndex,
+            totalFiles: files.length,
+            currentFileSize: currentFile?.size || 0,
+            totalSize,
+            processedSize: totalProgressSize,
+            status: currentFileProgress === 100 ? 
+                'Prosesserer...' : 'Laster opp...'
+        });
+        
+        return overallPercentage;
     }
 
     // Loading state kontroll
@@ -544,6 +683,18 @@ export class TopLogicApp {
             batchIdDisplay.remove();
         }
         
+        // Fjern Google Sheet lenke og vis submit-knappen igjen
+        const sheetLinkContainer = document.querySelector('.sheet-link-container');
+        if (sheetLinkContainer) {
+            sheetLinkContainer.remove();
+        }
+        
+        // Vis submit-knappen igjen
+        const submitBtn = document.getElementById('submitBtn');
+        if (submitBtn) {
+            submitBtn.style.display = '';
+        }
+        
         // Reset progress
         this.setProgress(0, false);
         
@@ -566,24 +717,121 @@ export class TopLogicApp {
         return `${timestamp}_${randomPart}`;
     }
 
-    // Vis batch ID i UI
-    showBatchId(batchId) {
-        // Finn eller opprett batch ID display element
-        let batchIdDisplay = document.querySelector('.batch-id-display');
-        if (!batchIdDisplay) {
-            batchIdDisplay = document.createElement('div');
-            batchIdDisplay.className = 'batch-id-display';
-            batchIdDisplay.style.cssText = 'font-size: 12px; color: #666; font-family: monospace; margin-top: 8px; text-align: center;';
-            
-            // Plasser elementet under progress bar
-            const progressBar = document.getElementById('progressBar');
-            if (progressBar && progressBar.parentNode) {
-                progressBar.parentNode.insertBefore(batchIdDisplay, progressBar.nextSibling);
-            }
+    // Vis disabled Google Sheet-knapp (grå, venter på link)
+    showDisabledSheetButton() {
+        const submitBtn = document.getElementById('submitBtn');
+        if (!submitBtn) return;
+
+        // Sjekk hvem som laster opp - kun vis Google Sheet-knapp for Amund
+        const opplasterSelect = document.getElementById('opplaster');
+        const opplaster = opplasterSelect ? opplasterSelect.value : '';
+        
+        if (opplaster !== 'Amund') {
+            return;
+        }
+
+        // Fjern full-width fra submit-knappen
+        submitBtn.classList.remove('btn-full');
+        
+        // Fjern eksisterende sheet button hvis den finnes
+        const existingContainer = document.querySelector('.sheet-link-container');
+        if (existingContainer) {
+            existingContainer.remove();
+        }
+
+        // Opprett wrapper container med flexbox
+        const wrapper = document.createElement('div');
+        wrapper.className = 'sheet-link-container';
+        wrapper.style.cssText = 'display: block; width: 100%; margin-top: var(--spacing-md);';
+        
+        wrapper.innerHTML = `
+            <button type="button" disabled class="sheet-link-btn btn btn-secondary btn-large btn-full" id="sheetButton" style="display: flex; align-items: center; justify-content: center; opacity: 0.6; cursor: not-allowed;">
+                <svg class="sheet-link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; margin-right: 8px;">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="3" y1="9" x2="21" y2="9"></line>
+                    <line x1="9" y1="21" x2="9" y2="9"></line>
+                </svg>
+                <span>Venter på Google Sheet...</span>
+            </button>
+        `;
+        
+        // Plasser containeren rett etter submit-knappen (under)
+        submitBtn.parentNode.insertBefore(wrapper, submitBtn.nextSibling);
+    }
+
+    // Aktiver Google Sheet-knapp med link (grønn, klikkbar)
+    showSheetLink(sheetUrl, batchId) {
+        const submitBtn = document.getElementById('submitBtn');
+        if (!submitBtn) return;
+
+        // Sjekk hvem som laster opp - kun vis Google Sheet-knapp for Amund
+        const opplasterSelect = document.getElementById('opplaster');
+        const opplaster = opplasterSelect ? opplasterSelect.value : '';
+        
+        if (opplaster !== 'Amund') {
+            console.log('Google Sheet-knapp vises ikke - opplaster er ikke Amund');
+            return;
         }
         
-        batchIdDisplay.textContent = `Batch ID: ${batchId}`;
-        batchIdDisplay.style.display = 'block';
+        // Skjul progressbar og batch ID display
+        const progressBar = document.getElementById('progressBar');
+        if (progressBar) {
+            progressBar.classList.remove('show');
+        }
+        
+        const batchIdDisplay = document.querySelector('.batch-id-display');
+        if (batchIdDisplay) {
+            batchIdDisplay.style.display = 'none';
+        }
+        
+        // Fjern eksisterende sheet link container hvis den finnes
+        const existingContainer = document.querySelector('.sheet-link-container');
+        if (existingContainer) {
+            existingContainer.remove();
+        }
+
+        // Opprett wrapper container
+        const wrapper = document.createElement('div');
+        wrapper.className = 'sheet-link-container';
+        wrapper.style.cssText = 'display: block; width: 100%; margin-top: var(--spacing-md);';
+        
+        wrapper.innerHTML = `
+            <a href="${sheetUrl}" target="_blank" rel="noopener noreferrer" class="sheet-link-btn btn btn-success btn-large btn-full" style="display: flex; align-items: center; justify-content: center; text-decoration: none;">
+                <svg class="sheet-link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; margin-right: 8px;">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="3" y1="9" x2="21" y2="9"></line>
+                    <line x1="9" y1="21" x2="9" y2="9"></line>
+                </svg>
+                <span>Åpne Google Sheet</span>
+                <svg class="sheet-link-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px; margin-left: 8px;">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+            </a>
+            ${batchId && batchId !== 'N/A' ? `<div class="sheet-link-text" style="margin-top: var(--spacing-sm); text-align: center; width: 100%;">Batch ID: ${batchId}</div>` : ''}
+        `;
+        
+        // Plasser containeren rett etter submit-knappen (under)
+        submitBtn.parentNode.insertBefore(wrapper, submitBtn.nextSibling);
+        
+        // Vis containeren med animasjon
+        setTimeout(() => {
+            wrapper.classList.add('show');
+        }, 100);
+    }
+
+    // Vis batch ID i UI (skjult som standard - vises kun i konsollen)
+    showBatchId(batchId) {
+        console.log('🆔 Batch ID generert:', batchId);
+        
+        // Finn batch ID display element hvis det finnes
+        let batchIdDisplay = document.querySelector('.batch-id-display');
+        if (batchIdDisplay) {
+            batchIdDisplay.textContent = `Batch ID: ${batchId}`;
+            // Behold skjult - vises kun via Google Sheet-knappen
+            batchIdDisplay.style.display = 'none';
+        }
     }
 
     // Auto-detect dokumenttype basert på filnavn

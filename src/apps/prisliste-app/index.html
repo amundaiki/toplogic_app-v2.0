@@ -225,9 +225,26 @@
                     app.showMessage('Sender prisliste til Make.com...', 'success');
                 },
                 onProgress: (progress) => {
-                    app.setProgress(progress);
+                    app.setProgress(progress, true, {
+                        status: 'Laster opp prisliste...',
+                        currentFile: file.name,
+                        currentFileIndex: 0,
+                        totalFiles: 1,
+                        currentFileSize: file.size,
+                        totalSize: file.size,
+                        processedSize: (progress / 100) * file.size
+                    });
                 },
                 onSuccess: (message) => {
+                    app.setProgress(100, true, {
+                        status: 'Prisliste sendt!',
+                        currentFile: file.name,
+                        currentFileIndex: 0,
+                        totalFiles: 1,
+                        currentFileSize: file.size,
+                        totalSize: file.size,
+                        processedSize: file.size
+                    });
                     app.showMessage(config.APP_CONFIG.messages.success.prislisteUploaded, 'success');
                 },
                 onError: (error) => {
