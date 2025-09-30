@@ -552,6 +552,8 @@
                                 action: 'prepare_batch',
                                 batchId,
                                 totalFiles: formDataArray.length,
+                                opplaster,
+                                leverandor,
                                 fileNames
                             });
                             
@@ -603,6 +605,12 @@
                                 // Send alle unntatt siste parallelt
                                 const promises = allExceptLast.map((item) => {
                                     console.log(`Starter sending av fil: ${item.fileName} (${TopLogicUtils.formatFileSize(item.fileSize)})`);
+                                    console.log(`📋 FormData innhold:`, {
+                                        fileName: item.formData.get('fileName'),
+                                        opplaster: item.formData.get('opplaster'),
+                                        leverandor: item.formData.get('leverandor'),
+                                        timestamp: item.formData.get('timestamp')
+                                    });
                                     
                                     return app.submitForm(item.formData, 'faktura', {
                                         batchId: batchId,
@@ -660,6 +668,14 @@
                             
                             // Legg til spesiell action for siste faktura
                             lastInvoice.formData.append('action', 'last_invoice');
+                            
+                            console.log(`📋 Siste faktura FormData innhold:`, {
+                                fileName: lastInvoice.formData.get('fileName'),
+                                opplaster: lastInvoice.formData.get('opplaster'),
+                                leverandor: lastInvoice.formData.get('leverandor'),
+                                action: lastInvoice.formData.get('action'),
+                                timestamp: lastInvoice.formData.get('timestamp')
+                            });
                             
                             await app.submitForm(lastInvoice.formData, 'faktura', {
                                 batchId: batchId,
