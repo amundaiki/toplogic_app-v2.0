@@ -204,6 +204,11 @@ async function processClaudeRequest(requestId, prompt, webhookUrl, options, orig
 router.get('/status/:requestId', (req, res) => {
   const { requestId } = req.params;
 
+  // Set CORS headers explicitly for this endpoint
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+
   logger.debug('Status check requested', { requestId });
 
   const request = requestTracker.get(requestId);
