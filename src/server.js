@@ -29,8 +29,10 @@ const PORT = process.env.PORT || 3000;
 // Trust proxy - required for Railway/production deployments
 app.set('trust proxy', 1);
 
-// Security middleware
-app.use(helmet());
+// Security middleware - Relaxed for public status endpoint
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 
 // CORS configuration - Allow all origins for status endpoint
 const corsOptions = {
