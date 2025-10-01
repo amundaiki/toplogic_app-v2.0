@@ -1,7 +1,7 @@
 // Webhook URLs - Make.com integrasjoner
 export const WEBHOOKS = {
     // Faktura-opplaster
-    faktura: 'https://hook.eu2.make.com/we9l5rfpm86f7h6vtruiltlrc7dovdm6',
+    faktura: 'https://hook.eu2.make.com/21gnx15xohwcp5adfhg7o53dioz9zrtn',
     
     // Prisliste-apper
     prisliste_bring_transport: 'https://hook.eu2.make.com/mwmlrm2esor86r8w3dnyr7elo557rc2j',

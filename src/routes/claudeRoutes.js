@@ -42,7 +42,20 @@ const validateClaudeRequest = (req, res, next) => {
 
 // POST /api/claude - Main async Claude API endpoint
 router.post('/claude', authenticate, claudeApiLimiter, validateClaudeRequest, async (req, res) => {
-  const { prompt, webhookUrl, requestId: clientRequestId, options = {} } = req.body;
+  let { prompt, webhookUrl, requestId: clientRequestId, options = {} } = req.body;
+
+  // Parse options if it's a string (from form-data)
+  if (typeof options === 'string') {
+    try {
+      options = JSON.parse(options);
+    } catch (error) {
+      return res.status(400).json({
+        error: 'Validation error',
+        message: 'options must be valid JSON'
+      });
+    }
+  }
+
   const requestId = clientRequestId || uuidv4();
 
   logger.info('Received Claude API request', {

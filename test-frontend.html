@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Claude API - TopLogic</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+            font-family: monospace;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .status.loading {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            color: #856404;
+        }
+
+        .status.success {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            color: #721c24;
+        }
+
+        .response-box {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            display: none;
+        }
+
+        .response-box.show {
+            display: block;
+        }
+
+        .response-box pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top-color: #856404;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border: 2px solid #2196F3;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #0c5460;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #004085;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Test Claude API</h1>
+        <p class="subtitle">Railway Production API - TopLogic Faktura Strukturering</p>
+
+        <div class="info-box">
+            <strong>ℹ️ API Endepunkt:</strong>
+            <code>https://toplogic2-production.up.railway.app/api/claude</code>
+        </div>
+
+        <form id="testForm">
+            <div class="form-group">
+                <label for="apiUrl">API URL:</label>
+                <select id="apiUrl">
+                    <option value="https://toplogic2-production.up.railway.app/api/claude">Railway (Production)</option>
+                    <option value="http://localhost:3000/api/claude">Localhost (Development)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="ocrText">OCR Tekst (fra faktura):</label>
+                <textarea id="ocrText" placeholder="Lim inn OCR-tekst fra faktura her...
+
+Eksempel:
+Faktura nr: 164087
+Dato: 2025-03-16
+Leverandør: Hurtig-Gutta Transport AS
+Fraktsedelsnr: 70714832157787928
+Avgang: 2025-03-10
+Fra: Prostage AS
+Til: Oslofjord Hotel As
+Vekt: 22,0 kg
+Distribusjon: 511,00 NOK"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="webhookUrl">Webhook URL (Make.com):</label>
+                <input type="text" id="webhookUrl" value="https://hook.eu2.make.com/j33kho9fjjo54nk6aqqk5alndg5evplt">
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="btn-primary">📤 Send til Claude API</button>
+                <button type="button" class="btn-secondary" onclick="fillExample()">📋 Fyll inn eksempel</button>
+            </div>
+        </form>
+
+        <div id="status" class="status"></div>
+        <div id="response" class="response-box"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('testForm');
+        const statusDiv = document.getElementById('status');
+        const responseDiv = document.getElementById('response');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const apiUrl = document.getElementById('apiUrl').value;
+            const ocrText = document.getElementById('ocrText').value;
+            const webhookUrl = document.getElementById('webhookUrl').value;
+
+            if (!ocrText.trim()) {
+                showStatus('error', '❌ Vennligst fyll inn OCR-tekst');
+                return;
+            }
+
+            const requestId = `test-${Date.now()}`;
+
+            const prompt = `# PDF-FAKTURA STRUKTURERING
+
+DU ER en EKSPERT I DOKUMENTFORSTÅELSE. Din jobb er å lese en PDF-faktura og strukturere **hver separat sending/transportoppdrag** inn i **eksakt 133 nummererte JSON-nøkler**.
+
+## KRITISKE REGLER:
+
+1. **EN RAD PER SENDING** - Hvis faktura har flere sendinger, returner JSON-array med ett objekt per sending
+2. **DATOFORMAT**: ÅÅÅÅ-MM-DD (f.eks. "2025-03-16")
+3. **DECIMALAVGRÄNSARE**: Bruk ALLTID "," (f.eks. "125,50" IKKE "125.50")
+4. **TELEMATIK (felt 37)**: Skal ALLTID være null
+5. **MOMS/MVA**: ALDRI inkluder kostnader med "MOMS", "MVA", "VAT", "Tax", "25%", etc.
+6. **KUN FELT MED VERDI**: Ta kun med nøkler (1-133) som har faktisk verdi - ikke inkluder null eller tomme felt
+7. **INGEN MARKDOWN**: Returner BARE ren JSON - ALDRI start med \`\`\`json
+8. **FELTNAMN**: Returner faktiske VERDIER, IKKE feltnamn som "Forwarder" - det skal være "Hurtig-Gutta Transport AS"
+
+## OCR-TEKST:
+
+${ocrText}
+
+## OUTPUT:
+Returner BARE gyldig JSON (ett objekt hvis 1 sending, array hvis flere sendinger). Start DIREKTE med { eller [ - INGEN annen tekst.`;
+
+            const payload = {
+                prompt: prompt,
+                webhookUrl: webhookUrl,
+                requestId: requestId,
+                options: {
+                    model: "claude-3-5-sonnet-20241022",
+                    maxTokens: 8192,
+                    temperature: 0.1
+                }
+            };
+
+            showStatus('loading', `<span class="spinner"></span> Sender til Claude API...`);
+            responseDiv.classList.remove('show');
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-Key': 'toplogic_secure_key_2025'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || `HTTP ${response.status}`);
+                }
+
+                showStatus('success', `✅ Request sendt! Claude prosesserer i bakgrunnen...<br><br><strong>Request ID:</strong> ${data.requestId}<br><strong>Status:</strong> ${data.status}<br><br>Resultat vil bli sendt til webhook når Claude er ferdig (ca. 5-30 sekunder).`);
+
+                responseDiv.innerHTML = `<strong>📋 Response fra API:</strong><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                responseDiv.classList.add('show');
+
+            } catch (error) {
+                showStatus('error', `❌ Feil: ${error.message}`);
+                console.error('Error:', error);
+            }
+        });
+
+        function showStatus(type, message) {
+            statusDiv.className = `status ${type} show`;
+            statusDiv.innerHTML = message;
+        }
+
+        function fillExample() {
+            document.getElementById('ocrText').value = `Faktura nr: 164087
+Fakturadato: 2025-03-16
+Leverandør: Hurtig-Gutta Transport AS
+Kunde: Prostage AS
+
+Sending 1:
+Fraktsedelsnr: 70714832157787928
+Avgangsdato: 2025-03-10
+Fra: Prostage AS
+Til: Oslofjord Hotel As
+Vekt: 22,0 kg
+Tjeneste: Distribusjon
+Beløp: 511,00 NOK
+
+Sending 2:
+Fraktsedelsnr: 70714832157788031
+Avgangsdato: 2025-03-10
+Fra: Prostage AS
+Til: Nationaltheatret AS
+Vekt: 26,0 kg
+Tjeneste: Distribusjon
+Beløp: 117,00 NOK`;
+
+            showStatus('success', '✅ Eksempel fylt inn! Klar for testing.');
+        }
+    </script>
+</body>
+</html>
