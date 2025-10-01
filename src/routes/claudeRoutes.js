@@ -200,6 +200,15 @@ async function processClaudeRequest(requestId, prompt, webhookUrl, options, orig
   }
 }
 
+// OPTIONS /api/status/:requestId - Handle preflight request
+router.options('/status/:requestId', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, X-API-Key');
+  res.header('Access-Control-Max-Age', '86400');
+  res.sendStatus(204);
+});
+
 // GET /api/status/:requestId - Check request status (for polling)
 router.get('/status/:requestId', (req, res) => {
   const { requestId } = req.params;
@@ -207,7 +216,7 @@ router.get('/status/:requestId', (req, res) => {
   // Set CORS headers explicitly for this endpoint
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, X-API-Key');
 
   logger.debug('Status check requested', { requestId });
 
