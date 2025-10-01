@@ -89,7 +89,8 @@ router.post('/claude', authenticate, claudeApiLimiter, validateClaudeRequest, as
   // Return immediately with 202 Accepted and jobId
   res.status(202).json({
     success: true,
-    jobId: requestId, // Use requestId as jobId for consistency
+    jobId: requestId, // Use requestId as jobId (unique per file)
+    batchId: originalRequest.batchId || requestId, // batchId for grouping multiple files
     fileName: originalRequest.fileName || 'unknown',
     status: 'received',
     message: 'Request accepted and processing',
@@ -218,6 +219,7 @@ router.get('/status/:requestId', (req, res) => {
   // Return job status in format expected by frontend
   res.json({
     jobId: requestId,
+    batchId: request.originalRequest?.batchId || requestId,
     status: request.status,
     stage: request.stage || request.status,
     progress: request.progress || 0,

@@ -462,11 +462,14 @@ export class TopLogicApp {
             let responseData = null;
             try {
                 const responseText = await response.text();
-                
+                console.log('🔍 Raw response text:', responseText);
+
                 if (responseText.trim()) {
                     responseData = JSON.parse(responseText);
+                    console.log('🔍 Parsed response data:', responseData);
                 }
             } catch (parseError) {
+                console.warn('⚠️ Could not parse response as JSON:', parseError.message);
                 // Response ikke JSON, behandler som vanlig suksess
             }
             
