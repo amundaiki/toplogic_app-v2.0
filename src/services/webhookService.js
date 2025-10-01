@@ -80,6 +80,7 @@ class WebhookService {
   async sendCompletionCallback(webhookUrl, requestId, response, metadata = {}) {
     const payload = {
       requestId,
+      batchId: requestId, // Include batchId for Make.com compatibility
       response,
       status: 'completed',
       timestamp: new Date().toISOString(),
@@ -92,6 +93,7 @@ class WebhookService {
   async sendErrorCallback(webhookUrl, requestId, error, metadata = {}) {
     const payload = {
       requestId,
+      batchId: requestId, // Include batchId for Make.com compatibility
       error: typeof error === 'string' ? error : error.message,
       status: 'failed',
       timestamp: new Date().toISOString(),
