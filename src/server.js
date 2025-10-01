@@ -32,14 +32,13 @@ app.set('trust proxy', 1);
 // Security middleware
 app.use(helmet());
 
-// CORS configuration
+// CORS configuration - Allow all origins for status endpoint
 const corsOptions = {
-  origin: process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(',')
-    : '*',
+  origin: '*', // Allow all origins for polling
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'X-API-Key'],
-  maxAge: 86400 // 24 hours
+  maxAge: 86400, // 24 hours
+  credentials: false
 };
 app.use(cors(corsOptions));
 

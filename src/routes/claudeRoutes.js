@@ -86,11 +86,13 @@ router.post('/claude', authenticate, claudeApiLimiter, validateClaudeRequest, as
     status: 'pending'
   });
 
-  // Return immediately with 202 Accepted
+  // Return immediately with 202 Accepted and jobId
   res.status(202).json({
+    success: true,
+    jobId: requestId, // Use requestId as jobId for consistency
+    fileName: originalRequest.fileName || 'unknown',
+    status: 'received',
     message: 'Request accepted and processing',
-    requestId,
-    status: 'pending',
     timestamp: new Date().toISOString()
   });
 
@@ -103,8 +105,24 @@ async function processClaudeRequest(requestId, prompt, webhookUrl, options, orig
   try {
     logger.info('Starting background Claude API processing', { requestId });
 
-    // Update status to processing
-    requestTracker.update(requestId, { status: 'processing' });
+    // Stage 1: Extract text from PDF (simulated - you'll do actual PDF parsing)
+    requestTracker.update(requestId, {
+      status: 'processing',
+      stage: 'extracting_text',
+      progress: 33
+    });
+    logger.info('Processing stage: extracting_text', { requestId });
+
+    // Small delay to simulate PDF text extraction (remove in production if instant)
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Stage 2: AI Analysis
+    requestTracker.update(requestId, {
+      status: 'processing',
+      stage: 'ai_analysis',
+      progress: 66
+    });
+    logger.info('Processing stage: ai_analysis', { requestId });
 
     // Call Claude API
     const result = await claudeService.sendMessage(prompt, options);
@@ -115,11 +133,27 @@ async function processClaudeRequest(requestId, prompt, webhookUrl, options, orig
         responseLength: result.response.length
       });
 
-      // Update tracker
+      // Parse response to extract supplier name if available
+      let detectedSupplier = null;
+      try {
+        // Try to extract supplier from the response
+        const jsonMatch = result.response.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          detectedSupplier = parsed['1'] || parsed.leverandor || parsed.supplier;
+        }
+      } catch (e) {
+        logger.debug('Could not parse supplier from response', { requestId });
+      }
+
+      // Update tracker with completed status
       requestTracker.update(requestId, {
         status: 'completed',
+        stage: 'completed',
+        progress: 100,
         response: result.response,
-        usage: result.usage
+        usage: result.usage,
+        detectedSupplier
       });
 
       // Send success callback to Make.com with original request data
@@ -165,8 +199,8 @@ async function processClaudeRequest(requestId, prompt, webhookUrl, options, orig
   }
 }
 
-// GET /api/status/:requestId - Check request status
-router.get('/status/:requestId', authenticate, (req, res) => {
+// GET /api/status/:requestId - Check request status (for polling)
+router.get('/status/:requestId', (req, res) => {
   const { requestId } = req.params;
 
   logger.debug('Status check requested', { requestId });
@@ -175,20 +209,22 @@ router.get('/status/:requestId', authenticate, (req, res) => {
 
   if (!request) {
     return res.status(404).json({
-      error: 'Not found',
-      message: 'Request not found',
-      requestId
+      jobId: requestId,
+      status: 'not_found',
+      message: 'Job not found or expired'
     });
   }
 
-  // Don't send back the full prompt and response in status check
-  const { prompt, response, ...statusData } = request;
-
+  // Return job status in format expected by frontend
   res.json({
-    requestId,
-    ...statusData,
-    promptLength: prompt ? prompt.length : 0,
-    responseLength: response ? response.length : 0
+    jobId: requestId,
+    status: request.status,
+    stage: request.stage || request.status,
+    progress: request.progress || 0,
+    fileName: request.originalRequest?.fileName || 'unknown',
+    detectedSupplier: request.detectedSupplier,
+    sheetUrl: request.sheetUrl, // Will be set by Make.com callback if needed
+    timestamp: request.updatedAt || request.createdAt
   });
 });
 

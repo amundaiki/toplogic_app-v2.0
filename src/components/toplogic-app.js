@@ -479,11 +479,11 @@ export class TopLogicApp {
             }
 
             // Success
-            const successMessage = webhookType === 'test' 
+            const successMessage = webhookType === 'test'
                 ? this.config.APP_CONFIG.messages.success.testMode
                 : this.config.APP_CONFIG.messages.success.documentUploaded;
-            
-            if (settings.onSuccess) settings.onSuccess(successMessage);
+
+            if (settings.onSuccess) settings.onSuccess(successMessage, responseData);
 
         } catch (error) {
             if (progressInterval) clearInterval(progressInterval);
@@ -821,16 +821,28 @@ export class TopLogicApp {
         }, 100);
     }
 
-    // Vis batch ID i UI (skjult som standard - vises kun i konsollen)
+    // Vis batch ID i UI med copy button
     showBatchId(batchId) {
         console.log('🆔 Batch ID generert:', batchId);
-        
+
         // Finn batch ID display element hvis det finnes
         let batchIdDisplay = document.querySelector('.batch-id-display');
         if (batchIdDisplay) {
-            batchIdDisplay.textContent = `Batch ID: ${batchId}`;
-            // Behold skjult - vises kun via Google Sheet-knappen
-            batchIdDisplay.style.display = 'none';
+            batchIdDisplay.innerHTML = `
+                <span>Batch ID: <strong>#${batchId}</strong></span>
+                <div class="batch-id-actions">
+                    <button type="button" class="batch-action-btn" onclick="navigator.clipboard.writeText('${batchId}').then(() => alert('Batch ID kopiert!'))" title="Kopier Batch ID">
+                        <i data-lucide="clipboard"></i>
+                        <span>Kopier</span>
+                    </button>
+                </div>
+            `;
+            batchIdDisplay.style.display = 'flex';
+
+            // Initialize Lucide icons for new elements
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
         }
     }
 
