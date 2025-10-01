@@ -65,11 +65,15 @@ router.post('/claude', authenticate, claudeApiLimiter, validateClaudeRequest, as
     options
   });
 
+  // Store entire request body for passing through to webhook
+  const originalRequest = { ...req.body };
+
   // Store request in tracker
   requestTracker.create(requestId, {
     prompt,
     webhookUrl,
     options,
+    originalRequest,
     status: 'pending'
   });
 
@@ -82,11 +86,11 @@ router.post('/claude', authenticate, claudeApiLimiter, validateClaudeRequest, as
   });
 
   // Process Claude API call in background
-  processClaudeRequest(requestId, prompt, webhookUrl, options);
+  processClaudeRequest(requestId, prompt, webhookUrl, options, originalRequest);
 });
 
 // Background processing function
-async function processClaudeRequest(requestId, prompt, webhookUrl, options) {
+async function processClaudeRequest(requestId, prompt, webhookUrl, options, originalRequest = {}) {
   try {
     logger.info('Starting background Claude API processing', { requestId });
 
@@ -109,7 +113,7 @@ async function processClaudeRequest(requestId, prompt, webhookUrl, options) {
         usage: result.usage
       });
 
-      // Send success callback to Make.com
+      // Send success callback to Make.com with original request data
       await webhookService.sendCompletionCallback(
         webhookUrl,
         requestId,
@@ -117,7 +121,13 @@ async function processClaudeRequest(requestId, prompt, webhookUrl, options) {
         {
           usage: result.usage,
           model: result.model,
-          stopReason: result.stopReason
+          stopReason: result.stopReason,
+          // Pass through all original request fields (except sensitive data)
+          ...Object.fromEntries(
+            Object.entries(originalRequest).filter(([key]) =>
+              !['prompt', 'webhookUrl', 'options'].includes(key)
+            )
+          )
         }
       );
 
