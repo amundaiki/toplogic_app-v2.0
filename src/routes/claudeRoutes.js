@@ -62,11 +62,20 @@ router.post('/claude', authenticate, claudeApiLimiter, validateClaudeRequest, as
     requestId,
     promptLength: prompt.length,
     webhookUrl,
-    options
+    options,
+    allBodyKeys: Object.keys(req.body)
   });
 
   // Store entire request body for passing through to webhook
   const originalRequest = { ...req.body };
+
+  logger.info('Original request fields to pass through', {
+    requestId,
+    originalRequestKeys: Object.keys(originalRequest),
+    action: originalRequest.action,
+    opplaster: originalRequest.opplaster,
+    leverandor: originalRequest.leverandor
+  });
 
   // Store request in tracker
   requestTracker.create(requestId, {
