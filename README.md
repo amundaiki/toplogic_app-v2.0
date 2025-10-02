@@ -1,317 +1,550 @@
 # 🏢 TopLogic AI-Apper - Forretningsverktøy Suite
 
-En samling av webbaserte AI-drevne forretningsapplikasjoner for å automatisere og effektivisere daglige arbeidsoppgaver. Hver applikasjon benytter avansert AI via Make.com webhooks for dokumentprosessering og dataanalyse.
+En samling av webbaserte AI-drevne forretningsapplikasjoner for å automatisere og effektivisere daglige arbeidsoppgaver. Med integrert Claude AI backend via async API for fakturaekstraksjon, dokumentanalyse og mer.
 
 ## 🚀 Live Demo
 
-Besøk applikasjonene live på: [https://toplogic.aiki.as](https://toplogic.aiki.as)
+**Frontend:** [https://toplogic.aiki.as](https://toplogic.aiki.as)
+**Backend API:** Deployed på Railway (async Claude processing)
 
 ## 📋 Applikasjoner
 
-### 📄 PDF Faktura til EXCEL (Åpen)
-**Mappe:** `faktura-opplaster/`
+### 📄 PDF Faktura til EXCEL (Produksjon)
+**Mappe:** `src/apps/faktura-opplaster/`
 - **Formål:** AI-drevet konvertering av PDF-fakturaer til strukturert Excel-format
-- **Funksjoner:** Automatisk tekstgjenkjenning, dataekstraksjon, Excel-generering
-- **Bruksområde:** Økonomi- og regnskapsavdelinger
-- **AI-prosessering:** Make.com webhook for fakturaanalyse
+- **Funksjoner:**
+  - Multi-fil batch upload (drag & drop)
+  - Automatisk 133+ felt ekstraksjon via Claude 3.5 Sonnet
+  - Real-time status tracking per faktura
+  - Smart batch-prosessering (sortert etter filstørrelse)
+  - Google Sheet auto-generering
+  - Excel sendt på e-post til riktig bruker
+- **Bruksområde:** Økonomi- og regnskapsavdelinger (Janne, Peter, etc.)
+- **Arkitektur:** Frontend → Make.com → Railway (Claude API) → Make.com → Excel/Email
 
-### 📊 Prislister til EXCEL (Låst - Passord: 1)
-**Mappe:** `prisliste-app/`
+### 📊 Prislister til EXCEL
+**Mappe:** `src/apps/prisliste-app/`
 - **Formål:** Konvertering av prislister til strukturert Excel-format
-- **Funksjoner:** Prisdata-ekstraksjon, kategorisering, sammenligning
-- **Bruksområde:** Innkjøp og salg
-- **AI-prosessering:** Make.com webhook for prislisteanalyse
+- **Status:** Integrert med samme backend-arkitektur
 
-### 🗂️ Dokumentbehandler (Låst - Passord: 1)
-**Mappe:** `dokument-uploader/`
-- **Formål:** Generell AI-drevet dokumentanalyse og kategorisering
-- **Funksjoner:** Automatisk dokumenttype-gjenkjenning, metadata-ekstraksjon
-- **Bruksområde:** Generell dokumenthåndtering
-- **AI-prosessering:** Make.com webhook for dokumentanalyse
+## 🏗️ Arkitektur
 
-### 💰 Kostnadsanalyse (Låst - Passord: 1)
-**Mappe:** `kostnadsanalyse/`
-- **Formål:** Avansert AI-drevet kostnadsanalyse og budsjettoptimalisering
-- **Funksjoner:** Trend-analyse, kostnadsprediksjon, sammenligning av perioder
-- **Bruksområde:** Budsjettplanlegging og kostnadsoptimalisering
-- **AI-prosessering:** Make.com webhook for kostnadsmodellering
+### **Hybrid System:**
+```
+┌─────────────┐      ┌──────────────┐      ┌─────────────┐      ┌──────────────┐
+│   Frontend  │─────>│  Make.com    │─────>│   Railway   │─────>│  Make.com    │
+│  (Static)   │      │  (Webhook)   │      │  (Claude)   │      │  (Excel)     │
+└─────────────┘      └──────────────┘      └─────────────┘      └──────────────┘
+      │                                            │
+      │              Polling for status            │
+      └───────────────────────────────────────────┘
+```
+
+### **To deployment-modeller:**
+
+#### **Model 1: Frontend Only (GitHub Pages)**
+- Statiske HTML/CSS/JS filer
+- Direkte Make.com webhooks fra frontend
+- Enkel, rask, gratis
+- Brukes for: Prisliste-app, andre enkle apper
+
+#### **Model 2: Frontend + Backend (Railway)**
+- Frontend: Statisk på GitHub Pages
+- Backend: Node.js/Express på Railway
+- Claude API integration i backend
+- Async processing med status polling
+- Brukes for: Faktura-opplaster (kompleks AI-prosessering)
+
+---
 
 ## 🛠️ Teknologi Stack
 
 ### Frontend
-- **HTML5** - Semantisk markup og moderne web-standarder
+- **HTML5** - Semantisk markup
 - **CSS3** - Modular design system med CSS custom properties
-- **Vanilla JavaScript (ES6+)** - Moderne JavaScript uten rammeverk
-- **Modulær arkitektur** - Delte komponenter og utilities
+- **Vanilla JavaScript (ES6+)** - Ingen frameworks
+- **Lucide Icons** - Moderne ikoner
+- **Modulær arkitektur** - Delte komponenter (`src/components/`, `src/utils/`)
 
-### Backend & AI
-- **Make.com** - AI-prosessering og workflow-automatisering
-- **Webhook-basert arkitektur** - Asynkron prosessering
-- **FileReader API** - Klient-side filhåndtering
-- **Drag & Drop API** - Moderne filupload-opplevelse
+### Backend (Railway)
+- **Node.js 18+** - Runtime
+- **Express.js** - Web framework
+- **Anthropic SDK** - Claude API integration
+- **Winston** - Structured logging
+- **Helmet** - Security middleware
+- **CORS** - Cross-origin request handling
+- **Rate limiting** - API protection
 
-### Design & UX
-- **Responsivt design** - Mobile-first tilnærming
-- **TopLogic/AIKI merkevareidentitet** - Konsistent visuell profil
-- **Tilgjengelighet** - WCAG 2.1 kompatibel
-- **Progressive Enhancement** - Fungerer uten JavaScript
+### Infrastructure
+- **Docker** - Containerisering for Railway
+- **Railway.app** - Backend hosting + CI/CD
+- **GitHub Pages** - Frontend hosting (static)
+- **Make.com** - Workflow orchestration + Excel generation
 
-## 📁 Ny Prosjektstruktur (2025)
+### AI & Processing
+- **Claude 3.5 Sonnet** - PDF analyse og dataekstraksjon
+- **Make.com** - OCR, filhåndtering, Excel-generering, e-post
+- **Async architecture** - Non-blocking request/response med polling
+
+---
+
+## 📁 Prosjektstruktur
 
 ```
 toplogic/
-├── 🏠 index.html                 # Hovedside med app-navigasjon
-├── 🎨 shared.css                 # Sentralisert design system
-├── ⚙️ config.js                  # Sentralisert konfigurasjon
-├── 🔧 shared.js                  # Delte JavaScript-utilities
-├── 
-├── 📄 dokument-uploader/
-│   └── index.html               # Dokumentbehandler app
-├── 🧾 faktura-opplaster/
-│   └── index.html               # Fakturaopplaster app  
-├── 📊 kostnadsanalyse/
-│   └── index.html               # Kostnadsanalyse app
-├── 💰 prisliste-app/
-│   └── index.html               # Prisliste-app
-├── 
-├── 🌐 CNAME                     # GitHub Pages domene
-└── 📖 README.md                 # Denne filen
+├── 📄 README.md                      # Denne filen
+├── 📄 package.json                   # Node.js dependencies
+├── 🐳 Dockerfile                     # Railway deployment config
+├── 🔐 .env.example                   # Environment variables template
+├── 🏠 index.html                     # Hovedside (app-navigasjon)
+│
+├── 📁 src/
+│   ├── 🚀 server.js                  # Express backend (Railway)
+│   ├── 📄 index.js                   # Frontend entry point
+│   ├── 📄 legacy.js                  # Legacy compatibility
+│   │
+│   ├── 📁 apps/
+│   │   ├── faktura-opplaster/
+│   │   │   ├── index.html            # Faktura upload UI
+│   │   │   ├── PROMPTS/              # Claude prompts per leverandør
+│   │   │   └── blueprint             # Make.com scenario backup
+│   │   └── prisliste-app/
+│   │       └── index.html
+│   │
+│   ├── 📁 components/
+│   │   ├── toplogic-app.js           # Main app class (file upload, forms, etc.)
+│   │   └── password-manager.js       # App locking system
+│   │
+│   ├── 📁 config/
+│   │   ├── index.js                  # Config aggregator
+│   │   ├── app.js                    # App settings (users, suppliers, etc.)
+│   │   ├── webhooks.js               # Make.com webhook URLs
+│   │   ├── branding.js               # Logos, colors
+│   │   └── environment.js            # Environment detection
+│   │
+│   ├── 📁 routes/
+│   │   ├── claudeRoutes.js           # /api/process, /api/status
+│   │   └── healthRoutes.js           # /health endpoint
+│   │
+│   ├── 📁 services/
+│   │   ├── claudeService.js          # Claude API wrapper
+│   │   └── webhookService.js         # Make.com webhook caller
+│   │
+│   ├── 📁 middleware/
+│   │   ├── auth.js                   # API key authentication
+│   │   ├── errorHandler.js           # Global error handling
+│   │   └── rateLimiter.js            # Rate limiting
+│   │
+│   ├── 📁 utils/
+│   │   ├── logger.js                 # Winston logger
+│   │   ├── requestTracker.js         # Request state management
+│   │   ├── toplogic-utils.js         # Helper functions
+│   │   └── config-helpers.js         # Config validation
+│   │
+│   └── 📁 styles/
+│       ├── shared.css                # Global styles
+│       ├── advanced-paths.css        # Animations
+│       └── micro-interactions.css    # UI feedback
+│
+├── 📁 docs/
+│   ├── CLAUDE_API_README.md          # Backend API documentation
+│   ├── MAKE_SCENARIO_GUIDE.md        # Make.com setup guide
+│   └── CHANGELOG.md                  # Version history
+│
+├── 📁 test/
+│   ├── test-frontend.html            # Frontend testing
+│   ├── test-faktura-prompt.json      # Prompt examples
+│   └── example-133-fields-full.json  # Expected output format
+│
+├── 📁 blueprints/
+│   ├── Toplogic faktura 1.blueprint.json  # Make.com scenario v1
+│   └── Toplogic faktura 2.blueprint.json  # Make.com scenario v2
+│
+└── 📁 archive/
+    └── (gamle filer, legacy code)
 ```
 
-## ⚙️ Konfigurasjon og Administrasjon
+---
 
-### 🔗 Webhook-konfigurasjon
+## ⚙️ Konfigurasjon
 
-Alle webhook-URLer er sentralisert i `config.js`:
+### 🔗 Webhook URLs
+
+**Fil:** `src/config/webhooks.js`
 
 ```javascript
-const WEBHOOKS = {
-    faktura: 'https://hook.eu2.make.com/din-faktura-webhook-url',
-    prisliste: 'https://hook.eu2.make.com/din-prisliste-webhook-url',
-    dokument: 'https://hook.eu2.make.com/din-dokument-webhook-url',
-    kostnadsAnalyse: 'https://hook.eu2.make.com/din-kostnad-webhook-url'
+export const WEBHOOKS = {
+    faktura: 'https://hook.eu2.make.com/YOUR_WEBHOOK_HERE',
+    prisliste_bring_transport: 'https://hook.eu2.make.com/YOUR_WEBHOOK_HERE',
+    // ... flere webhooks
 };
 ```
 
-**Slik oppdaterer du webhooks:**
+**Slik oppdaterer du:**
+1. Åpne `src/config/webhooks.js`
+2. Erstatt `YOUR_WEBHOOK_HERE` med Make.com webhook URL
+3. Commit og push til GitHub
+4. Railway rebuilder automatisk (hvis backend)
 
-1. **Åpne `config.js` filen**
-2. **Finn `WEBHOOKS` objektet** (linje ~20)
-3. **Erstatt URL-ene** med dine nye Make.com webhook-endepunkter
-4. **Lagre og test** at nye URLer fungerer
+### 👥 Brukere og Leverandører
 
-### 🏢 Bedriftskonfigurasjon
-
-Oppdater bedriftsinformasjon i `config.js`:
+**Fil:** `src/config/app.js`
 
 ```javascript
-const APP_CONFIG = {
-    company: {
-        name: 'TopLogic',
-        supportEmail: 'amund@aiki.as',
-        website: 'www.aiki.as'
+export const APP_CONFIG = {
+    users: [
+        { value: 'janne', label: 'Janne Langås' },
+        { value: 'peter', label: 'Peter Nygård' },
+        // Legg til flere brukere her
+    ],
+
+    suppliers: [
+        'Freja', 'FedEx', 'Samtransport', 'NTG Road',
+        'Sendify', 'MaserFrakt'
+        // Legg til flere leverandører her
+    ]
+};
+```
+
+### 🎨 Branding
+
+**Fil:** `src/config/branding.js`
+
+```javascript
+export const BRANDING = {
+    logos: {
+        toplogic: 'https://www.toplogic.no/.../logo.svg',
+        aiki: 'https://images.squarespace-cdn.com/.../logo.png'
     },
-    // ... mer konfigurasjon
-};
-```
 
-### 🎨 Logo og Merkevareidentitet
-
-Logoer er sentralisert i `config.js`:
-
-```javascript
-const LOGOS = {
-    toplogic: 'https://www.toplogic.no/wp-content/uploads/2023/01/Toplogic_norge_logo.svg',
-    aiki: 'https://images.squarespace-cdn.com/content/v1/67a10d12887082593bb5d293/d39dc0a0-5a17-4ef9-88a4-2d0edb45fd5e/LOGO+l.png?format=500w'
-};
-```
-
-**Slik oppdaterer du logoer:**
-1. Endre URL-ene i `LOGOS` objektet i `config.js`
-2. Oppdater favicon-lenker i alle HTML-filer
-3. Test at alle logoer laster korrekt
-
-### 🔐 Passord og Tilgangskontroll
-
-App-passord er konfigurert i `config.js`:
-
-```javascript
-const NAVIGATION = {
-    apps: {
-        fakturaOpplaster: { locked: false },                    // Åpen
-        prislisteApp: { locked: true, password: '1' },          // Låst
-        dokumentUploader: { locked: true, password: '1' },      // Låst  
-        kostnadsAnalyse: { locked: true, password: '1' }        // Låst
+    colors: {
+        primary: '#c72027',      // TopLogic rød
+        secondary: '#3b82f6',    // Blå for AI-apper
     }
 };
 ```
 
-**Slik endrer du passord:**
-1. Endre `password` verdien for aktuell app
-2. Sett `locked: false` for å gjøre appen åpen
-3. Test at ny passord fungerer
+---
 
-### 👥 Bruker og Leverandør-lister
+## 🚀 Deployment
 
-Dropdown-alternativer er konfigurert i `config.js`:
+### **Frontend (GitHub Pages)**
 
-```javascript
-const USERS = ['Amund Rangøy', 'Martine Haugen', /* ... flere brukere */];
-const SUPPLIERS = ['Uno-X', 'Shell', 'Statoil', /* ... flere leverandører */];
-```
-
-**Slik legger du til nye brukere/leverandører:**
-1. Legg til navn i respektive arrays
-2. Listen oppdateres automatisk i alle apper
-
-## 🚀 Lokal Utvikling
-
-### 1. Klone og Oppsett
+#### Automatisk via GitHub Actions:
 ```bash
-git clone https://github.com/[username]/toplogic.git
-cd toplogic
-```
-
-### 2. Lokal Server
-```bash
-# Python 3 (anbefalt)
-python3 -m http.server 8000
-
-# Alternativt med Node.js
-npx http-server -p 8000 -c-1
-
-# Alternativt med PHP  
-php -S localhost:8000
-```
-
-### 3. Åpne og Test
-```
-http://localhost:8000
-```
-
-**Testing checklist:**
-- [ ] Alle apper laster korrekt
-- [ ] Logoer vises riktig
-- [ ] Filupload fungerer
-- [ ] Navigasjon mellom apper virker
-- [ ] Passord-beskyttelse fungerer
-- [ ] Responsivt design på mobil
-
-## 🎨 Design System
-
-### Fargepalett (TopLogic)
-```css
---color-red: #c72027          /* TopLogic primærfarge */
---color-red-dark: #a51a1e     /* Mørkere rød */
---color-red-light: #ffeaea    /* Lys rød bakgrunn */
-```
-
-### Bakgrunner
-- **Hjemmeside:** TopLogic transport-bilde med rød overlay
-- **Apper:** Animerte sirkel-mønstre med gradient-bakgrunn
-
-### Typografi
-- **Hovedfont:** -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto
-- **Størrelser:** Definert via CSS custom properties
-
-## 🔄 Deployment til GitHub Pages
-
-### Automatisk Deployment
-1. **Push til main branch:**
-   ```bash
-   git add .
-   git commit -m "Oppdatert konfigurasjon"
-   git push origin main
-   ```
-
-2. **GitHub Pages bygger automatisk** (ingen build-prosess nødvendig)
-
-3. **Tilgjengelig på:** [https://toplogic.aiki.as](https://toplogic.aiki.as)
-
-### Custom Domene
-Konfigurert via `CNAME` fil - oppdater denne for å endre domene.
-
-## 🤖 Make.com Integrasjon
-
-### Webhook-flyt
-1. **Bruker laster opp fil** i webapp
-2. **JavaScript sender fil** til Make.com webhook
-3. **Make.com prosesserer** med AI (OCR, analyse, etc.)
-4. **Resultat sendes tilbake** via webhook response
-5. **Webapp viser resultat** til bruker
-
-### Webhook-format
-```javascript
-// Eksempel på webhook-forespørsel
-{
-    "file": "base64-encoded-file-data",
-    "filename": "dokument.pdf",
-    "user": "Amund Rangøy",
-    "documentType": "faktura",
-    "outputFormats": ["excel", "json"]
-}
-```
-
-## 🛠️ Feilsøking
-
-### Vanlige problemer:
-
-**1. Webhooks fungerer ikke:**
-- Sjekk at URL-ene i `config.js` er korrekte
-- Kontroller Make.com scenario status
-- Se nettleser-konsoll for feilmeldinger
-
-**2. Logoer laster ikke:**
-- Verifiser URL-er i `config.js` og HTML-filer
-- Sjekk CORS-innstillinger på image-serveren
-
-**3. Apper ikke tilgjengelige:**
-- Kontroller passord i `config.js`
-- Sjekk at `locked` status er korrekt
-
-**4. Styling ser feil ut:**
-- Sørg for at `shared.css` laster korrekt
-- Sjekk CSS custom properties support
-
-## 📈 Kommende Funksjoner
-
-- [ ] Real-time status for AI-prosessering
-- [ ] Batch-upload av flere filer
-- [ ] Historikk og logging av prosesserte dokumenter
-- [ ] API-nøkkel-basert autentisering
-- [ ] Webhook-testing verktøy
-- [ ] Utvidet kostnadsprediksjon med ML
-
-## 🤝 Bidrag og Utvikling
-
-### Kodestandard:
-- **JavaScript:** ES6+ med moderne syntax
-- **CSS:** BEM-metodikk og CSS custom properties
-- **HTML:** Semantisk markup
-- **Tilgjengelighet:** WCAG 2.1 AA standard
-
-### Git-arbeidsflyt:
-```bash
-git checkout -b feature/ny-funksjon
-# Gjør endringer
 git add .
-git commit -m "Beskriv endringen"
-git push origin feature/ny-funksjon
-# Opprett Pull Request
+git commit -m "Update frontend"
+git push origin main
 ```
-
-## 📞 Support og Kontakt
-
-- **AIKI Support:** amund@aiki.as
-- **AIKI Nettside:** www.aiki.as  
-- **TopLogic Partner:** TopLogic AS
-- **GitHub Issues:** [Rapporter problemer](https://github.com/[username]/toplogic/issues)
-
-## 📄 Lisens
-
-MIT License - Se LICENSE fil for fullstendige detaljer.
+GitHub Pages deployer automatisk til: `https://toplogic.aiki.as`
 
 ---
 
-*🤖 Powered by AI - Utviklet av AIKI for TopLogic AS*  
-*Automatiser dine forretningsprosesser med kunstig intelligens*
+### **Backend (Railway)**
+
+#### 1. Første gang setup:
+
+**Railway.app:**
+1. Gå til [railway.app](https://railway.app)
+2. Sign in med GitHub
+3. "New Project" → "Deploy from GitHub repo"
+4. Velg `amundaiki/toplogic_app`
+5. Branch: `test-branch` (for testing) eller `main` (for prod)
+
+#### 2. Environment Variables:
+
+```json
+{
+  "ANTHROPIC_API_KEY": "sk-ant-api03-...",
+  "API_SECRET_KEY": "generer-med-openssl-rand-base64-32",
+  "NODE_ENV": "production",
+  "PORT": "3000",
+  "ALLOWED_ORIGINS": "https://hook.eu2.make.com,https://toplogic.aiki.as",
+  "LOG_LEVEL": "info"
+}
+```
+
+**Generer sterkt API_SECRET_KEY:**
+```bash
+openssl rand -base64 32
+```
+
+#### 3. Deploy:
+Railway oppdager `Dockerfile` automatisk og bygger.
+
+#### 4. Test deployment:
+```bash
+curl https://your-app.up.railway.app/health
+# Expected: {"status":"ok","timestamp":"2025-01-XX..."}
+```
+
+#### 5. Kontinuerlig deployment:
+```bash
+git push origin test-branch  # Railway rebuilder automatisk
+```
+
+---
+
+## 🧪 Lokal Utvikling
+
+### **Frontend Only (Simple apps):**
+
+```bash
+# Python simple server
+python3 -m http.server 8000
+
+# Node.js http-server
+npx http-server -p 8000 -c-1
+
+# Åpne i browser
+open http://localhost:8000
+```
+
+### **Frontend + Backend (Faktura-opplaster):**
+
+#### Terminal 1 - Backend:
+```bash
+# Install dependencies
+npm install
+
+# Copy .env template
+cp .env.example .env
+
+# Edit .env med dine API keys
+nano .env
+
+# Start backend
+npm run dev  # eller: npm start
+```
+
+#### Terminal 2 - Frontend:
+```bash
+# Serve static files
+python3 -m http.server 8000 --directory ./
+```
+
+#### Test full flow:
+1. Gå til `http://localhost:8000/src/apps/faktura-opplaster/`
+2. Backend kjører på `http://localhost:3000`
+3. Upload en test-PDF
+4. Sjekk backend logs i terminal 1
+
+---
+
+## 📊 API Dokumentasjon (Backend)
+
+### **Base URL:** `https://your-app.up.railway.app`
+
+### **Endpoints:**
+
+#### `POST /api/process`
+**Beskrivelse:** Send PDF til Claude for ekstraksjon
+
+**Headers:**
+```
+X-API-Key: your-api-secret-key
+Content-Type: multipart/form-data
+```
+
+**Body:**
+```javascript
+{
+  file: <PDF File>,
+  prompt: "Ekstraher fakturafelter...",
+  batchId: "batch_12345",
+  fileName: "faktura.pdf"
+}
+```
+
+**Response:**
+```json
+{
+  "jobId": "job_abc123",
+  "batchId": "batch_12345",
+  "status": "processing",
+  "message": "Request queued for processing"
+}
+```
+
+#### `GET /api/status/:batchId`
+**Beskrivelse:** Sjekk status for batch
+
+**Response:**
+```json
+{
+  "batchId": "batch_12345",
+  "status": "completed",
+  "totalJobs": 5,
+  "completedJobs": 5,
+  "results": [
+    {
+      "jobId": "job_abc123",
+      "fileName": "faktura.pdf",
+      "status": "completed",
+      "result": { "fakturaData": "..." }
+    }
+  ]
+}
+```
+
+#### `GET /health`
+**Beskrivelse:** Health check
+
+**Response:**
+```json
+{
+  "status": "ok",
+  "timestamp": "2025-01-XX...",
+  "uptime": 12345
+}
+```
+
+Se `docs/CLAUDE_API_README.md` for full API-dokumentasjon.
+
+---
+
+## 🔧 Make.com Integrasjon
+
+### **Scenario-flyt for Faktura-opplaster:**
+
+```
+1. [Webhook] Motta PDF + metadata fra frontend
+2. [Router] Sjekk action-type:
+   ├─ "prepare_batch" → Opprett Google Sheet
+   ├─ "upload" → Send til Railway Claude API
+   └─ "last_invoice" → Generer Excel + send e-post
+3. [HTTP] POST til Railway: /api/process
+4. [Wait] Vent på Claude-respons (async)
+5. [Parse] Parse JSON fra Claude
+6. [Google Sheets] Legg til rad i Sheet
+7. [Router] Hvis siste faktura:
+   └─ [Excel] Generer Excel fra Sheet
+   └─ [Email] Send til bruker
+```
+
+**Import scenario:**
+1. Gå til Make.com → Create new scenario
+2. Import blueprint fra `blueprints/Toplogic faktura 2.blueprint.json`
+3. Oppdater webhook URLs
+4. Oppdater Railway API URL
+5. Test scenario
+6. Activate
+
+Se `docs/MAKE_SCENARIO_GUIDE.md` for detaljert guide.
+
+---
+
+## 🐛 Feilsøking
+
+### **Frontend-feil:**
+
+**Problem:** "Feil ved sending av faktura"
+- Sjekk: Console i browser (F12)
+- Sjekk: Webhook URL i `src/config/webhooks.js` er korrekt
+- Sjekk: Make.com scenario er aktivt
+- Sjekk: Railway backend er oppe (`/health` endpoint)
+
+**Problem:** "CORS error"
+- Sjekk: `ALLOWED_ORIGINS` i Railway environment variables inkluderer frontend URL
+- Sjekk: Backend logger for CORS-relaterte feil
+
+### **Backend-feil:**
+
+**Se Railway logs:**
+```bash
+railway logs  # Hvis du har Railway CLI
+```
+Eller gå til Railway dashboard → Logs tab
+
+**Vanlige feil:**
+- `ANTHROPIC_API_KEY not found` → Sett env variable i Railway
+- `Rate limit exceeded` → Vent eller oppgrader Claude API-plan
+- `Timeout` → PDF for stor eller kompleks, reduser filstørrelse
+
+---
+
+## 📈 Kostnader & Skalering
+
+### **Nåværende oppsett (2-10 brukere):**
+
+| Tjeneste | Kostnad/mnd | Kommentar |
+|----------|-------------|-----------|
+| GitHub Pages | Gratis | Frontend hosting |
+| Railway | $5-10 | Backend + DB (gratis tier: $5 kreditt) |
+| Make.com | $9-29 | Starter/Basic plan |
+| Claude API | $0-20 | Pay-as-you-go (~$0.50 per 100 fakturaer) |
+| **Total** | **~$15-60** | Avhenger av bruk |
+
+### **Skalering til 50+ brukere:**
+- Railway: $20-50/mnd (høyere tier)
+- Make.com: $99/mnd (Pro plan)
+- Claude API: $50-200/mnd (volumrabatt)
+- **Total: ~$170-350/mnd**
+
+---
+
+## 🎯 Status & Roadmap
+
+### ✅ Ferdig (Produksjonsklar):
+- [x] Multi-fil batch upload med drag & drop
+- [x] Real-time progress tracking per fil
+- [x] Smart batch-prosessering (sortert etter størrelse)
+- [x] Claude API integration (Railway backend)
+- [x] Google Sheet auto-generering
+- [x] Excel e-post til riktig bruker
+- [x] Docker deployment til Railway
+- [x] Health check og logging
+- [x] Rate limiting og CORS
+
+### 🔄 Pågående:
+- [ ] Test med Janne og Peter (feedback loop)
+- [ ] Fine-tune Claude prompts per leverandør
+- [ ] Webhook URL oppdatering til prod
+
+### 📋 Kommende (Nice-to-have):
+- [ ] Live Excel preview før eksport (se data i app)
+- [ ] Smart error messages med recovery options
+- [ ] Upload history i LocalStorage
+- [ ] Enhanced file metadata per fil
+- [ ] Supplier auto-detection via Claude
+- [ ] Cost tracking per bruker/batch
+
+---
+
+## 👥 Team & Support
+
+### **Utviklet av:**
+- **AIKI** - AI development & integration
+- **Amund Rangøy** - Lead developer
+- Email: amund@aiki.as
+
+### **For:**
+- **TopLogic AS** - Transport & logistikkselskap
+- **Sluttbrukere:** Janne Langås, Peter Nygård, m.fl.
+
+### **Support:**
+- GitHub Issues: [rapporter bugs her](https://github.com/amundaiki/toplogic_app/issues)
+- Email: amund@aiki.as
+- Make.com issues: Sjekk scenario execution history
+
+---
+
+## 📄 Lisens
+
+MIT License - fri bruk for TopLogic AS og partnere.
+
+---
+
+## 🔗 Viktige Lenker
+
+- **Frontend:** https://toplogic.aiki.as
+- **Backend (Railway):** https://your-app.up.railway.app
+- **GitHub Repo:** https://github.com/amundaiki/toplogic_app
+- **Make.com Dashboard:** https://eu2.make.com/scenarios
+- **Railway Dashboard:** https://railway.app/dashboard
+- **Claude Console:** https://console.anthropic.com
+
+---
+
+*🤖 Powered by Claude 3.5 Sonnet - Utviklet av AIKI for TopLogic AS*
+*Automatiser fakturabehandling med kunstig intelligens*

@@ -465,11 +465,25 @@ export class TopLogicApp {
                 console.log('🔍 Raw response text:', responseText);
 
                 if (responseText.trim()) {
-                    responseData = JSON.parse(responseText);
-                    console.log('🔍 Parsed response data:', responseData);
+                    // Try to parse as JSON
+                    try {
+                        responseData = JSON.parse(responseText);
+                        console.log('🔍 Parsed response data:', responseData);
+                    } catch (jsonError) {
+                        // If not JSON, check if it's just "Accepted" or similar text response
+                        console.log('⚠️ Response is not JSON, got text:', responseText);
+                        // Create a minimal response object for "Accepted" responses
+                        if (responseText.toLowerCase().includes('accepted')) {
+                            responseData = {
+                                status: 'accepted',
+                                message: responseText
+                            };
+                            console.log('✅ Treated as accepted response');
+                        }
+                    }
                 }
             } catch (parseError) {
-                console.warn('⚠️ Could not parse response as JSON:', parseError.message);
+                console.warn('⚠️ Could not parse response:', parseError.message);
                 // Response ikke JSON, behandler som vanlig suksess
             }
             
@@ -505,7 +519,9 @@ export class TopLogicApp {
         messageElement.textContent = text;
         messageElement.className = `message ${type} show`;
 
-        if (type === 'success' && duration > 0) {
+        // Don't auto-hide success messages - keep them visible
+        // Only auto-hide info and error messages
+        if ((type === 'info' || type === 'error') && duration > 0) {
             setTimeout(() => {
                 messageElement.classList.remove('show');
             }, duration);
@@ -516,17 +532,27 @@ export class TopLogicApp {
     setProgress(percentage, show = true, options = {}) {
         const progressBar = document.getElementById('progressBar');
         const progressFill = document.getElementById('progressFill');
-        
+
         if (progressBar && show) {
             progressBar.classList.add('show');
-            
+
             // Opprett eller oppdater progress info elementer
             this.updateProgressInfo(progressBar, percentage, options);
         }
-        
+
+        if (progressBar && !show) {
+            // Hide progress bar and reset
+            progressBar.classList.remove('show');
+            if (progressFill) {
+                progressFill.style.width = '0%';
+                progressFill.classList.remove('animate');
+            }
+            this.clearProgressInfo(progressBar);
+        }
+
         if (progressFill) {
             progressFill.style.width = `${Math.min(100, Math.max(0, percentage))}%`;
-            
+
             // Legg til animasjon under aktiv opplasting
             if (percentage > 0 && percentage < 100) {
                 progressFill.classList.add('animate');
@@ -534,18 +560,9 @@ export class TopLogicApp {
                 progressFill.classList.remove('animate');
             }
         }
-        
-        if (percentage >= 100 && progressBar) {
-            setTimeout(() => {
-                progressBar.classList.remove('show');
-                if (progressFill) {
-                    progressFill.style.width = '0%';
-                    progressFill.classList.remove('animate');
-                }
-                // Fjern progress info
-                this.clearProgressInfo(progressBar);
-            }, 2000); // Økt tid for å se fullført status
-        }
+
+        // Keep progress bar visible when completed - don't auto-hide
+        // User can manually reset with "Nullstill" button
     }
 
     // Oppdater detaljert progress-informasjon
@@ -584,27 +601,17 @@ export class TopLogicApp {
             <span class="progress-percentage">${Math.round(percentage)}%</span>
         `;
         
-        // Detaljert informasjon
+        // Detaljert informasjon - kun vis total størrelse hvis flere filer
         let detailsHtml = '';
-        
-        if (totalFiles > 1) {
+
+        if (totalFiles > 1 && totalSize > 0) {
             detailsHtml += `
                 <div class="progress-file-info">
-                    <span>Fil ${currentFileIndex + 1} av ${totalFiles}</span>
                     <span>${TopLogicUtils.formatFileSize(processedSize)} / ${TopLogicUtils.formatFileSize(totalSize)}</span>
                 </div>
             `;
         }
-        
-        if (currentFile) {
-            detailsHtml += `
-                <div class="progress-file-info">
-                    <span class="progress-current-file">${currentFile}</span>
-                    <span class="progress-file-size">${TopLogicUtils.formatFileSize(currentFileSize)}</span>
-                </div>
-            `;
-        }
-        
+
         progressDetails.innerHTML = detailsHtml;
     }
 
@@ -833,19 +840,8 @@ export class TopLogicApp {
         if (batchIdDisplay) {
             batchIdDisplay.innerHTML = `
                 <span>Batch ID: <strong>#${batchId}</strong></span>
-                <div class="batch-id-actions">
-                    <button type="button" class="batch-action-btn" onclick="navigator.clipboard.writeText('${batchId}').then(() => alert('Batch ID kopiert!'))" title="Kopier Batch ID">
-                        <i data-lucide="clipboard"></i>
-                        <span>Kopier</span>
-                    </button>
-                </div>
             `;
             batchIdDisplay.style.display = 'flex';
-
-            // Initialize Lucide icons for new elements
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
         }
     }
 

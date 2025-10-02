@@ -432,7 +432,18 @@ claude-async-api/
 ├── Dockerfile                   # Docker configuration
 ├── .dockerignore
 ├── package.json
-└── CLAUDE_API_README.md         # This file
+├── docs/
+│   ├── CLAUDE_API_README.md     # This file
+│   ├── MAKE_SCENARIO_GUIDE.md
+│   └── CHANGELOG.md
+├── test/                        # Test files and examples
+│   ├── test-frontend.html
+│   ├── test-faktura-prompt.json
+│   └── example-133-fields-full.json
+├── blueprints/                  # Make.com blueprints
+│   ├── Toplogic faktura 1.blueprint.json
+│   └── Toplogic faktura 2.blueprint.json
+└── archive/                     # Legacy files (archived)
 ```
 
 ## Error Handling

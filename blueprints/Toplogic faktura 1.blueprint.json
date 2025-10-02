@@ -1,0 +1,2002 @@
+{
+    "name": "Toplogic faktura 1",
+    "flow": [
+        {
+            "id": 28,
+            "module": "gateway:CustomWebHook",
+            "version": 1,
+            "parameters": {
+                "hook": 3307831,
+                "maxResults": 1
+            },
+            "mapper": {},
+            "metadata": {
+                "designer": {
+                    "x": 0,
+                    "y": 150
+                },
+                "restore": {
+                    "parameters": {
+                        "hook": {
+                            "data": {
+                                "editable": "true"
+                            },
+                            "label": "Toplogic_claude_integrert"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "hook",
+                        "type": "hook:gateway-webhook",
+                        "label": "Webhook",
+                        "required": true
+                    },
+                    {
+                        "name": "maxResults",
+                        "type": "number",
+                        "label": "Maximum number of results"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 40,
+            "module": "builtin:BasicRouter",
+            "version": 1,
+            "mapper": null,
+            "metadata": {
+                "designer": {
+                    "x": 300,
+                    "y": 150
+                }
+            },
+            "routes": [
+                {
+                    "flow": [
+                        {
+                            "id": 37,
+                            "module": "google-drive:copyAFile",
+                            "version": 4,
+                            "parameters": {
+                                "__IMTCONN__": 5396929
+                            },
+                            "filter": {
+                                "name": "",
+                                "conditions": [
+                                    [
+                                        {
+                                            "a": "{{28.action}}",
+                                            "b": "prepare_batch",
+                                            "o": "text:equal"
+                                        }
+                                    ]
+                                ]
+                            },
+                            "mapper": {
+                                "file": "1kySKnkBAJKBzui2b-k7PteqqUORM-HIa05IQuCmSz8k",
+                                "name": "{{28.batchId}}",
+                                "select": "map",
+                                "folderId": "1KbPcJeoUA4j3Qx0gvIkhxrGtXKS-FAzb"
+                            },
+                            "metadata": {
+                                "designer": {
+                                    "x": 600,
+                                    "y": 0,
+                                    "name": "Lager kopi av Standard mal"
+                                },
+                                "restore": {
+                                    "expect": {
+                                        "select": {
+                                            "label": "Enter manually"
+                                        }
+                                    },
+                                    "parameters": {
+                                        "__IMTCONN__": {
+                                            "data": {
+                                                "scoped": "true",
+                                                "connection": "google-restricted"
+                                            },
+                                            "label": "AMUND AIKI (amund@aiki.as)"
+                                        }
+                                    }
+                                },
+                                "parameters": [
+                                    {
+                                        "name": "__IMTCONN__",
+                                        "type": "account:google-restricted",
+                                        "label": "Connection",
+                                        "required": true
+                                    }
+                                ],
+                                "expect": [
+                                    {
+                                        "type": "hidden"
+                                    },
+                                    {
+                                        "name": "select",
+                                        "type": "select",
+                                        "label": "Select the Method",
+                                        "required": true,
+                                        "validate": {
+                                            "enum": [
+                                                "map",
+                                                "list"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "name": "name",
+                                        "type": "text",
+                                        "label": "Copied File Name"
+                                    },
+                                    {
+                                        "name": "file",
+                                        "type": "text",
+                                        "label": "Original File ID",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "folderId",
+                                        "type": "text",
+                                        "label": "New Folder Location",
+                                        "required": true
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "id": 38,
+                            "module": "util:SetVariables",
+                            "version": 1,
+                            "parameters": {},
+                            "mapper": {
+                                "scope": "roundtrip",
+                                "variables": [
+                                    {
+                                        "name": "file_id",
+                                        "value": "{{37.id}}"
+                                    }
+                                ]
+                            },
+                            "metadata": {
+                                "designer": {
+                                    "x": 900,
+                                    "y": 0
+                                },
+                                "restore": {
+                                    "expect": {
+                                        "scope": {
+                                            "label": "One cycle"
+                                        },
+                                        "variables": {
+                                            "items": [
+                                                null
+                                            ]
+                                        }
+                                    }
+                                },
+                                "expect": [
+                                    {
+                                        "name": "variables",
+                                        "spec": [
+                                            {
+                                                "name": "name",
+                                                "type": "text",
+                                                "label": "Variable name",
+                                                "required": true
+                                            },
+                                            {
+                                                "name": "value",
+                                                "type": "any",
+                                                "label": "Variable value"
+                                            }
+                                        ],
+                                        "type": "array",
+                                        "label": "Variables"
+                                    },
+                                    {
+                                        "name": "scope",
+                                        "type": "select",
+                                        "label": "Variable lifetime",
+                                        "required": true,
+                                        "validate": {
+                                            "enum": [
+                                                "roundtrip",
+                                                "execution"
+                                            ]
+                                        }
+                                    }
+                                ],
+                                "interface": [
+                                    {
+                                        "name": "file_id",
+                                        "type": "any",
+                                        "label": "file_id"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "id": 39,
+                            "module": "gateway:WebhookRespond",
+                            "version": 1,
+                            "parameters": {},
+                            "mapper": {
+                                "body": "{\n  \"sheetUrl\": \"{{37.webViewLink}}\",\n  \"status\": \"success\",\n  \"message\": \"Google Sheet opprettet\"\n}",
+                                "status": "200",
+                                "headers": []
+                            },
+                            "metadata": {
+                                "designer": {
+                                    "x": 1200,
+                                    "y": 0
+                                },
+                                "restore": {
+                                    "expect": {
+                                        "headers": {
+                                            "mode": "chose"
+                                        }
+                                    }
+                                },
+                                "expect": [
+                                    {
+                                        "name": "status",
+                                        "type": "uinteger",
+                                        "label": "Status",
+                                        "required": true,
+                                        "validate": {
+                                            "min": 100
+                                        }
+                                    },
+                                    {
+                                        "name": "body",
+                                        "type": "any",
+                                        "label": "Body"
+                                    },
+                                    {
+                                        "name": "headers",
+                                        "spec": [
+                                            {
+                                                "name": "key",
+                                                "type": "text",
+                                                "label": "Key",
+                                                "required": true,
+                                                "validate": {
+                                                    "max": 256
+                                                }
+                                            },
+                                            {
+                                                "name": "value",
+                                                "type": "text",
+                                                "label": "Value",
+                                                "required": true,
+                                                "validate": {
+                                                    "max": 4096
+                                                }
+                                            }
+                                        ],
+                                        "type": "array",
+                                        "label": "Custom headers",
+                                        "validate": {
+                                            "maxItems": 16
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "flow": [
+                        {
+                            "id": 31,
+                            "module": "http:ActionSendData",
+                            "version": 3,
+                            "parameters": {
+                                "handleErrors": true,
+                                "useNewZLibDeCompress": true
+                            },
+                            "filter": {
+                                "name": "",
+                                "conditions": [
+                                    [
+                                        {
+                                            "a": "{{28.action}}",
+                                            "b": "prepare_batch",
+                                            "o": "text:notequal"
+                                        }
+                                    ]
+                                ]
+                            },
+                            "mapper": {
+                                "ca": "",
+                                "qs": [],
+                                "url": "https://api.mistral.ai/v1/files",
+                                "gzip": true,
+                                "method": "post",
+                                "headers": [
+                                    {
+                                        "name": "Authorization",
+                                        "value": "Bearer VsobdsvWq4Qmb4JI6kuwQ7bxGGSsdRnc"
+                                    }
+                                ],
+                                "timeout": "",
+                                "useMtls": false,
+                                "authPass": "",
+                                "authUser": "",
+                                "bodyType": "multipart_form_data",
+                                "serializeUrl": false,
+                                "shareCookies": false,
+                                "parseResponse": true,
+                                "followRedirect": true,
+                                "formDataFields": [
+                                    {
+                                        "key": "purpose",
+                                        "value": "ocr",
+                                        "fieldType": "text"
+                                    },
+                                    {
+                                        "key": "file",
+                                        "data": "{{28.file.data}}",
+                                        "fileName": "{{28.file.name}}",
+                                        "fieldType": "file"
+                                    }
+                                ],
+                                "useQuerystring": false,
+                                "followAllRedirects": false,
+                                "rejectUnauthorized": true
+                            },
+                            "metadata": {
+                                "designer": {
+                                    "x": 600,
+                                    "y": 300
+                                },
+                                "restore": {
+                                    "expect": {
+                                        "qs": {
+                                            "mode": "chose"
+                                        },
+                                        "method": {
+                                            "mode": "chose",
+                                            "label": "POST"
+                                        },
+                                        "headers": {
+                                            "mode": "chose",
+                                            "items": [
+                                                null
+                                            ]
+                                        },
+                                        "bodyType": {
+                                            "label": "Multipart/form-data"
+                                        },
+                                        "formDataFields": {
+                                            "mode": "chose",
+                                            "items": [
+                                                {
+                                                    "fieldType": {
+                                                        "mode": "chose",
+                                                        "label": "Text"
+                                                    }
+                                                },
+                                                {
+                                                    "fieldType": {
+                                                        "mode": "chose",
+                                                        "label": "File"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                "parameters": [
+                                    {
+                                        "name": "handleErrors",
+                                        "type": "boolean",
+                                        "label": "Evaluate all states as errors (except for 2xx and 3xx )",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "useNewZLibDeCompress",
+                                        "type": "hidden"
+                                    }
+                                ],
+                                "expect": [
+                                    {
+                                        "name": "url",
+                                        "type": "url",
+                                        "label": "URL",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "serializeUrl",
+                                        "type": "boolean",
+                                        "label": "Serialize URL",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "method",
+                                        "type": "select",
+                                        "label": "Method",
+                                        "required": true,
+                                        "validate": {
+                                            "enum": [
+                                                "get",
+                                                "head",
+                                                "post",
+                                                "put",
+                                                "patch",
+                                                "delete",
+                                                "options"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "name": "headers",
+                                        "spec": [
+                                            {
+                                                "name": "name",
+                                                "type": "text",
+                                                "label": "Name",
+                                                "required": true
+                                            },
+                                            {
+                                                "name": "value",
+                                                "type": "text",
+                                                "label": "Value"
+                                            }
+                                        ],
+                                        "type": "array",
+                                        "label": "Headers"
+                                    },
+                                    {
+                                        "name": "qs",
+                                        "spec": [
+                                            {
+                                                "name": "name",
+                                                "type": "text",
+                                                "label": "Name",
+                                                "required": true
+                                            },
+                                            {
+                                                "name": "value",
+                                                "type": "text",
+                                                "label": "Value"
+                                            }
+                                        ],
+                                        "type": "array",
+                                        "label": "Query String"
+                                    },
+                                    {
+                                        "name": "bodyType",
+                                        "type": "select",
+                                        "label": "Body type",
+                                        "validate": {
+                                            "enum": [
+                                                "raw",
+                                                "x_www_form_urlencoded",
+                                                "multipart_form_data"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "name": "parseResponse",
+                                        "type": "boolean",
+                                        "label": "Parse response",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "authUser",
+                                        "type": "text",
+                                        "label": "User name"
+                                    },
+                                    {
+                                        "name": "authPass",
+                                        "type": "password",
+                                        "label": "Password"
+                                    },
+                                    {
+                                        "name": "timeout",
+                                        "type": "uinteger",
+                                        "label": "Timeout",
+                                        "validate": {
+                                            "max": 300,
+                                            "min": 1
+                                        }
+                                    },
+                                    {
+                                        "name": "shareCookies",
+                                        "type": "boolean",
+                                        "label": "Share cookies with other HTTP modules",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "ca",
+                                        "type": "cert",
+                                        "label": "Self-signed certificate"
+                                    },
+                                    {
+                                        "name": "rejectUnauthorized",
+                                        "type": "boolean",
+                                        "label": "Reject connections that are using unverified (self-signed) certificates",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "followRedirect",
+                                        "type": "boolean",
+                                        "label": "Follow redirect",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "useQuerystring",
+                                        "type": "boolean",
+                                        "label": "Disable serialization of multiple same query string keys as arrays",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "gzip",
+                                        "type": "boolean",
+                                        "label": "Request compressed content",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "useMtls",
+                                        "type": "boolean",
+                                        "label": "Use Mutual TLS",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "formDataFields",
+                                        "spec": [
+                                            {
+                                                "name": "fieldType",
+                                                "type": "select",
+                                                "label": "Field type",
+                                                "options": [
+                                                    {
+                                                        "label": "Text",
+                                                        "value": "text",
+                                                        "nested": [
+                                                            {
+                                                                "name": "key",
+                                                                "type": "text",
+                                                                "label": "Key",
+                                                                "required": true
+                                                            },
+                                                            {
+                                                                "name": "value",
+                                                                "type": "text",
+                                                                "label": "Value"
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "label": "File",
+                                                        "value": "file",
+                                                        "nested": [
+                                                            {
+                                                                "name": "key",
+                                                                "type": "text",
+                                                                "label": "Key",
+                                                                "required": true
+                                                            },
+                                                            {
+                                                                "name": "data",
+                                                                "type": "buffer",
+                                                                "label": "Data",
+                                                                "semantic": "file:data"
+                                                            },
+                                                            {
+                                                                "help": "File name, including the suffix, e.g. invoice, xml",
+                                                                "name": "fileName",
+                                                                "type": "filename",
+                                                                "label": "File name",
+                                                                "semantic": "file:name"
+                                                            }
+                                                        ]
+                                                    }
+                                                ],
+                                                "required": true
+                                            }
+                                        ],
+                                        "type": "array",
+                                        "label": "Fields"
+                                    },
+                                    {
+                                        "name": "followAllRedirects",
+                                        "type": "boolean",
+                                        "label": "Follow all redirect",
+                                        "required": true
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "id": 32,
+                            "module": "http:ActionSendData",
+                            "version": 3,
+                            "parameters": {
+                                "handleErrors": true,
+                                "useNewZLibDeCompress": true
+                            },
+                            "mapper": {
+                                "ca": "",
+                                "qs": [],
+                                "url": "https://api.mistral.ai/v1/files/{{31.data.id}}/url?expiry=24",
+                                "gzip": true,
+                                "method": "get",
+                                "headers": [
+                                    {
+                                        "name": "Authorization",
+                                        "value": "Bearer VsobdsvWq4Qmb4JI6kuwQ7bxGGSsdRnc"
+                                    }
+                                ],
+                                "timeout": "",
+                                "useMtls": false,
+                                "authPass": "",
+                                "authUser": "",
+                                "bodyType": "",
+                                "serializeUrl": false,
+                                "shareCookies": false,
+                                "parseResponse": true,
+                                "followRedirect": true,
+                                "useQuerystring": false,
+                                "followAllRedirects": false,
+                                "rejectUnauthorized": true
+                            },
+                            "metadata": {
+                                "designer": {
+                                    "x": 900,
+                                    "y": 300
+                                },
+                                "restore": {
+                                    "expect": {
+                                        "qs": {
+                                            "mode": "chose"
+                                        },
+                                        "method": {
+                                            "mode": "chose",
+                                            "label": "GET"
+                                        },
+                                        "headers": {
+                                            "mode": "chose",
+                                            "items": [
+                                                null
+                                            ]
+                                        },
+                                        "bodyType": {
+                                            "label": "Empty"
+                                        }
+                                    }
+                                },
+                                "parameters": [
+                                    {
+                                        "name": "handleErrors",
+                                        "type": "boolean",
+                                        "label": "Evaluate all states as errors (except for 2xx and 3xx )",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "useNewZLibDeCompress",
+                                        "type": "hidden"
+                                    }
+                                ],
+                                "expect": [
+                                    {
+                                        "name": "url",
+                                        "type": "url",
+                                        "label": "URL",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "serializeUrl",
+                                        "type": "boolean",
+                                        "label": "Serialize URL",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "method",
+                                        "type": "select",
+                                        "label": "Method",
+                                        "required": true,
+                                        "validate": {
+                                            "enum": [
+                                                "get",
+                                                "head",
+                                                "post",
+                                                "put",
+                                                "patch",
+                                                "delete",
+                                                "options"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "name": "headers",
+                                        "spec": [
+                                            {
+                                                "name": "name",
+                                                "type": "text",
+                                                "label": "Name",
+                                                "required": true
+                                            },
+                                            {
+                                                "name": "value",
+                                                "type": "text",
+                                                "label": "Value"
+                                            }
+                                        ],
+                                        "type": "array",
+                                        "label": "Headers"
+                                    },
+                                    {
+                                        "name": "qs",
+                                        "spec": [
+                                            {
+                                                "name": "name",
+                                                "type": "text",
+                                                "label": "Name",
+                                                "required": true
+                                            },
+                                            {
+                                                "name": "value",
+                                                "type": "text",
+                                                "label": "Value"
+                                            }
+                                        ],
+                                        "type": "array",
+                                        "label": "Query String"
+                                    },
+                                    {
+                                        "name": "bodyType",
+                                        "type": "select",
+                                        "label": "Body type",
+                                        "validate": {
+                                            "enum": [
+                                                "raw",
+                                                "x_www_form_urlencoded",
+                                                "multipart_form_data"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "name": "parseResponse",
+                                        "type": "boolean",
+                                        "label": "Parse response",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "authUser",
+                                        "type": "text",
+                                        "label": "User name"
+                                    },
+                                    {
+                                        "name": "authPass",
+                                        "type": "password",
+                                        "label": "Password"
+                                    },
+                                    {
+                                        "name": "timeout",
+                                        "type": "uinteger",
+                                        "label": "Timeout",
+                                        "validate": {
+                                            "max": 300,
+                                            "min": 1
+                                        }
+                                    },
+                                    {
+                                        "name": "shareCookies",
+                                        "type": "boolean",
+                                        "label": "Share cookies with other HTTP modules",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "ca",
+                                        "type": "cert",
+                                        "label": "Self-signed certificate"
+                                    },
+                                    {
+                                        "name": "rejectUnauthorized",
+                                        "type": "boolean",
+                                        "label": "Reject connections that are using unverified (self-signed) certificates",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "followRedirect",
+                                        "type": "boolean",
+                                        "label": "Follow redirect",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "useQuerystring",
+                                        "type": "boolean",
+                                        "label": "Disable serialization of multiple same query string keys as arrays",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "gzip",
+                                        "type": "boolean",
+                                        "label": "Request compressed content",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "useMtls",
+                                        "type": "boolean",
+                                        "label": "Use Mutual TLS",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "followAllRedirects",
+                                        "type": "boolean",
+                                        "label": "Follow all redirect",
+                                        "required": true
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "id": 56,
+                            "module": "http:ActionSendData",
+                            "version": 3,
+                            "parameters": {
+                                "handleErrors": true,
+                                "useNewZLibDeCompress": true
+                            },
+                            "mapper": {
+                                "ca": "",
+                                "qs": [],
+                                "url": "https://api.mistral.ai/v1/ocr",
+                                "data": "{\r\n  \"model\": \"mistral-ocr-latest\",\r\n  \"document\": {\r\n    \"type\": \"document_url\",\r\n    \"document_url\": \"{{32.data.url}}\"\r\n  },\r\n  \"include_image_base64\": true\r\n}",
+                                "gzip": true,
+                                "method": "post",
+                                "headers": [
+                                    {
+                                        "name": "Authorization",
+                                        "value": "Bearer VsobdsvWq4Qmb4JI6kuwQ7bxGGSsdRnc"
+                                    }
+                                ],
+                                "timeout": "",
+                                "useMtls": false,
+                                "authPass": "",
+                                "authUser": "",
+                                "bodyType": "raw",
+                                "contentType": "application/json",
+                                "serializeUrl": false,
+                                "shareCookies": false,
+                                "parseResponse": true,
+                                "followRedirect": true,
+                                "useQuerystring": false,
+                                "followAllRedirects": false,
+                                "rejectUnauthorized": true
+                            },
+                            "metadata": {
+                                "designer": {
+                                    "x": 1200,
+                                    "y": 300
+                                },
+                                "restore": {
+                                    "expect": {
+                                        "qs": {
+                                            "mode": "chose"
+                                        },
+                                        "method": {
+                                            "mode": "chose",
+                                            "label": "POST"
+                                        },
+                                        "headers": {
+                                            "mode": "chose",
+                                            "items": [
+                                                null
+                                            ]
+                                        },
+                                        "bodyType": {
+                                            "label": "Raw"
+                                        },
+                                        "contentType": {
+                                            "label": "JSON (application/json)"
+                                        }
+                                    }
+                                },
+                                "parameters": [
+                                    {
+                                        "name": "handleErrors",
+                                        "type": "boolean",
+                                        "label": "Evaluate all states as errors (except for 2xx and 3xx )",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "useNewZLibDeCompress",
+                                        "type": "hidden"
+                                    }
+                                ],
+                                "expect": [
+                                    {
+                                        "name": "url",
+                                        "type": "url",
+                                        "label": "URL",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "serializeUrl",
+                                        "type": "boolean",
+                                        "label": "Serialize URL",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "method",
+                                        "type": "select",
+                                        "label": "Method",
+                                        "required": true,
+                                        "validate": {
+                                            "enum": [
+                                                "get",
+                                                "head",
+                                                "post",
+                                                "put",
+                                                "patch",
+                                                "delete",
+                                                "options"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "name": "headers",
+                                        "spec": [
+                                            {
+                                                "name": "name",
+                                                "type": "text",
+                                                "label": "Name",
+                                                "required": true
+                                            },
+                                            {
+                                                "name": "value",
+                                                "type": "text",
+                                                "label": "Value"
+                                            }
+                                        ],
+                                        "type": "array",
+                                        "label": "Headers"
+                                    },
+                                    {
+                                        "name": "qs",
+                                        "spec": [
+                                            {
+                                                "name": "name",
+                                                "type": "text",
+                                                "label": "Name",
+                                                "required": true
+                                            },
+                                            {
+                                                "name": "value",
+                                                "type": "text",
+                                                "label": "Value"
+                                            }
+                                        ],
+                                        "type": "array",
+                                        "label": "Query String"
+                                    },
+                                    {
+                                        "name": "bodyType",
+                                        "type": "select",
+                                        "label": "Body type",
+                                        "validate": {
+                                            "enum": [
+                                                "raw",
+                                                "x_www_form_urlencoded",
+                                                "multipart_form_data"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "name": "parseResponse",
+                                        "type": "boolean",
+                                        "label": "Parse response",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "authUser",
+                                        "type": "text",
+                                        "label": "User name"
+                                    },
+                                    {
+                                        "name": "authPass",
+                                        "type": "password",
+                                        "label": "Password"
+                                    },
+                                    {
+                                        "name": "timeout",
+                                        "type": "uinteger",
+                                        "label": "Timeout",
+                                        "validate": {
+                                            "max": 300,
+                                            "min": 1
+                                        }
+                                    },
+                                    {
+                                        "name": "shareCookies",
+                                        "type": "boolean",
+                                        "label": "Share cookies with other HTTP modules",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "ca",
+                                        "type": "cert",
+                                        "label": "Self-signed certificate"
+                                    },
+                                    {
+                                        "name": "rejectUnauthorized",
+                                        "type": "boolean",
+                                        "label": "Reject connections that are using unverified (self-signed) certificates",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "followRedirect",
+                                        "type": "boolean",
+                                        "label": "Follow redirect",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "useQuerystring",
+                                        "type": "boolean",
+                                        "label": "Disable serialization of multiple same query string keys as arrays",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "gzip",
+                                        "type": "boolean",
+                                        "label": "Request compressed content",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "useMtls",
+                                        "type": "boolean",
+                                        "label": "Use Mutual TLS",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "contentType",
+                                        "type": "select",
+                                        "label": "Content type",
+                                        "validate": {
+                                            "enum": [
+                                                "text/plain",
+                                                "application/json",
+                                                "application/xml",
+                                                "text/xml",
+                                                "text/html",
+                                                "custom"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "name": "data",
+                                        "type": "buffer",
+                                        "label": "Request content"
+                                    },
+                                    {
+                                        "name": "followAllRedirects",
+                                        "type": "boolean",
+                                        "label": "Follow all redirect",
+                                        "required": true
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "id": 33,
+                            "module": "http:ActionSendData",
+                            "version": 3,
+                            "parameters": {
+                                "handleErrors": true,
+                                "useNewZLibDeCompress": true
+                            },
+                            "mapper": {
+                                "ca": "",
+                                "qs": [],
+                                "url": "https://api.mistral.ai/v1/ocr",
+                                "data": "{\r\n  \"model\": \"mistral-ocr-latest\",\r\n  \"document\": {\r\n    \"type\": \"document_url\",\r\n    \"document_url\": \"{{32.data.url}}\"\r\n  },\r\n  \"include_image_base64\": true\r\n}",
+                                "gzip": true,
+                                "method": "post",
+                                "headers": [
+                                    {
+                                        "name": "Authorization",
+                                        "value": "Bearer VsobdsvWq4Qmb4JI6kuwQ7bxGGSsdRnc"
+                                    }
+                                ],
+                                "timeout": "",
+                                "useMtls": false,
+                                "authPass": "",
+                                "authUser": "",
+                                "bodyType": "raw",
+                                "contentType": "application/json",
+                                "serializeUrl": false,
+                                "shareCookies": false,
+                                "parseResponse": false,
+                                "followRedirect": true,
+                                "useQuerystring": false,
+                                "followAllRedirects": false,
+                                "rejectUnauthorized": true
+                            },
+                            "metadata": {
+                                "designer": {
+                                    "x": 1500,
+                                    "y": 300
+                                },
+                                "restore": {
+                                    "expect": {
+                                        "qs": {
+                                            "mode": "chose"
+                                        },
+                                        "method": {
+                                            "mode": "chose",
+                                            "label": "POST"
+                                        },
+                                        "headers": {
+                                            "mode": "chose",
+                                            "items": [
+                                                null
+                                            ]
+                                        },
+                                        "bodyType": {
+                                            "label": "Raw"
+                                        },
+                                        "contentType": {
+                                            "label": "JSON (application/json)"
+                                        }
+                                    }
+                                },
+                                "parameters": [
+                                    {
+                                        "name": "handleErrors",
+                                        "type": "boolean",
+                                        "label": "Evaluate all states as errors (except for 2xx and 3xx )",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "useNewZLibDeCompress",
+                                        "type": "hidden"
+                                    }
+                                ],
+                                "expect": [
+                                    {
+                                        "name": "url",
+                                        "type": "url",
+                                        "label": "URL",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "serializeUrl",
+                                        "type": "boolean",
+                                        "label": "Serialize URL",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "method",
+                                        "type": "select",
+                                        "label": "Method",
+                                        "required": true,
+                                        "validate": {
+                                            "enum": [
+                                                "get",
+                                                "head",
+                                                "post",
+                                                "put",
+                                                "patch",
+                                                "delete",
+                                                "options"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "name": "headers",
+                                        "spec": [
+                                            {
+                                                "name": "name",
+                                                "type": "text",
+                                                "label": "Name",
+                                                "required": true
+                                            },
+                                            {
+                                                "name": "value",
+                                                "type": "text",
+                                                "label": "Value"
+                                            }
+                                        ],
+                                        "type": "array",
+                                        "label": "Headers"
+                                    },
+                                    {
+                                        "name": "qs",
+                                        "spec": [
+                                            {
+                                                "name": "name",
+                                                "type": "text",
+                                                "label": "Name",
+                                                "required": true
+                                            },
+                                            {
+                                                "name": "value",
+                                                "type": "text",
+                                                "label": "Value"
+                                            }
+                                        ],
+                                        "type": "array",
+                                        "label": "Query String"
+                                    },
+                                    {
+                                        "name": "bodyType",
+                                        "type": "select",
+                                        "label": "Body type",
+                                        "validate": {
+                                            "enum": [
+                                                "raw",
+                                                "x_www_form_urlencoded",
+                                                "multipart_form_data"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "name": "parseResponse",
+                                        "type": "boolean",
+                                        "label": "Parse response",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "authUser",
+                                        "type": "text",
+                                        "label": "User name"
+                                    },
+                                    {
+                                        "name": "authPass",
+                                        "type": "password",
+                                        "label": "Password"
+                                    },
+                                    {
+                                        "name": "timeout",
+                                        "type": "uinteger",
+                                        "label": "Timeout",
+                                        "validate": {
+                                            "max": 300,
+                                            "min": 1
+                                        }
+                                    },
+                                    {
+                                        "name": "shareCookies",
+                                        "type": "boolean",
+                                        "label": "Share cookies with other HTTP modules",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "ca",
+                                        "type": "cert",
+                                        "label": "Self-signed certificate"
+                                    },
+                                    {
+                                        "name": "rejectUnauthorized",
+                                        "type": "boolean",
+                                        "label": "Reject connections that are using unverified (self-signed) certificates",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "followRedirect",
+                                        "type": "boolean",
+                                        "label": "Follow redirect",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "useQuerystring",
+                                        "type": "boolean",
+                                        "label": "Disable serialization of multiple same query string keys as arrays",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "gzip",
+                                        "type": "boolean",
+                                        "label": "Request compressed content",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "useMtls",
+                                        "type": "boolean",
+                                        "label": "Use Mutual TLS",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "contentType",
+                                        "type": "select",
+                                        "label": "Content type",
+                                        "validate": {
+                                            "enum": [
+                                                "text/plain",
+                                                "application/json",
+                                                "application/xml",
+                                                "text/xml",
+                                                "text/html",
+                                                "custom"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "name": "data",
+                                        "type": "buffer",
+                                        "label": "Request content"
+                                    },
+                                    {
+                                        "name": "followAllRedirects",
+                                        "type": "boolean",
+                                        "label": "Follow all redirect",
+                                        "required": true
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "id": 45,
+                            "module": "ai-tools:Categorize",
+                            "version": 2,
+                            "parameters": {
+                                "model": "medium",
+                                "makeConnectionId": 12003927
+                            },
+                            "mapper": {
+                                "input": "{{56.data.pages[1].markdown}}",
+                                "categories": [
+                                    {
+                                        " ": "FedEx"
+                                    },
+                                    {
+                                        " ": "Sendify"
+                                    },
+                                    {
+                                        " ": "NTG_road"
+                                    },
+                                    {
+                                        " ": "ukjent leverandør"
+                                    },
+                                    {
+                                        " ": "Freja"
+                                    },
+                                    {
+                                        " ": "Samtransort"
+                                    },
+                                    {
+                                        " ": "MaserFrakt"
+                                    }
+                                ],
+                                "shouldGenerateDescription": true
+                            },
+                            "metadata": {
+                                "designer": {
+                                    "x": 1800,
+                                    "y": 300
+                                },
+                                "restore": {
+                                    "expect": {
+                                        "categories": {
+                                            "mode": "chose",
+                                            "items": [
+                                                null,
+                                                null,
+                                                null,
+                                                null,
+                                                null,
+                                                null,
+                                                null
+                                            ]
+                                        }
+                                    },
+                                    "parameters": {
+                                        "model": {
+                                            "mode": "chose",
+                                            "label": "Medium (GPT OSS 120B)"
+                                        },
+                                        "makeConnectionId": {
+                                            "data": {
+                                                "scoped": "true",
+                                                "connection": "ai-provider"
+                                            },
+                                            "label": "My Make's AI Provider connection",
+                                            "nested": [
+                                                {
+                                                    "name": "model",
+                                                    "type": "select",
+                                                    "label": "Model",
+                                                    "options": {
+                                                        "store": "rpc://ai-tools/2/RpcGetModels?connectionId={{makeConnectionId}}&teamId=410178"
+                                                    },
+                                                    "mappable": true,
+                                                    "required": true
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                "parameters": [
+                                    {
+                                        "name": "makeConnectionId",
+                                        "type": "account:ai-provider,openai-gpt-3,anthropic-claude,gemini-ai-q9zyjp,ai-agent-foundry-openai,ai-agent-foundry-non-openai,mistral-ai,cohere,groq,ai-agent-xai,amazon-bedrock,ai-agent-openai-compatible",
+                                        "label": "Connection",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "model",
+                                        "type": "select",
+                                        "label": "Model",
+                                        "required": true
+                                    }
+                                ],
+                                "expect": [
+                                    {
+                                        "name": "input",
+                                        "type": "text",
+                                        "label": "Text to categorize",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "categories",
+                                        "spec": {
+                                            "name": "value",
+                                            "spec": [
+                                                {
+                                                    "name": " ",
+                                                    "type": "text",
+                                                    "label": "Name",
+                                                    "required": true
+                                                }
+                                            ],
+                                            "type": "collection",
+                                            "label": "Category"
+                                        },
+                                        "type": "array",
+                                        "label": "Categories",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "shouldGenerateDescription",
+                                        "type": "boolean",
+                                        "label": "Return an explanation for the categorization",
+                                        "required": true
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "id": 36,
+                            "module": "util:SetVariables",
+                            "version": 1,
+                            "parameters": {},
+                            "mapper": {
+                                "scope": "roundtrip",
+                                "variables": [
+                                    {
+                                        "name": "prompt",
+                                        "value": "# PDF-FAKTURA STRUKTURERING\\n\\nDU ER en EKSPERT I DOKUMENTFORSTÅELSE. Din jobb er å lese en PDF-faktura og strukturere **hver separat sending/transportoppdrag** inn i **eksakt 133 nummererte JSON-nøkler**.\\n\\n## MÅL\\n\\nDu skal bruke denna **standardiserade malen** og mappe hver sendings informasjon til riktige felt:\\n\\n{\\n\\\"1\\\": \\\"Forwarder\\\",\\n\\\"2\\\": \\\"Purchaser\\\",\\n\\\"3\\\": \\\"Bill-toAddrNo\\\",\\n\\\"4\\\": \\\"InvoiceDate\\\",\\n\\\"5\\\": \\\"InvoiceNo\\\",\\n\\\"6\\\": \\\"InvoiceCurrency\\\",\\n\\\"7\\\": \\\"Debit/Credit\\\",\\n\\\"8\\\": \\\"PartnerNo\\\",\\n\\\"9\\\": \\\"Departure Date\\\",\\n\\\"10\\\": \\\"Destination Date\\\",\\n\\\"11\\\": \\\"Transport Mode\\\",\\n\\\"12\\\": \\\"TermsOfDelivery\\\",\\n\\\"13\\\": \\\"DeptCountry\\\",\\n\\\"14\\\": \\\"DeptZip\\\",\\n\\\"15\\\": \\\"DeptCity\\\",\\n\\\"16\\\": \\\"DeptName\\\",\\n\\\"17\\\": \\\"DeptZone\\\",\\n\\\"18\\\": \\\"DestCountry\\\",\\n\\\"19\\\": \\\"DestZip\\\",\\n\\\"20\\\": \\\"DestCity\\\",\\n\\\"21\\\": \\\"DestName\\\",\\n\\\"22\\\": \\\"DestZone\\\",\\n\\\"23\\\": \\\"Net\\\",\\n\\\"24\\\": \\\"Gross\\\",\\n\\\"25\\\": \\\"Volume\\\",\\n\\\"26\\\": \\\"LoadingMeters\\\",\\n\\\"27\\\": \\\"PayWeight\\\",\\n\\\"28\\\": \\\"HandlingUnits\\\",\\n\\\"29\\\": \\\"Distance\\\",\\n\\\"30\\\": \\\"CalcHours\\\",\\n\\\"31\\\": \\\"CalcDays\\\",\\n\\\"32\\\": \\\"Trans1\\\",\\n\\\"33\\\": \\\"Trans2\\\",\\n\\\"34\\\": \\\"ADR\\\",\\n\\\"35\\\": \\\"CustomerRef\\\",\\n\\\"36\\\": \\\"ReceiverRef\\\",\\n\\\"37\\\": \\\"KI_TELEMATIK_NR\\\",\\n\\\"38\\\": \\\"CostName1\\\",\\n\\\"39\\\": \\\"CostAmount1\\\",\\n\\\"40\\\": \\\"CostCurr1\\\",\\n\\\"41\\\": \\\"CostName2\\\",\\n\\\"42\\\": \\\"CostAmount2\\\",\\n\\\"43\\\": \\\"CostCurr2\\\",\\n\\\"44\\\": \\\"CostName3\\\",\\n\\\"45\\\": \\\"CostAmount3\\\",\\n\\\"46\\\": \\\"CostCurr3\\\",\\n\\\"47\\\": \\\"CostName4\\\",\\n\\\"48\\\": \\\"CostAmount4\\\",\\n\\\"49\\\": \\\"CostCurr4\\\",\\n\\\"50\\\": \\\"CostName5\\\",\\n\\\"51\\\": \\\"CostAmount5\\\",\\n\\\"52\\\": \\\"CostCurr5\\\",\\n\\\"53\\\": \\\"CostName6\\\",\\n\\\"54\\\": \\\"CostAmount6\\\",\\n\\\"55\\\": \\\"CostCurr6\\\",\\n\\\"56\\\": \\\"CostName7\\\",\\n\\\"57\\\": \\\"CostAmount7\\\",\\n\\\"58\\\": \\\"CostCurr7\\\",\\n\\\"59\\\": \\\"CostName8\\\",\\n\\\"60\\\": \\\"CostAmount8\\\",\\n\\\"61\\\": \\\"CostCurr8\\\",\\n\\\"62\\\": \\\"CostName9\\\",\\n\\\"63\\\": \\\"CostAmount9\\\",\\n\\\"64\\\": \\\"CostCurr9\\\",\\n\\\"65\\\": \\\"CostName10\\\",\\n\\\"66\\\": \\\"CostAmount10\\\",\\n\\\"67\\\": \\\"CostCurr10\\\",\\n\\\"68\\\": \\\"CostName11\\\",\\n\\\"69\\\": \\\"CostAmount11\\\",\\n\\\"70\\\": \\\"CostCurr11\\\",\\n\\\"71\\\": \\\"CostName12\\\",\\n\\\"72\\\": \\\"CostAmount12\\\",\\n\\\"73\\\": \\\"CostCurr12\\\",\\n\\\"74\\\": \\\"CostName13\\\",\\n\\\"75\\\": \\\"CostAmount13\\\",\\n\\\"76\\\": \\\"CostCurr13\\\",\\n\\\"77\\\": \\\"CostName14\\\",\\n\\\"78\\\": \\\"CostAmount14\\\",\\n\\\"79\\\": \\\"CostCurr14\\\",\\n\\\"80\\\": \\\"CostName15\\\",\\n\\\"81\\\": \\\"CostAmount15\\\",\\n\\\"82\\\": \\\"CostCurr15\\\",\\n\\\"83\\\": \\\"CostName16\\\",\\n\\\"84\\\": \\\"CostAmount16\\\",\\n\\\"85\\\": \\\"CostCurr16\\\",\\n\\\"86\\\": \\\"CostName17\\\",\\n\\\"87\\\": \\\"CostAmount17\\\",\\n\\\"88\\\": \\\"CostCurr17\\\",\\n\\\"89\\\": \\\"CostName18\\\",\\n\\\"90\\\": \\\"CostAmount18\\\",\\n\\\"91\\\": \\\"CostCurr18\\\",\\n\\\"92\\\": \\\"CostName19\\\",\\n\\\"93\\\": \\\"CostAmount19\\\",\\n\\\"94\\\": \\\"CostCurr19\\\",\\n\\\"95\\\": \\\"CostName20\\\",\\n\\\"96\\\": \\\"CostAmount20\\\",\\n\\\"97\\\": \\\"CostCurr20\\\",\\n\\\"98\\\": \\\"CostName21\\\",\\n\\\"99\\\": \\\"CostAmount21\\\",\\n\\\"100\\\": \\\"CostCurr21\\\",\\n\\\"101\\\": \\\"CostName22\\\",\\n\\\"102\\\": \\\"CostAmount22\\\",\\n\\\"103\\\": \\\"CostCurr22\\\",\\n\\\"104\\\": \\\"CostName23\\\",\\n\\\"105\\\": \\\"CostAmount23\\\",\\n\\\"106\\\": \\\"CostCurr23\\\",\\n\\\"107\\\": \\\"CostName24\\\",\\n\\\"108\\\": \\\"CostAmount24\\\",\\n\\\"109\\\": \\\"CostCurr24\\\",\\n\\\"110\\\": \\\"CostName25\\\",\\n\\\"111\\\": \\\"CostAmount25\\\",\\n\\\"112\\\": \\\"CostCurr25\\\",\\n\\\"113\\\": \\\"CostName26\\\",\\n\\\"114\\\": \\\"CostAmount26\\\",\\n\\\"115\\\": \\\"CostCurr26\\\",\\n\\\"116\\\": \\\"CostName27\\\",\\n\\\"117\\\": \\\"CostAmount27\\\",\\n\\\"118\\\": \\\"CostCurr27\\\",\\n\\\"119\\\": \\\"CostName28\\\",\\n\\\"120\\\": \\\"CostAmount28\\\",\\n\\\"121\\\": \\\"CostCurr28\\\",\\n\\\"122\\\": \\\"CostName29\\\",\\n\\\"123\\\": \\\"CostAmount29\\\",\\n\\\"124\\\": \\\"CostCurr29\\\",\\n\\\"125\\\": \\\"CostName30\\\",\\n\\\"126\\\": \\\"CostAmount30\\\",\\n\\\"127\\\": \\\"CostCurr30\\\",\\n\\\"128\\\": \\\"Currency1\\\",\\n\\\"129\\\": \\\"Currency1RateToInvoiceCurrency\\\",\\n\\\"130\\\": \\\"Currency2\\\",\\n\\\"131\\\": \\\"Currency2RateToInvoiceCurrency\\\",\\n\\\"132\\\": \\\"Currency3\\\",\\n\\\"133\\\": \\\"Currency3RateToInvoiceCurrency\\\"\\n}\\n\\n## KRITISK: EN RAD PER SENDING/TRANSPORTOPPDRAG\\n\\n**EN FAKTURA kan innehålla FLERE SENDINGER - hver sending ska få sin egen JSON-rad:**\\n\\n* **1 faktura med 1 sending** = 1 JSON-objekt med 133 fält\\n* **1 faktura med 10 sendinger** = JSON-array med 10 objekt, vardera med 133 fält\\n* **3 fakturaer med totalt 15 sendinger** = JSON-array med 15 objekt\\n\\n## IDENTIFIERA SEPARATA SENDINGAR\\n\\n**En separat sending/transportoppdrag identifieras gennem:**\\n\\n* Eget ordre nummer (t.ex. \\\"1802818\\\", \\\"1802916\\\")\\n* Eget fraktbrevnummer (t.ex. \\\"70714832157787928\\\")\\n* Egen rad i fakturaens transporttabell\\n* Egen avsändare/mottagare kombination\\n* Eget pris/kostnad\\n\\n**VIKTIGT:** Samma fakturanummer og fakturadatum används för alla sendinger inom samma faktura.\\n\\n## KRITISK: TRANSPORTÖR-VARIATIONER\\n\\n**Olika transportører använder olika termer för samma information. Du MÅSTE känna igen dessa variationer:**\\n\\n### VANLIGA SYNONYMER:\\n\\n* **Departure Date** = \\\"Avgang\\\", \\\"Pickup Date\\\", \\\"Collection Date\\\", \\\"Hentedato\\\", \\\"Sendingsdato\\\", \\\"Dato\\\"\\n* **Destination Date** = \\\"Ankomst\\\", \\\"Delivery Date\\\", \\\"Leveransedato\\\", \\\"Arrival\\\"\\n* **DeptCity/DestCity** = \\\"From/To\\\", \\\"Avsender/Mottaker\\\", \\\"Origin/Destination\\\", \\\"Avs. sted/Mott. sted\\\"\\n* **InvoiceNo** = \\\"Fakturanr\\\", \\\"Invoice Number\\\", \\\"Faktura-ID\\\", \\\"Bill No\\\", \\\"Fakturanummer\\\"\\n* **CustomerRef** = \\\"Kundenummer\\\", \\\"Reference\\\", \\\"Order No\\\", \\\"Bestilling\\\", \\\"Ordre nr\\\"\\n* **PayWeight** = \\\"Fakturavekt\\\", \\\"Chargeable Weight\\\", \\\"Betalingsvekt\\\", \\\"Vekt\\\"\\n* **Transport Mode** = \\\"Transportslag\\\", \\\"Service\\\", \\\"Product\\\", \\\"Tjeneste\\\"\\n* **PartnerNo** = \\\"Fraktsedelsnr\\\", \\\"Waybill Number\\\", \\\"Consignment Number\\\", \\\"Shipment Number\\\", \\\"Fraktbrevnr\\\"\\n\\n### TRANSPORTØR-SPECIFIKA TERMER:\\n\\n* **FedEx**: \\\"Service Type\\\", \\\"Tracking Number\\\", \\\"Account Number\\\"\\n* **DHL**: \\\"Waybill\\\", \\\"Product Code\\\", \\\"Service Area\\\"\\n* **Bring**: \\\"Produktkode\\\", \\\"Kolli\\\", \\\"Vekt\\\"\\n* **PostNord**: \\\"Avsändar-ID\\\", \\\"Mottagnings-ID\\\"\\n* **UPS**: \\\"Service Code\\\", \\\"Zone\\\", \\\"Billable Weight\\\"\\n* **Hurtig-Gutta**: \\\"EDI\\\", \\\"Referanse\\\", \\\"Fakturaref\\\", \\\"Anlegg/Prosj...\\\"\\n\\n## KOSTNADSFÄLT - BEKRÄFTAT KORREKT TOLKNING\\n\\nKostnadsfälten är korrekt tolkade enligt följande pattern:\\n\\n**CostName1** = Namnet på kostnaden (ex: \\\"Frakt\\\", \\\"Fuel Surcharge\\\", \\\"Handling\\\", \\\"Distribusjon\\\", \\\"Ekspress singeltur\\\", \\\"Bompenger\\\")\\n**CostAmount1** = Beloppet för kostnaden (ex: \\\"850,00\\\", \\\"125,50\\\", \\\"511,00\\\", \\\"40,00\\\")\\n**CostCurr1** = Valutan för kostnaden (ex: \\\"SEK\\\", \\\"EUR\\\", \\\"USD\\\", \\\"NOK\\\")\\n\\n**VIKTIGT för kostnadsfält:**\\n\\n* Varje sending kan ha flera kostnader (huvudpris + tillägg som bompenger, extra avgifter)\\n* Exempel: CostName1=\\\"Distribusjon\\\", CostAmount1=\\\"511,00\\\", CostName2=\\\"Bompenger\\\", CostAmount2=\\\"40,00\\\"\\n\\nDetta pattern upprepas för alla kostnadsfält från CostName1/Amount1/Curr1 till CostName30/Amount30/Curr30.\\n\\n## VALUTAFÄLT (128-133) - INTE PRIORITET JUST NU\\n\\n**Currency1/Currency1RateToInvoiceCurrency** används när en faktura innehåller poster i olika valutor och man vet vilken växelkurs som tillämpades vid fakurering. Detta används för att omvandla alla kostnadsposter till samma valuta.\\n\\n**OBS:** Detta behöver inte fokuseras på i första läget eftersom det främst används vid sjö- og flygtransporter som inte er aktuella för tillfället. Lämna dessa fält som null om de inte är tydligt angivna i fakturan.\\n\\n## OUTPUTFORMAT\\n\\n### EN FAKTURA MED EN SENDING:\\n\\n{\\n\\\"1\\\": \\\"Hurtig-Gutta Transport AS\\\",\\n\\\"2\\\": \\\"Prostage AS\\\",\\n\\\"3\\\": \\\"19013\\\",\\n\\\"4\\\": \\\"2025-03-16\\\",\\n\\\"5\\\": \\\"164087\\\",\\n\\\"6\\\": \\\"NOK\\\",\\n\\\"8\\\": \\\"70714832157787928\\\",\\n\\\"9\\\": \\\"2025-03-10\\\",\\n\\\"11\\\": \\\"Distribusjon\\\",\\n\\\"38\\\": \\\"Distribusjon\\\",\\n\\\"39\\\": \\\"511,00\\\",\\n\\\"40\\\": \\\"NOK\\\"\\n}\\n\\n### EN FAKTURA MED FLERA SENDINGAR (typiskt scenario):\\n\\n[\\n{\\n\\\"1\\\": \\\"Hurtig-Gutta Transport AS\\\",\\n\\\"2\\\": \\\"Prostage AS\\\",\\n\\\"3\\\": \\\"19013\\\",\\n\\\"4\\\": \\\"2025-03-16\\\",\\n\\\"5\\\": \\\"164087\\\",\\n\\\"6\\\": \\\"NOK\\\",\\n\\\"8\\\": \\\"70714832157787928\\\",\\n\\\"9\\\": \\\"2025-03-10\\\",\\n\\\"11\\\": \\\"Distribusjon\\\",\\n\\\"16\\\": \\\"Prostage AS\\\",\\n\\\"21\\\": \\\"Oslofjord Hotel As\\\",\\n\\\"27\\\": \\\"22,0\\\",\\n\\\"38\\\": \\\"Distribusjon\\\",\\n\\\"39\\\": \\\"511,00\\\",\\n\\\"40\\\": \\\"NOK\\\"\\n},\\n{\\n\\\"1\\\": \\\"Hurtig-Gutta Transport AS\\\",\\n\\\"2\\\": \\\"Prostage AS\\\",\\n\\\"3\\\": \\\"19013\\\",\\n\\\"4\\\": \\\"2025-03-16\\\",\\n\\\"5\\\": \\\"164087\\\",\\n\\\"6\\\": \\\"NOK\\\",\\n\\\"8\\\": \\\"70714832157788031\\\",\\n\\\"9\\\": \\\"2025-03-10\\\",\\n\\\"11\\\": \\\"Distribusjon\\\",\\n\\\"16\\\": \\\"Prostage AS\\\",\\n\\\"21\\\": \\\"Nationaltheatret AS\\\",\\n\\\"27\\\": \\\"26,0\\\",\\n\\\"38\\\": \\\"Distribusjon\\\",\\n\\\"39\\\": \\\"117,00\\\",\\n\\\"40\\\": \\\"NOK\\\"\\n},\\n{\\n\\\"1\\\": \\\"Hurtig-Gutta Transport AS\\\",\\n\\\"2\\\": \\\"Prostage AS\\\",\\n\\\"3\\\": \\\"19013\\\",\\n\\\"4\\\": \\\"2025-03-16\\\",\\n\\\"5\\\": \\\"164087\\\",\\n\\\"6\\\": \\\"NOK\\\",\\n\\\"8\\\": \\\"70714832157788765\\\",\\n\\\"9\\\": \\\"2025-03-11\\\",\\n\\\"11\\\": \\\"Ekspress singeltur\\\",\\n\\\"16\\\": \\\"Prostage AS\\\",\\n\\\"21\\\": \\\"Storgata 26\\\",\\n\\\"27\\\": \\\"8,0\\\",\\n\\\"38\\\": \\\"Ekspress singeltur\\\",\\n\\\"39\\\": \\\"298,00\\\",\\n\\\"40\\\": \\\"NOK\\\",\\n\\\"41\\\": \\\"Bompenger\\\",\\n\\\"42\\\": \\\"40,00\\\",\\n\\\"43\\\": \\\"NOK\\\"\\n}\\n]\\n\\n## EXTRA VIKTIGT - SPECIFIKA KRAV FRÅN TOPLOGIC\\n\\n### DATUMFORMAT\\n\\n* **\\\"4\\\": \\\"InvoiceDate\\\"** - Måste vara format **ÅÅÅÅ-MM-DD**\\n* **\\\"9\\\": \\\"Departure Date\\\"** - Måste vara format **ÅÅÅÅ-MM-DD**\\n\\n### FRAKTSEDELSNUMMER\\n\\n* **\\\"8\\\": \\\"PartnerNo\\\"** - Ska innehålla **fraktsedelsnummer** (t.ex. \\\"70714832157787928\\\")\\n* Synonymer: \\\"Waybill Number\\\", \\\"Consignment Number\\\", \\\"Shipment Number\\\", \\\"Tracking Number\\\", \\\"Fraktbrevnr\\\"\\n\\n### DECIMALAVGRÄNSARE\\n\\n* **Använd ALLTID \\\",\\\" som decimalavgränsare**\\n* Exempel: \\\"125,50\\\" INTE \\\"125.50\\\"\\n* Gäller alla numeriska värden: vikt, belopp, volym, etc.\\n\\n### TELEMATIK\\n\\n* **\\\"37\\\": \\\"KI_TELEMATIK_NR\\\"** - Utelat dette feltet helt (ikke inkluder i output)\\n\\n### MOMS/MERVÄRDESSKATT PROHIBITION\\n\\n* **MAPPAR ALDRIG** kostnader som innehåller:\\n  * \\\"MOMS\\\", \\\"VAT\\\", \\\"Mervärdesskatt\\\", \\\"Tax\\\", \\\"Skatt\\\", \\\"MVA\\\"\\n  * \\\"25%\\\", \\\"12%\\\", \\\"6%\\\" (vanliga momssatser)\\n  * Hoppa över dessa helt - ta inte med i CostName/Amount/Curr fälten\\n\\n## STRIKT FÖRBUD\\n\\n* Ingen markdown eller ```json\\n* Inga förklaringar eller kommentarer\\n* **ALDRIG returnera feltnamn eller headers** - bara faktiska värden från PDF-en\\n* **EXEMPEL PÅ FEL**: \\\"1\\\": \\\"Forwarder\\\"\\n* **EXEMPEL PÅ RÄTT**: \\\"1\\\": \\\"Hurtig-Gutta Transport AS\\\"\\n* Bara nummernøklar och faktiska värden från dokumentet\\n* Inget text över eller under JSON\\n* Måste vara 100% giltig JSON\\n* Aldrig uppfinna data - bara strukturera det som finns i PDF-en\\n* **MERVÄRDESSKATT/MOMS ska ALDRIG mappas** - hoppa över alla moms-relaterade kostnader\\n\\n## NYTT KRAV – RETURNER KUN FELTER MED VERDI\\n\\n* Ta kun med nøkler (1–133) som faktisk har verdi i dokumentet.\\n* Ikke inkluder nøkler uten verdi (utelat helt).\\n* Output skal fortsatt være gyldig JSON: én sending = ett objekt; flere sendinger = et JSON-array av objekter.\\n* Start alltid direkte med JSON - ALDRI med ```json\\n\\n## SAMMANFATTNING\\n\\n* **Var flexibel med terminologi** - samma information kan ha olika namn hos olika transportører\\n* **Konsekvent output** - varje objekt innehåller kun nøkler med faktisk verdi\\n* **Ett objekt per sending** - även om de kommer från samma faktura\\n* **Identifiera sendingar** - genom ordre nr, fraktbrevnr og rader i transporttabeller\\n* **Samma fakturainformation** för alla sendinger inom samma faktura (InvoiceNo, InvoiceDate, Forwarder, Purchaser)\\n* Data går direkt til Google Sheets - formatfel förstör hele kedjan\\n\\n"
+                                    },
+                                    {
+                                        "name": "SAMTRANSPORT_prompt",
+                                        "value": "# PDF-FAKTURA STRUKTURERING - SAMTRANSPORT AS\\n\\nDU ER en EKSPERT I DOKUMENTFORSTÅELSE. Din jobb er å lese en faktura fra **SAMTRANSPORT AS** og strukturere **hver separat sending/transportoppdrag** inn i **eksakt 133 nummererte JSON-nøkler**.\\n\\n## MÅL\\n\\nDu skal bruke denna **standardiserade malen** og mappe hver sendings informasjon til riktige felt:\\n\\n{\\n\"1\": \"Forwarder\",\\n\"2\": \"Purchaser\",\\n\"3\": \"Bill-toAddrNo\",\\n\"4\": \"InvoiceDate\",\\n\"5\": \"InvoiceNo\",\\n\"6\": \"InvoiceCurrency\",\\n\"7\": \"Debit/Credit\",\\n\"8\": \"PartnerNo\",\\n\"9\": \"Departure Date\",\\n\"10\": \"Destination Date\",\\n\"11\": \"Transport Mode\",\\n\"12\": \"TermsOfDelivery\",\\n\"13\": \"DeptCountry\",\\n\"14\": \"DeptZip\",\\n\"15\": \"DeptCity\",\\n\"16\": \"DeptName\",\\n\"17\": \"DeptZone\",\\n\"18\": \"DestCountry\",\\n\"19\": \"DestZip\",\\n\"20\": \"DestCity\",\\n\"21\": \"DestName\",\\n\"22\": \"DestZone\",\\n\"23\": \"Net\",\\n\"24\": \"Gross\",\\n\"25\": \"Volume\",\\n\"26\": \"LoadingMeters\",\\n\"27\": \"PayWeight\",\\n\"28\": \"HandlingUnits\",\\n\"29\": \"Distance\",\\n\"30\": \"CalcHours\",\\n\"31\": \"CalcDays\",\\n\"32\": \"Trans1\",\\n\"33\": \"Trans2\",\\n\"34\": \"ADR\",\\n\"35\": \"CustomerRef\",\\n\"36\": \"ReceiverRef\",\\n\"37\": \"KI_TELEMATIK_NR\",\\n\"38\": \"CostName1\",\\n\"39\": \"CostAmount1\",\\n\"40\": \"CostCurr1\",\\n\"41\": \"CostName2\",\\n\"42\": \"CostAmount2\",\\n\"43\": \"CostCurr2\",\\n\"44\": \"CostName3\",\\n\"45\": \"CostAmount3\",\\n\"46\": \"CostCurr3\",\\n\"47\": \"CostName4\",\\n\"48\": \"CostAmount4\",\\n\"49\": \"CostCurr4\",\\n\"50\": \"CostName5\",\\n\"51\": \"CostAmount5\",\\n\"52\": \"CostCurr5\",\\n\"53\": \"CostName6\",\\n\"54\": \"CostAmount6\",\\n\"55\": \"CostCurr6\",\\n\"56\": \"CostName7\",\\n\"57\": \"CostAmount7\",\\n\"58\": \"CostCurr7\",\\n\"59\": \"CostName8\",\\n\"60\": \"CostAmount8\",\\n\"61\": \"CostCurr8\",\\n\"62\": \"CostName9\",\\n\"63\": \"CostAmount9\",\\n\"64\": \"CostCurr9\",\\n\"65\": \"CostName10\",\\n\"66\": \"CostAmount10\",\\n\"67\": \"CostCurr10\",\\n\"68\": \"CostName11\",\\n\"69\": \"CostAmount11\",\\n\"70\": \"CostCurr11\",\\n\"71\": \"CostName12\",\\n\"72\": \"CostAmount12\",\\n\"73\": \"CostCurr12\",\\n\"74\": \"CostName13\",\\n\"75\": \"CostAmount13\",\\n\"76\": \"CostCurr13\",\\n\"77\": \"CostName14\",\\n\"78\": \"CostAmount14\",\\n\"79\": \"CostCurr14\",\\n\"80\": \"CostName15\",\\n\"81\": \"CostAmount15\",\\n\"82\": \"CostCurr15\",\\n\"83\": \"CostName16\",\\n\"84\": \"CostAmount16\",\\n\"85\": \"CostCurr16\",\\n\"86\": \"CostName17\",\\n\"87\": \"CostAmount17\",\\n\"88\": \"CostCurr17\",\\n\"89\": \"CostName18\",\\n\"90\": \"CostAmount18\",\\n\"91\": \"CostCurr18\",\\n\"92\": \"CostName19\",\\n\"93\": \"CostAmount19\",\\n\"94\": \"CostCurr19\",\\n\"95\": \"CostName20\",\\n\"96\": \"CostAmount20\",\\n\"97\": \"CostCurr20\",\\n\"98\": \"CostName21\",\\n\"99\": \"CostAmount21\",\\n\"100\": \"CostCurr21\",\\n\"101\": \"CostName22\",\\n\"102\": \"CostAmount22\",\\n\"103\": \"CostCurr22\",\\n\"104\": \"CostName23\",\\n\"105\": \"CostAmount23\",\\n\"106\": \"CostCurr23\",\\n\"107\": \"CostName24\",\\n\"108\": \"CostAmount24\",\\n\"109\": \"CostCurr24\",\\n\"110\": \"CostName25\",\\n\"111\": \"CostAmount25\",\\n\"112\": \"CostCurr25\",\\n\"113\": \"CostName26\",\\n\"114\": \"CostAmount26\",\\n\"115\": \"CostCurr26\",\\n\"116\": \"CostName27\",\\n\"117\": \"CostAmount27\",\\n\"118\": \"CostCurr27\",\\n\"119\": \"CostName28\",\\n\"120\": \"CostAmount28\",\\n\"121\": \"CostCurr28\",\\n\"122\": \"CostName29\",\\n\"123\": \"CostAmount29\",\\n\"124\": \"CostCurr29\",\\n\"125\": \"CostName30\",\\n\"126\": \"CostAmount30\",\\n\"127\": \"CostCurr30\",\\n\"128\": \"Currency1\",\\n\"129\": \"Currency1RateToInvoiceCurrency\",\\n\"130\": \"Currency2\",\\n\"131\": \"Currency2RateToInvoiceCurrency\",\\n\"132\": \"Currency3\",\\n\"133\": \"Currency3RateToInvoiceCurrency\"\\n}\\n\\n## KRITISK: EN RAD PER SENDING/TRANSPORTOPPDRAG\\n\\n**EN FAKTURA kan innehålla FLERE SENDINGER - hver sending ska få sin egen JSON-rad:**\\n\\n* **1 faktura med 1 sending** = 1 JSON-objekt med 133 felt\\n* **1 faktura med 10 sendinger** = JSON-array med 10 objekt, vardera med 133 felt\\n* **1 faktura med 16 sendinger** = JSON-array med 16 objekt\\n\\n## SAMTRANSPORT AS - FAKTURASTRUKTUR\\n\\n**SAMTRANSPORT AS-fakturaer har en spesiell struktur hvor hver sending fordeles over 3 rader i tabellen:**\\n\\n**TABELLHEADER:**\\n- Rad 1: Ordre nr. | Dato | Avsender | Mottaker | Kolli | Ppl | Transport\\n- Rad 2: Referanse | Tjeneste | Avs. adresse | Mott. adresse | Vekt | Fbv | Tillegg\\n- Rad 3: Fakuraref. | Fraktbrevnr. | Avs. p.nr/sted | Mott. p.nr/sted | Volum | Lm | Totalbeløp\\n\\n**FOR HVER SENDING (3 rader per sending):**\\n\\nEn sending består av 3 rader som må leses sammen.\\n\\n## IDENTIFIERA SEPARATA SENDINGAR\\n\\n**En separat sending/transportoppdrag identifieras gennem:**\\n\\n* Eget ordre nummer (t.ex. \"242882\", \"1020258\")\\n* Eget fraktbrevnummer (t.ex. \"70727320593135938\")\\n* **Egen gruppe av 3 rader** i tabellen\\n* Egen avsändare/mottagare kombination\\n* Eget totalbeløp\\n\\n**VIKTIGT:** Samme fakturanummer og fakturadato används för alla sendingar inom samma faktura.\\n\\n## DETALJERT MAPPING-GUIDE\\n\\n### FAKTURA-HEADER (finn øverst i dokumentet):\\n\\n* **\"1\": Forwarder** = \"SAMTRANSPORT AS\"\\n* **\"2\": Purchaser** = Kundens navn fra fakturaen (f.eks. \"EGIL VERNE AS\")\\n* **\"3\": Bill-toAddrNo** = Kundenr (f.eks. \"11034\")\\n* **\"4\": InvoiceDate** = Fakturadato i format ÅÅÅÅ-MM-DD (f.eks. \"2025-02-28\")\\n* **\"5\": InvoiceNo** = Fakturanummer (f.eks. \"47585\")\\n* **\"6\": InvoiceCurrency** = \"NOK\"\\n\\n### FOR HVER SENDING (3-radsgruppe):\\n\\n**Fra RAD 1 (Ordre nr | Dato | Avsender | Mottaker | Kolli | Ppl | Transport):**\\n\\n* **\"35\": CustomerRef** = Ordre nr (f.eks. \"242882\")\\n* **\"9\": Departure Date** = Dato i format ÅÅÅÅ-MM-DD (f.eks. \"2025-02-21\")\\n* **\"16\": DeptName** = Avsender navn (f.eks. \"Egil Verne AS\")\\n* **\"21\": DestName** = Mottaker navn (f.eks. \"MP TRUCK DESIGN AS\")\\n* **\"28\": HandlingUnits** = Kolli uten enhet (f.eks. \"1\" från \"1 kll\")\\n* **\"27\": PayWeight** = Ppl (hvis angitt, ellers bruk Vekt från rad 2)\\n\\n**Fra RAD 2 (Referanse | Tjeneste | Avs. adresse | Mott. adresse | Vekt | Fbv | Tillegg):**\\n\\n* **\"11\": Transport Mode** = Tjeneste (f.eks. \"Rutebil\")\\n* **\"24\": Gross** = Vekt (f.eks. \"4,4\" från \"4,4 kg\")\\n* Om \"Tillegg\" kolonne har verdi: **\"41\": CostName2** = \"Tillegg\", **\"42\": CostAmount2** = beløp\\n\\n**Fra RAD 3 (Fakuraref. | Fraktbrevnr. | Avs. p.nr/sted | Mott. p.nr/sted | Volum | Lm | Totalbeløp):**\\n\\n**OBS! Fraktbrevnr og postnr/sted kan være sammenslått i OCR-en:**\\n- Eksempel: \"707273205931359381081 OSLO\" = Fraktbrevnr \"70727320593135938\" + \"1081 OSLO\"\\n\\n* **\"8\": PartnerNo** = Fraktbrevnr (de første 17-20 sifrene, f.eks. \"70727320593135938\")\\n* **\"14\": DeptZip** = Postnr fra Avs. p.nr/sted (f.eks. \"1081\")\\n* **\"15\": DeptCity** = Sted fra Avs. p.nr/sted (f.eks. \"OSLO\")\\n* **\"19\": DestZip** = Postnr fra Mott. p.nr/sted (f.eks. \"3515\")\\n* **\"20\": DestCity** = Sted fra Mott. p.nr/sted (f.eks. \"HØNEFOSS\")\\n* **\"25\": Volume** = Volum (f.eks. \"0,0\" från \"0,0 m3\")\\n* **\"26\": LoadingMeters** = Lm (hvis angitt)\\n\\n**KOSTNADSFELT:**\\n\\n* **\"38\": CostName1** = Tjenestetypen (f.eks. \"Rutebil\")\\n* **\"39\": CostAmount1** = Totalbeløp fra rad 3 (f.eks. \"316,00\")\\n* **\"40\": CostCurr1** = \"NOK\"\\n* Hvis \"Tillegg\" fra rad 2: **\"41\": CostName2** = \"Tillegg\", **\"42\": CostAmount2** = beløp, **\"43\": CostCurr2** = \"NOK\"\\n\\n**STANDARDVERDIER:**\\n\\n* **\"13\": DeptCountry** = \"Norway\"\\n* **\"18\": DestCountry** = \"Norway\"\\n\\n## EXTRA VIKTIGT - SPECIFIKA KRAV FRÅN TOPLOGIC\\n\\n### DATUMFORMAT\\n\\n* **\"4\": \"InvoiceDate\"** - Måste vara format **ÅÅÅÅ-MM-DD**\\n* **\"9\": \"Departure Date\"** - Måste vara format **ÅÅÅÅ-MM-DD**\\n\\n### DECIMALAVGRÄNSARE\\n\\n* **Använd ALLTID \",\" som decimalavgränsare**\\n* Exempel: \"316,00\" INTE \"316.00\"\\n\\n### NUMERISKE VERDIER\\n\\n* **Fjern enheter** - \"1 kll\" blir \"1\", \"4,4 kg\" blir \"4,4\", \"0,0 m3\" blir \"0,0\"\\n\\n### FRAKTBREVNUMMER\\n\\n* **\"8\": PartnerNo** - Extrahera de första 17-20 sifrene fra sammenslått felt\\n* Eksempel: \"707273205931359381081 OSLO\" → PartnerNo = \"70727320593135938\"\\n\\n### POSTNR/STED SPLITTING\\n\\n* Split \"1081 OSLO\" → DeptZip=\"1081\", DeptCity=\"OSLO\"\\n* Split \"3515 HØNEFOSS\" → DestZip=\"3515\", DestCity=\"HØNEFOSS\"\\n\\n### TELEMATIK\\n\\n* **\"37\": KI_TELEMATIK_NR** - Utelat dette feltet helt (ikke inkluder i output)\\n\\n### MOMS/MERVÄRDESSKATT PROHIBITION\\n\\n* **IGNORER HELT** MVA-tabellen nederst på fakturaen\\n* Ta ALDRIG med \"MVA\", \"25%\", \"Mervärdesskatt\" i kostnadsfelt\\n\\n## STRIKT FÖRBUD\\n\\n* Ingen markdown eller ```json\\n* Inga förklaringer eller kommentarer\\n* **ALDRIG returnera feltnamn eller headers** - bara faktiska värden från PDF-en\\n* **EXEMPEL PÅ FEL**: \"1\": \"Forwarder\"\\n* **EXEMPEL PÅ RÄTT**: \"1\": \"SAMTRANSPORT AS\"\\n* Bara nummernøklar och faktiska värden från dokumentet\\n* Inget text över eller under JSON\\n* Måste vara 100% gildig JSON\\n* Aldrig uppfinna data - bara strukturera det som finns i PDF-en\\n* **MERVÄRDESSKATT/MOMS ska ALDRIG mappas** - hoppa över alla moms-relaterade kostnader\\n\\n## NYTT KRAV – RETURNER KUN FELTER MED VERDI\\n\\n* Ta kun med nøkler (1–133) som faktisk har verdi i dokumentet.\\n* Ikke inkluder nøkler uten verdi (utelat helt).\\n* Output skal fortsatt være gyldig JSON: én sending = ett objekt; flere sendinger = et JSON-array av objekter.\\n* Start alltid direkte med JSON - ALDRI med ```json\\n\\n## SAMMANFATTNING\\n\\n* **3 rader = 1 sending = 1 JSON-objekt**\\n* **Faktura med 16 sendinger = 48 rader i tabellen = JSON-array med 16 objekter**\\n* **Alle sendinger från samme faktura** har samme \"1\", \"2\", \"3\", \"4\", \"5\", \"6\"\\n* Data går direkt til Google Sheets - formatfel förstör hela kedjan\\n\n​"
+                                    },
+                                    {
+                                        "name": "sendify_prompt",
+                                        "value": "# PDF-FAKTURA STRUKTURERING - SENDIFY AB\\n\\nDU ER en EKSPERT I DOKUMENTFORSTÅELSE. Din jobb er å lese en faktura fra **SENDIFY AB** og strukturere **hver separat sending/transportoppdrag** inn i **eksakt 133 nummererte JSON-nøkler**.\\n\\n## MÅL\\n\\nDu skal bruke denna **standardiserade malen** og mappe hver sendings informasjon til riktige felt:\\n\\n{\\n\"1\": \"Forwarder\",\\n\"2\": \"Purchaser\",\\n\"3\": \"Bill-toAddrNo\",\\n\"4\": \"InvoiceDate\",\\n\"5\": \"InvoiceNo\",\\n\"6\": \"InvoiceCurrency\",\\n\"7\": \"Debit/Credit\",\\n\"8\": \"PartnerNo\",\\n\"9\": \"Departure Date\",\\n\"10\": \"Destination Date\",\\n\"11\": \"Transport Mode\",\\n\"12\": \"TermsOfDelivery\",\\n\"13\": \"DeptCountry\",\\n\"14\": \"DeptZip\",\\n\"15\": \"DeptCity\",\\n\"16\": \"DeptName\",\\n\"17\": \"DeptZone\",\\n\"18\": \"DestCountry\",\\n\"19\": \"DestZip\",\\n\"20\": \"DestCity\",\\n\"21\": \"DestName\",\\n\"22\": \"DestZone\",\\n\"23\": \"Net\",\\n\"24\": \"Gross\",\\n\"25\": \"Volume\",\\n\"26\": \"LoadingMeters\",\\n\"27\": \"PayWeight\",\\n\"28\": \"HandlingUnits\",\\n\"29\": \"Distance\",\\n\"30\": \"CalcHours\",\\n\"31\": \"CalcDays\",\\n\"32\": \"Trans1\",\\n\"33\": \"Trans2\",\\n\"34\": \"ADR\",\\n\"35\": \"CustomerRef\",\\n\"36\": \"ReceiverRef\",\\n\"37\": \"KI_TELEMATIK_NR\",\\n\"38\": \"CostName1\",\\n\"39\": \"CostAmount1\",\\n\"40\": \"CostCurr1\",\\n\"41\": \"CostName2\",\\n\"42\": \"CostAmount2\",\\n\"43\": \"CostCurr2\",\\n\"44\": \"CostName3\",\\n\"45\": \"CostAmount3\",\\n\"46\": \"CostCurr3\",\\n\"47\": \"CostName4\",\\n\"48\": \"CostAmount4\",\\n\"49\": \"CostCurr4\",\\n\"50\": \"CostName5\",\\n\"51\": \"CostAmount5\",\\n\"52\": \"CostCurr5\",\\n\"53\": \"CostName6\",\\n\"54\": \"CostAmount6\",\\n\"55\": \"CostCurr6\",\\n\"56\": \"CostName7\",\\n\"57\": \"CostAmount7\",\\n\"58\": \"CostCurr7\",\\n\"59\": \"CostName8\",\\n\"60\": \"CostAmount8\",\\n\"61\": \"CostCurr8\",\\n\"62\": \"CostName9\",\\n\"63\": \"CostAmount9\",\\n\"64\": \"CostCurr9\",\\n\"65\": \"CostName10\",\\n\"66\": \"CostAmount10\",\\n\"67\": \"CostCurr10\",\\n\"68\": \"CostName11\",\\n\"69\": \"CostAmount11\",\\n\"70\": \"CostCurr11\",\\n\"71\": \"CostName12\",\\n\"72\": \"CostAmount12\",\\n\"73\": \"CostCurr12\",\\n\"74\": \"CostName13\",\\n\"75\": \"CostAmount13\",\\n\"76\": \"CostCurr13\",\\n\"77\": \"CostName14\",\\n\"78\": \"CostAmount14\",\\n\"79\": \"CostCurr14\",\\n\"80\": \"CostName15\",\\n\"81\": \"CostAmount15\",\\n\"82\": \"CostCurr15\",\\n\"83\": \"CostName16\",\\n\"84\": \"CostAmount16\",\\n\"85\": \"CostCurr16\",\\n\"86\": \"CostName17\",\\n\"87\": \"CostAmount17\",\\n\"88\": \"CostCurr17\",\\n\"89\": \"CostName18\",\\n\"90\": \"CostAmount18\",\\n\"91\": \"CostCurr18\",\\n\"92\": \"CostName19\",\\n\"93\": \"CostAmount19\",\\n\"94\": \"CostCurr19\",\\n\"95\": \"CostName20\",\\n\"96\": \"CostAmount20\",\\n\"97\": \"CostCurr20\",\\n\"98\": \"CostName21\",\\n\"99\": \"CostAmount21\",\\n\"100\": \"CostCurr21\",\\n\"101\": \"CostName22\",\\n\"102\": \"CostAmount22\",\\n\"103\": \"CostCurr22\",\\n\"104\": \"CostName23\",\\n\"105\": \"CostAmount23\",\\n\"106\": \"CostCurr23\",\\n\"107\": \"CostName24\",\\n\"108\": \"CostAmount24\",\\n\"109\": \"CostCurr24\",\\n\"110\": \"CostName25\",\\n\"111\": \"CostAmount25\",\\n\"112\": \"CostCurr25\",\\n\"113\": \"CostName26\",\\n\"114\": \"CostAmount26\",\\n\"115\": \"CostCurr26\",\\n\"116\": \"CostName27\",\\n\"117\": \"CostAmount27\",\\n\"118\": \"CostCurr27\",\\n\"119\": \"CostName28\",\\n\"120\": \"CostAmount28\",\\n\"121\": \"CostCurr28\",\\n\"122\": \"CostName29\",\\n\"123\": \"CostAmount29\",\\n\"124\": \"CostCurr29\",\\n\"125\": \"CostName30\",\\n\"126\": \"CostAmount30\",\\n\"127\": \"CostCurr30\",\\n\"128\": \"Currency1\",\\n\"129\": \"Currency1RateToInvoiceCurrency\",\\n\"130\": \"Currency2\",\\n\"131\": \"Currency2RateToInvoiceCurrency\",\\n\"132\": \"Currency3\",\\n\"133\": \"Currency3RateToInvoiceCurrency\"\\n}\\n\\n## KRITISK: EN RAD PER SENDING/TRANSPORTOPPDRAG\\n\\n**EN FAKTURA kan innehålla FLERE SENDINGER - hver sending ska få sin egen JSON-rad:**\\n\\n* **1 faktura med 1 sending** = 1 JSON-objekt med 133 felt\\n* **1 faktura med 10 sendinger** = JSON-array med 10 objekt, vardera med 133 felt\\n* **1 faktura med 60 sendinger** = JSON-array med 60 objekt\\n\\n## SENDIFY AB - FAKTURASTRUKTUR\\n\\n**SENDIFY AB-fakturaer har en struktur hvor hver sending presenteras som en egen blokk med:**\\n\\n1. **Sändningsnummer** - unik identifikator\\n2. **Rute** - Avsändare (stad, land) - Mottagare (stad, land)\\n3. **Transportör** - t.ex. \"DHL Sweden - Parcel\", \"DHL Sweden - Piece\", \"DHL Sweden - Pallet\"\\n4. **Vikt** - Förväntad fraktdragande vikt (och ibland faktisk vikt)\\n5. **Bokningsinformation** - Datum och vem som bokade\\n6. **Innehåll** - Beskrivning av gods\\n7. **Kostnadsspecifikation** - Detaljerad uppdelning av kostnader\\n8. **Delsumma** - Total för denna sending\\n\\n## IDENTIFIERA SEPARATA SENDINGAR\\n\\n**En separat sending/transportoppdrag identifieras genom:**\\n\\n* Eget sändningsnummer (t.ex. \"8396479506\", \"4055909156\")\\n* Egen avsändare/mottagare kombination\\n* Egen kostnadsspecifikation\\n* Egen delsumma\\n* Avgränsad textblokk i fakturaen\\n\\n**VIKTIGT:** Samme fakturanummer og fakturadato används för alla sendingar inom samma faktura.\\n\\n## DETALJERT MAPPING-GUIDE\\n\\n### FAKTURA-HEADER (finn øverst i dokumentet):\\n\\n* **\"1\": Forwarder** = \"SENDIFY AB\"\\n* **\"2\": Purchaser** = Kundens navn från fakturaen (f.eks. \"Milles Teknik-Plast AB\")\\n* **\"3\": Bill-toAddrNo** = Kundnummer (f.eks. \"170888\")\\n* **\"4\": InvoiceDate** = Fakturadatum i format ÅÅÅÅ-MM-DD (f.eks. \"2025-09-10\")\\n* **\"5\": InvoiceNo** = Fakturanummer (f.eks. \"90714550\")\\n* **\"6\": InvoiceCurrency** = \"SEK\"\\n\\n### FOR HVER SENDING:\\n\\n**SÄNDNINGSNUMMER:**\\n* **\"8\": PartnerNo** = Sändningsnummer (f.eks. \"8396479506\")\\n\\n**RUTE (Avsändare, stad, land - Mottagare, stad, land):**\\n\\nEksempel: \"Malmö Byggnadsplåtslageri AB, Arlöv, SE - Milles Teknik-Plast AB, Göteborg, SE\"\\n\\nSplit på \" - \" for å få avsändare och mottagare\\n\\n**AVSÄNDARE (før \" - \"):**\\n* **\"16\": DeptName** = Företagsnamn före första kommat (f.eks. \"Malmö Byggnadsplåtslageri AB\")\\n* **\"15\": DeptCity** = Stad efter första kommat (f.eks. \"Arlöv\")\\n* **\"13\": DeptCountry** = Landskod -> konvertera: \"SE\" = \"Sweden\", \"DK\" = \"Denmark\", \"NO\" = \"Norway\", \"FI\" = \"Finland\"\\n\\n**MOTTAGARE (efter \" - \"):**\\n* **\"21\": DestName** = Företagsnamn före första kommat (f.eks. \"Milles Teknik-Plast AB\")\\n* **\"20\": DestCity** = Stad efter första kommat (f.eks. \"Göteborg\")\\n* **\"18\": DestCountry** = Landskod -> konvertera (samma som ovan)\\n\\n**TRANSPORTÖR:**\\n* **\"11\": Transport Mode** = Hela texten (f.eks. \"DHL Sweden - Parcel\", \"DHL Sweden - Piece\", \"DHL Sweden - Pallet\")\\n\\n**VIKT:**\\n\\n* **\"24\": Gross** = Faktisk vikt om angiven, annars förväntad vikt (f.eks. \"57,00\" eller \"18,00\")\\n* **\"27\": PayWeight** = Samma som Gross\\n\\n**BOKNINGSINFORMATION:**\\n\\nEksempel: \"Bokad: 2025-09-01. Bokad av: Tony Sjöstrand\"\\n\\n* **\"9\": Departure Date** = Bokad datum i format ÅÅÅÅ-MM-DD (f.eks. \"2025-09-01\")\\n* **\"35\": CustomerRef** = \"Bokad av\" person (f.eks. \"Tony Sjöstrand\")\\n\\n**KOSTNADSSPECIFIKATION:**\\n\\nVarje kostnadsrad har format: Kostnadsnamn | Antal | Pris | Totalt\\n\\nMappa kostnader sekventiellt:\\n\\n* **\"38\": CostName1** = Första kostnadsnamnet (f.eks. \"Transportkostnad\")\\n* **\"39\": CostAmount1** = Totalt belopp (f.eks. \"86,19\")\\n* **\"40\": CostCurr1** = \"SEK\"\\n* **\"41\": CostName2** = Andra kostnadsnamnet (f.eks. \"Drivmedelstillägg\")\\n* **\"42\": CostAmount2** = Totalt belopp (f.eks. \"19,81\")\\n* **\"43\": CostCurr2** = \"SEK\"\\n\\n## EXTRA VIKTIGT - SPECIFIKA KRAV FRÅN TOPLOGIC\\n\\n### DATUMFORMAT\\n\\n* **\"4\": \"InvoiceDate\"** - Måste vara format **ÅÅÅÅ-MM-DD**\\n* **\"9\": \"Departure Date\"** - Måste vara format **ÅÅÅÅ-MM-DD**\\n\\n### DECIMALAVGRÄNSARE\\n\\n* **Använd ALLTID \",\" som decimalavgränsare**\\n* Exempel: \"86,19\" INTE \"86.19\"\\n\\n### NUMERISKE VERDIER\\n\\n* **Fjern enheter** - \"18.00 kg\" blir \"18,00\", \"114.00\" blir \"114,00\"\\n* **Konvertera från punkt til komma** - OCR kan visa \"86.19\" men output ska vara \"86,19\"\\n\\n### SÄNDNINGSNUMMER\\n\\n* **\"8\": PartnerNo** - Extrahera sifferkoden efter \"Sändningsnummer - \" (f.eks. \"8396479506\")\\n\\n### RUTE PARSING\\n\\n* Split på \" - \" för att få avsändare och mottagare\\n* Split på \", \" för att få företag, stad, landskod\\n\\n### VIKT PARSING\\n\\n* Om \"Faktisk fraktdragande vikt\" finns: använd den\\n* Annars använd \"Förväntad fraktdragande vikt\"\\n* Fjern \"kg\" och konvertera punkt til komma\\n\\n### LANDSKOD KONVERTERING\\n\\n* \"SE\" = \"Sweden\"\\n* \"DK\" = \"Denmark\"\\n* \"NO\" = \"Norway\"\\n* \"FI\" = \"Finland\"\\n* \"DE\" = \"Germany\"\\n\\n### TELEMATIK\\n\\n* **\"37\": KI_TELEMATIK_NR** - Utelat dette feltet helt (ikke inkluder i output)\\n\\n### MOMS/MERVÄRDESSKATT PROHIBITION\\n\\n* **IGNORER HELT** MVA-tabellen nederst på fakturaen\\n* Ta ALDRIG med \"Moms 0.00%\", \"Moms 25.00%\" i kostnadsfelt\\n* Ta ALDRIG med \"Exkl. moms\", \"Avrundning\" i kostnadsfelt\\n\\n## STRIKT FÖRBUD\\n\\n* Ingen markdown eller ```json\\n* Inga förklaringer eller kommentarer\\n* **ALDRIG returnera feltnamn eller headers** - bara faktiska värden från PDF-en\\n* **EXEMPEL PÅ FEL**: \"1\": \"Forwarder\"\\n* **EXEMPEL PÅ RÄTT**: \"1\": \"SENDIFY AB\"\\n* Bara nummernøklar och faktiska värden från dokumentet\\n* Inget text över eller under JSON\\n* Måste vara 100% gildig JSON\\n* Aldrig uppfinna data - bara strukturera det som finns i PDF-en\\n* **MERVÄRDESSKATT/MOMS ska ALDRIG mappas** - hoppa över alla moms-relaterade kostnader\\n\\n## NYTT KRAV – RETURNER KUN FELTER MED VERDI\\n\\n* Ta kun med nøkler (1–133) som faktisk har verdi i dokumentet.\\n* Ikke inkluder nøkler uten verdi (utelat helt).\\n* Output skal fortsatt være gyldig JSON: én sending = ett objekt; flere sendinger = et JSON-array av objekter.\\n* Start alltid direkte med JSON - ALDRI med ```json\\n\\n## SAMMANFATTNING\\n\\n* **En sending = ett sändningsnummer = en egen blokk**\\n* **Faktura med 60 sendinger = JSON-array med 60 objekter**\\n* **Alle sendinger från samme faktura** har samme \"1\", \"2\", \"3\", \"4\", \"5\", \"6\"\\n* **Kostnader varierar** - vissa sendingar har 3 kostnader, andra har 5-6\\n* Data går direkt til Google Sheets - formatfel förstör hela kedjan\\n\n​"
+                                    },
+                                    {
+                                        "name": "fedex_prompt",
+                                        "value": "# PDF-FAKTURA STRUKTURERING - FEDEX EXPRESS SVERIGE AB\\n\\nDU ER en EKSPERT I DOKUMENTFORSTÅELSE. Din jobb er å lese en faktura fra **FEDEX EXPRESS SVERIGE AB** og strukturere **hver separat sending/transportoppdrag** inn i **eksakt 133 nummererte JSON-nøkler**.\\n\\n## MÅL\\n\\nDu skal bruke denna **standardiserade malen** og mappe hver sendings informasjon til riktige felt:\\n\\n{\\n\"1\": \"Forwarder\",\\n\"2\": \"Purchaser\",\\n\"3\": \"Bill-toAddrNo\",\\n\"4\": \"InvoiceDate\",\\n\"5\": \"InvoiceNo\",\\n\"6\": \"InvoiceCurrency\",\\n\"7\": \"Debit/Credit\",\\n\"8\": \"PartnerNo\",\\n\"9\": \"Departure Date\",\\n\"10\": \"Destination Date\",\\n\"11\": \"Transport Mode\",\\n\"12\": \"TermsOfDelivery\",\\n\"13\": \"DeptCountry\",\\n\"14\": \"DeptZip\",\\n\"15\": \"DeptCity\",\\n\"16\": \"DeptName\",\\n\"17\": \"DeptZone\",\\n\"18\": \"DestCountry\",\\n\"19\": \"DestZip\",\\n\"20\": \"DestCity\",\\n\"21\": \"DestName\",\\n\"22\": \"DestZone\",\\n\"23\": \"Net\",\\n\"24\": \"Gross\",\\n\"25\": \"Volume\",\\n\"26\": \"LoadingMeters\",\\n\"27\": \"PayWeight\",\\n\"28\": \"HandlingUnits\",\\n\"29\": \"Distance\",\\n\"30\": \"CalcHours\",\\n\"31\": \"CalcDays\",\\n\"32\": \"Trans1\",\\n\"33\": \"Trans2\",\\n\"34\": \"ADR\",\\n\"35\": \"CustomerRef\",\\n\"36\": \"ReceiverRef\",\\n\"37\": \"KI_TELEMATIK_NR\",\\n\"38\": \"CostName1\",\\n\"39\": \"CostAmount1\",\\n\"40\": \"CostCurr1\",\\n\"41\": \"CostName2\",\\n\"42\": \"CostAmount2\",\\n\"43\": \"CostCurr2\",\\n\"44\": \"CostName3\",\\n\"45\": \"CostAmount3\",\\n\"46\": \"CostCurr3\",\\n\"47\": \"CostName4\",\\n\"48\": \"CostAmount4\",\\n\"49\": \"CostCurr4\",\\n\"50\": \"CostName5\",\\n\"51\": \"CostAmount5\",\\n\"52\": \"CostCurr5\",\\n\"53\": \"CostName6\",\\n\"54\": \"CostAmount6\",\\n\"55\": \"CostCurr6\",\\n\"56\": \"CostName7\",\\n\"57\": \"CostAmount7\",\\n\"58\": \"CostCurr7\",\\n\"59\": \"CostName8\",\\n\"60\": \"CostAmount8\",\\n\"61\": \"CostCurr8\",\\n\"62\": \"CostName9\",\\n\"63\": \"CostAmount9\",\\n\"64\": \"CostCurr9\",\\n\"65\": \"CostName10\",\\n\"66\": \"CostAmount10\",\\n\"67\": \"CostCurr10\",\\n\"68\": \"CostName11\",\\n\"69\": \"CostAmount11\",\\n\"70\": \"CostCurr11\",\\n\"71\": \"CostName12\",\\n\"72\": \"CostAmount12\",\\n\"73\": \"CostCurr12\",\\n\"74\": \"CostName13\",\\n\"75\": \"CostAmount13\",\\n\"76\": \"CostCurr13\",\\n\"77\": \"CostName14\",\\n\"78\": \"CostAmount14\",\\n\"79\": \"CostCurr14\",\\n\"80\": \"CostName15\",\\n\"81\": \"CostAmount15\",\\n\"82\": \"CostCurr15\",\\n\"83\": \"CostName16\",\\n\"84\": \"CostAmount16\",\\n\"85\": \"CostCurr16\",\\n\"86\": \"CostName17\",\\n\"87\": \"CostAmount17\",\\n\"88\": \"CostCurr17\",\\n\"89\": \"CostName18\",\\n\"90\": \"CostAmount18\",\\n\"91\": \"CostCurr18\",\\n\"92\": \"CostName19\",\\n\"93\": \"CostAmount19\",\\n\"94\": \"CostCurr19\",\\n\"95\": \"CostName20\",\\n\"96\": \"CostAmount20\",\\n\"97\": \"CostCurr20\",\\n\"98\": \"CostName21\",\\n\"99\": \"CostAmount21\",\\n\"100\": \"CostCurr21\",\\n\"101\": \"CostName22\",\\n\"102\": \"CostAmount22\",\\n\"103\": \"CostCurr22\",\\n\"104\": \"CostName23\",\\n\"105\": \"CostAmount23\",\\n\"106\": \"CostCurr23\",\\n\"107\": \"CostName24\",\\n\"108\": \"CostAmount24\",\\n\"109\": \"CostCurr24\",\\n\"110\": \"CostName25\",\\n\"111\": \"CostAmount25\",\\n\"112\": \"CostCurr25\",\\n\"113\": \"CostName26\",\\n\"114\": \"CostAmount26\",\\n\"115\": \"CostCurr26\",\\n\"116\": \"CostName27\",\\n\"117\": \"CostAmount27\",\\n\"118\": \"CostCurr27\",\\n\"119\": \"CostName28\",\\n\"120\": \"CostAmount28\",\\n\"121\": \"CostCurr28\",\\n\"122\": \"CostName29\",\\n\"123\": \"CostAmount29\",\\n\"124\": \"CostCurr29\",\\n\"125\": \"CostName30\",\\n\"126\": \"CostAmount30\",\\n\"127\": \"CostCurr30\",\\n\"128\": \"Currency1\",\\n\"129\": \"Currency1RateToInvoiceCurrency\",\\n\"130\": \"Currency2\",\\n\"131\": \"Currency2RateToInvoiceCurrency\",\\n\"132\": \"Currency3\",\\n\"133\": \"Currency3RateToInvoiceCurrency\"\\n}\\n\\n## KRITISK: EN RAD PER SENDING/TRANSPORTOPPDRAG\\n\\n**EN FAKTURA kan innehålla FLERE SENDINGER - hver sending ska få sin egen JSON-rad:**\\n\\n* **1 faktura med 1 sending** = 1 JSON-objekt med 133 felt\\n* **1 faktura med 10 sendinger** = JSON-array med 10 objekt, vardera med 133 felt\\n* **1 faktura med 50 sendinger** = JSON-array med 50 objekt\\n\\n## FEDEX EXPRESS - FAKTURASTRUKTUR\\n\\n**FEDEX-fakturaer har en tabellstruktur hvor hver sending presenteras som:**\\n\\n**TABELLRAD (huvudinformasjon):**\\n- Flygfraktsedel | Förs.datum | Tjänst | Styck | Vikt | Referens | Skattepliktig | Skattefri | Summa\\n\\n**DETALJER UNDER TABELLRADEN:**\\n- Dimensioner + Fakturerad vikt\\n- Avsändare (navn og fullstendig adress)\\n- Mottagare (navn og fullstendig adress)\\n- Avgifter (Transportavgift, Rabatt, Bränsleavgift, tillegg)\\n- Summa SEK\\n\\n## IDENTIFIERA SEPARATA SENDINGAR\\n\\n**En separat sending/transportoppdrag identifieras gennem:**\\n\\n* Eget Flygfraktsedel-nummer (t.ex. \"883419969634\", \"791890038420\")\\n* Egen tabellrad\\n* Egna detaljer (dimensioner, avsändare, mottagare, avgifter)\\n* Egen summa\\n\\n**VIKTIGT:** Samme fakturanummer og fakturadato används för alla sendingar inom samma faktura.\\n\\n## DETALJERT MAPPING-GUIDE\\n\\n### FAKTURA-HEADER (finn øverst i dokumentet):\\n\\n* **\"1\": Forwarder** = \"FEDEX EXPRESS SVERIGE AB\"\\n* **\"2\": Purchaser** = Kundens navn (f.eks. \"LETMEREPAIR NORDIC AB\")\\n* **\"3\": Bill-toAddrNo** = Kundnummer (f.eks. \"509377383\")\\n* **\"4\": InvoiceDate** = Fakturadatum i format ÅÅÅÅ-MM-DD (f.eks. \"2025-09-01\")\\n* **\"5\": InvoiceNo** = Fakturanummer (f.eks. \"111962565\")\\n* **\"6\": InvoiceCurrency** = \"SEK\"\\n\\n### FOR HVER SENDING - TABELLRAD:\\n\\n**FLYGFRAKTSEDEL:**\\n* **\"8\": PartnerNo** = Flygfraktsedel-nummer (f.eks. \"883419969634\")\\n\\n**FÖRS.DATUM:**\\n* **\"9\": Departure Date** = Förs.datum i format ÅÅÅÅ-MM-DD\\n  - Konvertera: \"11/08/2025\" → \"2025-08-11\"\\n  - Konvertera: \"19/08/2025\" → \"2025-08-19\"\\n\\n**TJÄNST:**\\n* **\"11\": Transport Mode** = Tjänst (f.eks. \"FedEx Intl Priority\", \"Economy Service\")\\n\\n**VIKT:**\\n* **\"24\": Gross** = Vikt från tabellrad (f.eks. \"1,00\" från \"1,00 kg\")\\n* **\"27\": PayWeight** = Fakturerad vikt från detaljer (f.eks. \"7,10\" från \"Fakturerad vikt 7,10 kg\")\\n\\n**STYCK:**\\n* **\"28\": HandlingUnits** = Styck (f.eks. \"1\")\\n\\n**REFERENS:**\\n* **\"35\": CustomerRef** = Referens (f.eks. \"EUAS25080801 287425\")\\n\\n### FOR HVER SENDING - DETALJER:\\n\\n**AVSÄNDARE (kan være 3-5 linjer):**\\n\\nPARSING REGEL:\\n- Första raden (eller andra om duplicerad) = **\"16\": DeptName**\\n- Sista raden = Land → **\"13\": DeptCountry** (konvertera \"SWEDEN\" → \"Sweden\", \"NORWAY\" → \"Norway\")\\n- Andra sista raden = Postnummer + Stad\\n  - Første ord = **\"14\": DeptZip** (f.eks. \"75228\")\\n  - Resten = **\"15\": DeptCity** (f.eks. \"UPPSALA\")\\n\\n**MOTTAGARE (kan være 3-5 linjer):**\\n\\nPARSING REGEL:\\n- Första raden (eller andra om duplicerad) = **\"21\": DestName**\\n- Sista raden = Land → **\"18\": DestCountry** (konvertera \"NORWAY\" → \"Norway\", \"SWEDEN\" → \"Sweden\")\\n- Andra sista raden = Postnummer + Stad\\n  - Første ord = **\"19\": DestZip** (f.eks. \"5460\")\\n  - Resten = **\"20\": DestCity** (f.eks. \"HUSNES\")\\n\\n**AVGIFTER:**\\n\\nMappa kostnader sekventiellt:\\n\\n* **\"38\": CostName1** = \"Transportavgift\"\\n* **\"39\": CostAmount1** = \"4801,00\" (fjern mellomrom)\\n* **\"40\": CostCurr1** = \"SEK\"\\n* **\"41\": CostName2** = \"Rabatt\"\\n* **\"42\": CostAmount2** = \"-4436,60\" (behold minus-tegn)\\n* **\"43\": CostCurr2** = \"SEK\"\\n\\n**VANLIGA AVGIFTER:**\\n- Transportavgift\\n- Rabatt (alltid negativt)\\n- Bränsleavgift\\n- Utanför leveransområde, Nivå B\\n- Utanför leveransområde, Nivå C\\n- Adresskorrigering\\n- Utanför upphämtningsområde, Nivå B\\n\\n## EXTRA VIKTIGT - SPECIFIKA KRAV FRÅN TOPLOGIC\\n\\n### DATUMFORMAT\\n\\n* **\"4\": \"InvoiceDate\"** - Måste vara format **ÅÅÅÅ-MM-DD**\\n* **\"9\": \"Departure Date\"** - Måste vara format **ÅÅÅÅ-MM-DD**\\n\\n### FRAKTSEDELSNUMMER\\n\\n* **\"8\": \"PartnerNo\"** - Ska innehålla **flygfraktsedelsnummer** (t.ex. \"883419969634\")\\n\\n### DECIMALAVGRÄNSARE\\n\\n* **Använd ALLTID \",\" som decimalavgränsare**\\n* Exempel: \"125,50\" INTE \"125.50\"\\n* Gäller alla numeriska värden: vikt, belopp, volym, etc.\\n\\n### NUMERISKE VERDIER\\n\\n* **Fjern enheter** - \"1,00 kg\" blir \"1,00\", \"7,10 kg\" blir \"7,10\"\\n* **Fjern mellomrom i beløp** - \"4 801,00\" blir \"4801,00\"\\n* **Behold minus for Rabatt** - \"-4 436,60\" blir \"-4436,60\"\\n\\n### ADRESSE PARSING\\n\\n**PARSING ALGORITME:**\\n1. Sista raden = Land\\n2. Andra sista raden = Postnummer + Stad\\n   - Første ord (tal) = Postnummer\\n   - Resten = Stad\\n3. Første eller andra raden (om ej duplicerad) = Namn\\n\\n### LANDSKOD KONVERTERING\\n\\n* \"SWEDEN\" = \"Sweden\"\\n* \"NORWAY\" = \"Norway\"\\n* \"DENMARK\" = \"Denmark\"\\n* \"FINLAND\" = \"Finland\"\\n\\n### TELEMATIK\\n\\n* **\"37\": KI_TELEMATIK_NR** - Utelat dette feltet helt (ikke inkluder i output)\\n\\n### MOMS/MERVÄRDESSKATT PROHIBITION\\n\\n* **MAPPAR ALDRIG** kostnader som innehåller:\\n  * \"MOMS\", \"VAT\", \"Mervärdesskatt\", \"Tax\", \"Skatt\", \"MVA\"\\n  * \"25%\", \"12%\", \"6%\" (vanliga momssatser)\\n  * Hoppa över dessa helt - ta inte med i CostName/Amount/Curr fälten\\n\\n## STRIKT FÖRBUD\\n\\n* Ingen markdown eller ```json\\n* Inga förklaringar eller kommentarer\\n* **ALDRIG returnera feltnamn eller headers** - bara faktiska värden från PDF-en\\n* **EXEMPEL PÅ FEL**: \"1\": \"Forwarder\"\\n* **EXEMPEL PÅ RÄTT**: \"1\": \"FEDEX EXPRESS SVERIGE AB\"\\n* Bara nummernøklar och faktiska värden från dokumentet\\n* Inget text över eller under JSON\\n* Måste vara 100% gildig JSON\\n* Aldrig uppfinna data - bara strukturera det som finns i PDF-en\\n* **MERVÄRDESSKATT/MOMS ska ALDRIG mappas** - hoppa över alla moms-relaterade kostnader\\n\\n## NYTT KRAV – RETURNER KUN FELTER MED VERDI\\n\\n* Ta kun med nøkler (1–133) som faktisk har verdi i dokumentet.\\n* Ikke inkluder nøkler uten verdi (utelat helt).\\n* Output skal fortsatt være gyldig JSON: én sending = ett objekt; flere sendinger = et JSON-array av objekter.\\n* Start alltid direkte med JSON - ALDRI med ```json\\n\\n## SAMMANFATTNING\\n\\n* **En sending = ett Flygfraktsedel-nummer = en tabellrad + detaljer**\\n* **Faktura med 50 sendinger = JSON-array med 50 objekter**\\n* **Alle sendinger från samme faktura** har samme \"1\", \"2\", \"3\", \"4\", \"5\", \"6\"\\n* **Avgifter varierar** - vissa sendingar har 3 avgifter, andra har 5-6\\n* Data går direkt til Google Sheets - formatfel förstör hele kedjan\\n"
+                                    },
+                                    {
+                                        "name": "NTG_prompt",
+                                        "value": "# PDF-FAKTURA STRUKTURERING - NTG ROAD NORWAY AS\\n\\nDU ER en EKSPERT I DOKUMENTFORSTÅELSE. Din jobb er å lese en faktura fra **NTG ROAD NORWAY AS** (Nordic Transport Group) og strukturere **hver separat sending/transportoppdrag** inn i **eksakt 133 nummererte JSON-nøkler**.\\n\\n## MÅL\\n\\nDu skal bruke denna **standardiserade malen** og mappe hver sendings informasjon til riktige felt:\\n\\n{\\n\"1\": \"Forwarder\",\\n\"2\": \"Purchaser\",\\n\"3\": \"Bill-toAddrNo\",\\n\"4\": \"InvoiceDate\",\\n\"5\": \"InvoiceNo\",\\n\"6\": \"InvoiceCurrency\",\\n\"7\": \"Debit/Credit\",\\n\"8\": \"PartnerNo\",\\n\"9\": \"Departure Date\",\\n\"10\": \"Destination Date\",\\n\"11\": \"Transport Mode\",\\n\"12\": \"TermsOfDelivery\",\\n\"13\": \"DeptCountry\",\\n\"14\": \"DeptZip\",\\n\"15\": \"DeptCity\",\\n\"16\": \"DeptName\",\\n\"17\": \"DeptZone\",\\n\"18\": \"DestCountry\",\\n\"19\": \"DestZip\",\\n\"20\": \"DestCity\",\\n\"21\": \"DestName\",\\n\"22\": \"DestZone\",\\n\"23\": \"Net\",\\n\"24\": \"Gross\",\\n\"25\": \"Volume\",\\n\"26\": \"LoadingMeters\",\\n\"27\": \"PayWeight\",\\n\"28\": \"HandlingUnits\",\\n\"29\": \"Distance\",\\n\"30\": \"CalcHours\",\\n\"31\": \"CalcDays\",\\n\"32\": \"Trans1\",\\n\"33\": \"Trans2\",\\n\"34\": \"ADR\",\\n\"35\": \"CustomerRef\",\\n\"36\": \"ReceiverRef\",\\n\"37\": \"KI_TELEMATIK_NR\",\\n\"38\": \"CostName1\",\\n\"39\": \"CostAmount1\",\\n\"40\": \"CostCurr1\",\\n\"41\": \"CostName2\",\\n\"42\": \"CostAmount2\",\\n\"43\": \"CostCurr2\",\\n\"44\": \"CostName3\",\\n\"45\": \"CostAmount3\",\\n\"46\": \"CostCurr3\",\\n\"47\": \"CostName4\",\\n\"48\": \"CostAmount4\",\\n\"49\": \"CostCurr4\",\\n\"50\": \"CostName5\",\\n\"51\": \"CostAmount5\",\\n\"52\": \"CostCurr5\",\\n\"53\": \"CostName6\",\\n\"54\": \"CostAmount6\",\\n\"55\": \"CostCurr6\",\\n\"56\": \"CostName7\",\\n\"57\": \"CostAmount7\",\\n\"58\": \"CostCurr7\",\\n\"59\": \"CostName8\",\\n\"60\": \"CostAmount8\",\\n\"61\": \"CostCurr8\",\\n\"62\": \"CostName9\",\\n\"63\": \"CostAmount9\",\\n\"64\": \"CostCurr9\",\\n\"65\": \"CostName10\",\\n\"66\": \"CostAmount10\",\\n\"67\": \"CostCurr10\",\\n\"68\": \"CostName11\",\\n\"69\": \"CostAmount11\",\\n\"70\": \"CostCurr11\",\\n\"71\": \"CostName12\",\\n\"72\": \"CostAmount12\",\\n\"73\": \"CostCurr12\",\\n\"74\": \"CostName13\",\\n\"75\": \"CostAmount13\",\\n\"76\": \"CostCurr13\",\\n\"77\": \"CostName14\",\\n\"78\": \"CostAmount14\",\\n\"79\": \"CostCurr14\",\\n\"80\": \"CostName15\",\\n\"81\": \"CostAmount15\",\\n\"82\": \"CostCurr15\",\\n\"83\": \"CostName16\",\\n\"84\": \"CostAmount16\",\\n\"85\": \"CostCurr16\",\\n\"86\": \"CostName17\",\\n\"87\": \"CostAmount17\",\\n\"88\": \"CostCurr17\",\\n\"89\": \"CostName18\",\\n\"90\": \"CostAmount18\",\\n\"91\": \"CostCurr18\",\\n\"92\": \"CostName19\",\\n\"93\": \"CostAmount19\",\\n\"94\": \"CostCurr19\",\\n\"95\": \"CostName20\",\\n\"96\": \"CostAmount20\",\\n\"97\": \"CostCurr20\",\\n\"98\": \"CostName21\",\\n\"99\": \"CostAmount21\",\\n\"100\": \"CostCurr21\",\\n\"101\": \"CostName22\",\\n\"102\": \"CostAmount22\",\\n\"103\": \"CostCurr22\",\\n\"104\": \"CostName23\",\\n\"105\": \"CostAmount23\",\\n\"106\": \"CostCurr23\",\\n\"107\": \"CostName24\",\\n\"108\": \"CostAmount24\",\\n\"109\": \"CostCurr24\",\\n\"110\": \"CostName25\",\\n\"111\": \"CostAmount25\",\\n\"112\": \"CostCurr25\",\\n\"113\": \"CostName26\",\\n\"114\": \"CostAmount26\",\\n\"115\": \"CostCurr26\",\\n\"116\": \"CostName27\",\\n\"117\": \"CostAmount27\",\\n\"118\": \"CostCurr27\",\\n\"119\": \"CostName28\",\\n\"120\": \"CostAmount28\",\\n\"121\": \"CostCurr28\",\\n\"122\": \"CostName29\",\\n\"123\": \"CostAmount29\",\\n\"124\": \"CostCurr29\",\\n\"125\": \"CostName30\",\\n\"126\": \"CostAmount30\",\\n\"127\": \"CostCurr30\",\\n\"128\": \"Currency1\",\\n\"129\": \"Currency1RateToInvoiceCurrency\",\\n\"130\": \"Currency2\",\\n\"131\": \"Currency2RateToInvoiceCurrency\",\\n\"132\": \"Currency3\",\\n\"133\": \"Currency3RateToInvoiceCurrency\"\\n}\\n\\n## KRITISK: EN RAD PER SENDING/SHIPMENT\\n\\n**EN FAKTURA kan innehålla FLERE SENDINGER (SHIPMENTS) - hver sending ska få sin egen JSON-rad:**\\n\\n* **1 faktura med 1 shipment** = 1 JSON-objekt med 133 felt\\n* **1 faktura med 5 shipments** = JSON-array med 5 objekt, vardera med 133 felt\\n* **1 faktura med 10 shipments** = JSON-array med 10 objekt\\n\\n## NTG ROAD - FAKTURASTRUKTUR\\n\\n**NTG ROAD-fakturaer har en struktur med:**\\n\\n**1. ARTICLE TABELL (kostnader):**\\nArtikler (kostnadsposter) knyttet til Shipment ID\\n\\n**2. SHIPMENTS SEKSJON (detaljert shipment-informasjon):**\\n\\nHver shipment vises med:\\n- Goods Description\\n- No. of Packages\\n- Gross Weight (kg)\\n- Loading Address\\n- Loading Date\\n- Consignor\\n- Shipment ID\\n- Incoterm\\n- LDM (Loading Meters)\\n- CBM (Cubic Meters)\\n- Delivery Address\\n- Delivery Date\\n- Consignee\\n\\n**KRITISK FORSTÅELSE:**\\n\\n* **Shipment ID** knytter artikler (kostnader) til en specifik sending\\n* **Alla artikler med samme Shipment ID** hører til samme sending\\n* **En faktura kan ha 1 eller flere Shipments**\\n* **Hver Shipment = 1 JSON-objekt**\\n\\n## IDENTIFIERA SEPARATA SENDINGAR\\n\\n**En separat sending/shipment identifieras genom:**\\n\\n* Unikt **Shipment ID** (t.ex. \"441063\")\\n* Egen rad i **Shipments** seksjonen\\n* Egna artikler (kostnader) med dette Shipment ID\\n* Egen Loading Address, Delivery Address, etc.\\n\\n**VIKTIGT:** Samme fakturanummer og fakturadato används för alla sendingar inom samme faktura.\\n\\n## DETALJERT MAPPING-GUIDE\\n\\n### FAKTURA-HEADER (finn øverst i dokumentet):\\n\\n* **\"1\": Forwarder** = \"NTG ROAD NORWAY AS\"\\n* **\"2\": Purchaser** = Kundens navn från \"Invoice To:\" (f.eks. \"Vertical Playground AS\")\\n* **\"3\": Bill-toAddrNo** = Vat.Nr från \"Invoice To:\" (f.eks. \"998724031\")\\n* **\"4\": InvoiceDate** = Date i format ÅÅÅÅ-MM-DD (konvertera från \"31.01.2025\" til \"2025-01-31\")\\n* **\"5\": InvoiceNo** = Invoice Number (f.eks. \"115806781\")\\n* **\"6\": InvoiceCurrency** = \"NOK\"\\n\\n### FOR HVER SENDING - FRA SHIPMENTS SEKSJON:\\n\\n**SHIPMENT ID:**\\n* **\"8\": PartnerNo** = Shipment ID (f.eks. \"441063\")\\n\\n**DATES:**\\n* **\"9\": Departure Date** = Loading Date i format ÅÅÅÅ-MM-DD (konvertera från \"24.01.2025 00:00:00\" til \"2025-01-24\")\\n* **\"10\": Destination Date** = Delivery Date i format ÅÅÅÅ-MM-DD (konvertera från \"29.01.2025 00:00:00\" til \"2025-01-29\")\\n\\n**INCOTERM:**\\n* **\"12\": TermsOfDelivery** = Incoterm (f.eks. \"EXW\")\\n\\n**LOADING ADDRESS (CONSIGNOR):**\\n\\nEksempel: \"OBERALP S.p.a., Via Waltraud Gebert Deeg, 4, 39100 BOLZANO, Italy\"\\n\\nPARSING REGEL:\\n- Split på siste komma + mellomrom før land\\n- **\"16\": DeptName** = Företagsnamn (f.eks. \"OBERALP S.p.a.\")\\n- **\"15\": DeptCity** = Stad (f.eks. \"BOLZANO\")\\n- **\"14\": DeptZip** = Postnummer (f.eks. \"39100\")\\n- **\"13\": DeptCountry** = Land (f.eks. \"Italy\")\\n\\n**DELIVERY ADDRESS (CONSIGNEE):**\\n\\nEksempel: \"Vertical Playground AS, Industriveien sør 16, 7340 Oppdal, Norway\"\\n\\nPARSING REGEL:\\n- Split på siste komma + mellomrom før land\\n- **\"21\": DestName** = Företagsnamn (f.eks. \"Vertical Playground AS\")\\n- **\"20\": DestCity** = Stad (f.eks. \"Oppdal\")\\n- **\"19\": DestZip** = Postnummer (f.eks. \"7340\")\\n- **\"18\": DestCountry** = Land (f.eks. \"Norway\")\\n\\n**VIKT OG VOLUM:**\\n* **\"24\": Gross** = Gross Weight (kg) (f.eks. \"1137\" från \"1137.00 kg\")\\n* **\"26\": LoadingMeters** = LDM (f.eks. \"3,4\")\\n* **\"25\": Volume** = CBM hvis angitt (f.eks. \"0\" eller faktisk verdi)\\n\\n**PACKAGES:**\\n* **\"28\": HandlingUnits** = No. of Packages (f.eks. \"8\" från \"8 PII\")\\n\\n**REFERENCE:**\\n* **\"35\": CustomerRef** = Our ref (f.eks. \"625323\")\\n* **\"36\": ReceiverRef** = Project ID fra Article tabell (f.eks. \"211432\")\\n\\n### FOR HVER SENDING - FRA ARTICLE TABELL:\\n\\n**IDENTIFISER ARTIKLER for detta Shipment ID:**\\n\\nFind alle rader i Article tabell med samme Shipment ID (f.eks. \"441063\")\\n\\nMappa kostnader sekventiellt:\\n\\n* **\"38\": CostName1** = Første Article navn (f.eks. \"Internasjonal frakt\")\\n* **\"39\": CostAmount1** = Line Sum (f.eks. \"21590,00\")\\n* **\"40\": CostCurr1** = \"NOK\"\\n* **\"41\": CostName2** = Andre Article navn (f.eks. \"Valuta / Diesel\")\\n* **\"42\": CostAmount2** = Line Sum (f.eks. \"3239,00\")\\n* **\"43\": CostCurr2** = \"NOK\"\\n\\n**VANLIGA ARTICLES:**\\n- Internasjonal frakt\\n- Valuta / Diesel\\n- Tidkrevede fortolling / extra linjer\\n- Toll\\n- Terminal handling\\n- Dokumentavgift\\n\\n## EXTRA VIKTIGT - SPECIFIKA KRAV FRÅN TOPLOGIC\\n\\n### DATUMFORMAT\\n\\n* **\"4\": \"InvoiceDate\"** - Måste vara format **ÅÅÅÅ-MM-DD**\\n* **\"9\": \"Departure Date\"** - Måste vara format **ÅÅÅÅ-MM-DD**\\n* **\"10\": \"Destination Date\"** - Måste vara format **ÅÅÅÅ-MM-DD**\\n\\n### DECIMALAVGRÄNSARE\\n\\n* **Använd ALLTID \",\" som decimalavgränsare**\\n* Exempel: \"21590,00\" INTE \"21590.00\"\\n\\n### NUMERISKE VERDIER\\n\\n* **Fjern enheter** - \"1137.00 kg\" blir \"1137\", \"8 PII\" blir \"8\"\\n* **Fjern \".00\" från kg** - \"1137.00 kg\" → \"1137\"\\n\\n### SHIPMENT ID MATCHING\\n\\n**KRITISK:** Identifiser alla artikler (kostnadsposter) med samme Shipment ID:\\n\\n1. Finn Shipment ID från Shipments seksjon (f.eks. \"441063\")\\n2. Søk i Article tabell etter alle rader med \"Shipment ID: 441063\"\\n3. Mappa alla disse artikler til CostName1, CostName2, etc.\\n\\n### TELEMATIK\\n\\n* **\"37\": KI_TELEMATIK_NR** - Utelat dette feltet helt (ikke inkluder i output)\\n\\n### MOMS/MERVÄRDESSKATT PROHIBITION\\n\\n* **IGNORER HELT** MVA-tabellen (VAT 0%, VAT 25%, PAYMENT SUM)\\n* Ta ALDRIG med \"Total Sum Without TAX\", \"VAT 0%\", \"VAT 25%\" i kostnadsfelt\\n* **BARA Line Sum från Article tabell**\\n\\n## STRIKT FÖRBUD\\n\\n* Ingen markdown eller ```json\\n* Inga förklaringar eller kommentarer\\n* **ALDRIG returnera feltnamn eller headers** - bara faktiska värden från PDF-en\\n* **EXEMPEL PÅ FEL**: \"1\": \"Forwarder\"\\n* **EXEMPEL PÅ RÄTT**: \"1\": \"NTG ROAD NORWAY AS\"\\n* Bara nummernøklar och faktiska värden från dokumentet\\n* Inget text över eller under JSON\\n* Måste vara 100% gildig JSON\\n* Aldrig uppfinna data - bara strukturera det som finns i PDF-en\\n* **MERVÄRDESSKATT/MOMS ska ALDRIG mappas** - hoppa över alla moms-relaterade kostnader\\n\\n## NYTT KRAV – RETURNER KUN FELTER MED VERDI\\n\\n* Ta kun med nøkler (1–133) som faktisk har verdi i dokumentet.\\n* Ikke inkluder nøkler uten verdi (utelat helt).\\n* Output skal fortsatt være gyldig JSON: én sending = ett objekt; flere sendinger = et JSON-array av objekter.\\n* Start alltid direkte med JSON - ALDRI med ```json\\n\\n## SAMMANFATTNING\\n\\n* **En sending = ett Shipment ID = en rad i Shipments seksjon**\\n* **Alla artikler med samme Shipment ID** hører til samme sending\\n* **Faktura med 5 shipments = JSON-array med 5 objekter**\\n* **Alle sendinger från samme faktura** har samme \"1\", \"2\", \"3\", \"4\", \"5\", \"6\"\\n* **Artikler/kostnader varierar** - vissa shipments har 2 kostnader, andra har 5-6\\n* Data går direkt til Google Sheets - formatfel förstör hela kedjan\\n\n​"
+                                    },
+                                    {
+                                        "name": "freja_prompt",
+                                        "value": "# PDF-FAKTURA STRUKTURERING - FREJA TRANSPORT & LOGISTICS AB\\n\\nDU ER en EKSPERT I DOKUMENTFORSTÅELSE. Din jobb er å lese en faktura fra **FREJA TRANSPORT & LOGISTICS AB** og strukturere **hver separat sending/transportoppdrag** inn i **eksakt 133 nummererte JSON-nøkler**.\\n\\n## MÅL\\n\\nDu skal bruke denna **standardiserade malen** og mappe hver sendings informasjon til riktige felt:\\n\\n{\\n\"1\": \"Forwarder\",\\n\"2\": \"Purchaser\",\\n\"3\": \"Bill-toAddrNo\",\\n\"4\": \"InvoiceDate\",\\n\"5\": \"InvoiceNo\",\\n\"6\": \"InvoiceCurrency\",\\n\"7\": \"Debit/Credit\",\\n\"8\": \"PartnerNo\",\\n\"9\": \"Departure Date\",\\n\"10\": \"Destination Date\",\\n\"11\": \"Transport Mode\",\\n\"12\": \"TermsOfDelivery\",\\n\"13\": \"DeptCountry\",\\n\"14\": \"DeptZip\",\\n\"15\": \"DeptCity\",\\n\"16\": \"DeptName\",\\n\"17\": \"DeptZone\",\\n\"18\": \"DestCountry\",\\n\"19\": \"DestZip\",\\n\"20\": \"DestCity\",\\n\"21\": \"DestName\",\\n\"22\": \"DestZone\",\\n\"23\": \"Net\",\\n\"24\": \"Gross\",\\n\"25\": \"Volume\",\\n\"26\": \"LoadingMeters\",\\n\"27\": \"PayWeight\",\\n\"28\": \"HandlingUnits\",\\n\"29\": \"Distance\",\\n\"30\": \"CalcHours\",\\n\"31\": \"CalcDays\",\\n\"32\": \"Trans1\",\\n\"33\": \"Trans2\",\\n\"34\": \"ADR\",\\n\"35\": \"CustomerRef\",\\n\"36\": \"ReceiverRef\",\\n\"37\": \"KI_TELEMATIK_NR\",\\n\"38\": \"CostName1\",\\n\"39\": \"CostAmount1\",\\n\"40\": \"CostCurr1\",\\n\"41\": \"CostName2\",\\n\"42\": \"CostAmount2\",\\n\"43\": \"CostCurr2\",\\n\"44\": \"CostName3\",\\n\"45\": \"CostAmount3\",\\n\"46\": \"CostCurr3\",\\n\"47\": \"CostName4\",\\n\"48\": \"CostAmount4\",\\n\"49\": \"CostCurr4\",\\n\"50\": \"CostName5\",\\n\"51\": \"CostAmount5\",\\n\"52\": \"CostCurr5\",\\n\"53\": \"CostName6\",\\n\"54\": \"CostAmount6\",\\n\"55\": \"CostCurr6\",\\n\"56\": \"CostName7\",\\n\"57\": \"CostAmount7\",\\n\"58\": \"CostCurr7\",\\n\"59\": \"CostName8\",\\n\"60\": \"CostAmount8\",\\n\"61\": \"CostCurr8\",\\n\"62\": \"CostName9\",\\n\"63\": \"CostAmount9\",\\n\"64\": \"CostCurr9\",\\n\"65\": \"CostName10\",\\n\"66\": \"CostAmount10\",\\n\"67\": \"CostCurr10\",\\n\"68\": \"CostName11\",\\n\"69\": \"CostAmount11\",\\n\"70\": \"CostCurr11\",\\n\"71\": \"CostName12\",\\n\"72\": \"CostAmount12\",\\n\"73\": \"CostCurr12\",\\n\"74\": \"CostName13\",\\n\"75\": \"CostAmount13\",\\n\"76\": \"CostCurr13\",\\n\"77\": \"CostName14\",\\n\"78\": \"CostAmount14\",\\n\"79\": \"CostCurr14\",\\n\"80\": \"CostName15\",\\n\"81\": \"CostAmount15\",\\n\"82\": \"CostCurr15\",\\n\"83\": \"CostName16\",\\n\"84\": \"CostAmount16\",\\n\"85\": \"CostCurr16\",\\n\"86\": \"CostName17\",\\n\"87\": \"CostAmount17\",\\n\"88\": \"CostCurr17\",\\n\"89\": \"CostName18\",\\n\"90\": \"CostAmount18\",\\n\"91\": \"CostCurr18\",\\n\"92\": \"CostName19\",\\n\"93\": \"CostAmount19\",\\n\"94\": \"CostCurr19\",\\n\"95\": \"CostName20\",\\n\"96\": \"CostAmount20\",\\n\"97\": \"CostCurr20\",\\n\"98\": \"CostName21\",\\n\"99\": \"CostAmount21\",\\n\"100\": \"CostCurr21\",\\n\"101\": \"CostName22\",\\n\"102\": \"CostAmount22\",\\n\"103\": \"CostCurr22\",\\n\"104\": \"CostName23\",\\n\"105\": \"CostAmount23\",\\n\"106\": \"CostCurr23\",\\n\"107\": \"CostName24\",\\n\"108\": \"CostAmount24\",\\n\"109\": \"CostCurr24\",\\n\"110\": \"CostName25\",\\n\"111\": \"CostAmount25\",\\n\"112\": \"CostCurr25\",\\n\"113\": \"CostName26\",\\n\"114\": \"CostAmount26\",\\n\"115\": \"CostCurr26\",\\n\"116\": \"CostName27\",\\n\"117\": \"CostAmount27\",\\n\"118\": \"CostCurr27\",\\n\"119\": \"CostName28\",\\n\"120\": \"CostAmount28\",\\n\"121\": \"CostCurr28\",\\n\"122\": \"CostName29\",\\n\"123\": \"CostAmount29\",\\n\"124\": \"CostCurr29\",\\n\"125\": \"CostName30\",\\n\"126\": \"CostAmount30\",\\n\"127\": \"CostCurr30\",\\n\"128\": \"Currency1\",\\n\"129\": \"Currency1RateToInvoiceCurrency\",\\n\"130\": \"Currency2\",\\n\"131\": \"Currency2RateToInvoiceCurrency\",\\n\"132\": \"Currency3\",\\n\"133\": \"Currency3RateToInvoiceCurrency\"\\n}\\n\\n## KRITISK: EN RAD PER SENDING/TRANSPORTOPPDRAG\\n\\n**EN FAKTURA kan innehålla FLERE SENDINGER - hver sending ska få sin egen JSON-rad:**\\n\\n* **1 faktura med 1 sending** = 1 JSON-objekt med 133 felt\\n* **1 faktura med 5 sendinger** = JSON-array med 5 objekt, vardera med 133 felt\\n* **1 faktura med 10 sendinger** = JSON-array med 10 objekt\\n\\n## FREJA - FAKTURASTRUKTUR\\n\\n**FREJA-fakturaer har en enkel struktur:**\\n\\n**1. FAKTURA-HEADER:**\\n- Mottagare (Invoice To)\\n- Fakturanummer\\n- Fakturadatum\\n- Kundnr\\n- Avhämtn. datum (pickup date)\\n- Lev. datum (delivery date)\\n- Kundref\\n\\n**2. ADRESS-SEKTION:**\\nTre kolonner:\\n- **Lev. adr.** (Leveransadress - ofta samma som avsändare)\\n- **Avsändare** (Shipper)\\n- **Avh. adr.** (Avhämtningsadress - ofta destination)\\n\\n**3. GODS-INFORMATION:**\\n- Mrk/nr (Mark number)\\n- Kolli (Packages)\\n- Art (Type)\\n- Innehåll (Content)\\n- Vikt (Weight)\\n- Volym (Volume)\\n\\n**4. KOSTNADER (Text-tabell):**\\n- Text (Beskrivning)\\n- Antal (Quantity)\\n- Sats (Rate)\\n- Enhet (Unit)\\n- Momsbel. (VAT basis)\\n- Belopp (Amount)\\n- SEK (Currency)\\n\\n**5. LEVERANSVILLKOR:**\\n- Leveransvillkor (f.eks. \"EXW - Ex Works\")\\n- Förfallodatum (Due date)\\n\\n## IDENTIFIERA SEPARATA SENDINGAR\\n\\n**En separat sending/transportoppdrag identifieras genom:**\\n\\n* Egen rad i gods-information (Mrk/nr, Kolli, etc.)\\n* Eget Sänd. nr. (Sending number)\\n* Egna kostnader i Text-tabellen\\n* Egen totalbeløp\\n\\n**VIKTIGT:**\\n- Freja-fakturaer har typisk **1 sending per faktura**\\n- Hvis det finns flere \"Mrk/nr\" rader eller flere \"Sänd. nr.\", då är det flera sendingar\\n- Samme fakturanummer og fakturadato används för alla sendingar inom samme faktura\\n\\n## DETALJERT MAPPING-GUIDE\\n\\n### FAKTURA-HEADER (finn øverst i dokumentet):\\n\\n* **\"1\": Forwarder** = \"FREJA TRANSPORT & LOGISTICS AB\"\\n* **\"2\": Purchaser** = Mottagare från fakturan (f.eks. \"DRIVABOLAGEN AB\")\\n* **\"3\": Bill-toAddrNo** = Kundnr (f.eks. \"1060255\")\\n* **\"4\": InvoiceDate** = Fakturadatum i format ÅÅÅÅ-MM-DD (konvertera från \"06-12-2022\" til \"2022-12-06\")\\n* **\"5\": InvoiceNo** = Fakturanummer (f.eks. \"1825947\")\\n* **\"6\": InvoiceCurrency** = \"SEK\"\\n\\n### FOR HVER SENDING:\\n\\n**SENDING NUMMER:**\\n* **\"8\": PartnerNo** = Sänd. nr. (f.eks. \"4220000489\")\\n\\n**DATES:**\\n* **\"9\": Departure Date** = Avhämtn. datum i format ÅÅÅÅ-MM-DD (konvertera från \"12-11-2022\" til \"2022-11-12\")\\n* **\"10\": Destination Date** = Lev. datum i format ÅÅÅÅ-MM-DD (om angitt)\\n\\n**LEVERANSVILLKOR:**\\n* **\"12\": TermsOfDelivery** = Fra \"Leveransvillkor\" (f.eks. \"EXW\")\\n\\n**REFERENCE:**\\n* **\"35\": CustomerRef** = Kundref (f.eks. \"ELA153091A\")\\n\\n### ADRESS-SEKTION (3 kolonner):\\n\\n**AVSÄNDARE (midten kolonne):**\\n\\nEksempel: \"MESSRS DRIVABOLAGEN AB, VINTERVAGEN 4, SE-283 21 OSBY\"\\n\\nPARSING REGEL:\\n1. Split på komma\\n2. Første del = **\"16\": DeptName** (f.eks. \"MESSRS DRIVABOLAGEN AB\")\\n3. Sista delen innehåller postnummer + stad\\n   - Parse \"SE-283 21 OSBY\":\\n   - **\"14\": DeptZip** = \"28321\"\\n   - **\"15\": DeptCity** = \"OSBY\"\\n   - **\"13\": DeptCountry** = \"Sweden\" (från \"SE-\")\\n\\n**AVH. ADR. (høyre kolonne / destination):**\\n\\nEksempel: \"M RICHARD (2002) LIMITED, PO BOX 278, 9 GRANTHAM CLOSE, GB-HA8 8XY EDGWARE\"\\n\\nPARSING REGEL:\\n1. Første del = **\"21\": DestName** (f.eks. \"M RICHARD (2002) LIMITED\")\\n2. Finn postnummer og stad\\n   - Parse \"GB-HA8 8XY EDGWARE\":\\n   - **\"19\": DestZip** = \"HA8 8XY\"\\n   - **\"20\": DestCity** = \"EDGWARE\"\\n   - **\"18\": DestCountry** = \"United Kingdom\" (från \"GB-\")\\n\\n### GODS-INFORMATION:\\n\\n**VIKT OG VOLYM:**\\n* **\"24\": Gross** = Vikt (f.eks. \"405,00\" från \"405,00 kg\")\\n* **\"25\": Volume** = Volym (f.eks. \"0,500\" från \"0,500 m³\")\\n\\n**KOLLI:**\\n* **\"28\": HandlingUnits** = Kolli (f.eks. \"1\" från \"1 PLL\")\\n\\n### KOSTNADER (TEXT-TABELL):\\n\\nMappa kostnader sekventiellt:\\n\\n* **\"38\": CostName1** = \"Frakt -2500 kg\"\\n* **\"39\": CostAmount1** = \"2100,00\"\\n* **\"40\": CostCurr1** = \"SEK\"\\n* **\"41\": CostName2** = \"Hamnavgift\"\\n* **\"42\": CostAmount2** = \"18,00\"\\n* **\"43\": CostCurr2** = \"SEK\"\\n\\n**VANLIGA KOSTNADER:**\\n- Frakt (med viktklasse, t.ex. \"Frakt -2500 kg\")\\n- Hamnavgift\\n- Marpol UK / Marpol avgift\\n- Valutatillägg SEK\\n- Tulldeklaration\\n- Exportklarering\\n- Tullterminalavgift\\n- Importklarering\\n- Dieseltillägg\\n- BAF (Bunker Adjustment Factor)\\n\\n## EXTRA VIKTIGT - SPECIFIKA KRAV FRÅN TOPLOGIC\\n\\n### DATUMFORMAT\\n\\n* **\"4\": \"InvoiceDate\"** - Måste vara format **ÅÅÅÅ-MM-DD**\\n* **\"9\": \"Departure Date\"** - Måste vara format **ÅÅÅÅ-MM-DD**\\n* **\"10\": \"Destination Date\"** - Måste vara format **ÅÅÅÅ-MM-DD** (om angitt)\\n\\n### DECIMALAVGRÄNSARE\\n\\n* **Använd ALLTID \",\" som decimalavgränsare**\\n* Exempel: \"2100,00\" INTE \"2100.00\"\\n\\n### NUMERISKE VERDIER\\n\\n* **Fjern enheter** - \"405,00 kg\" blir \"405,00\", \"0,500 m³\" blir \"0,500\"\\n* **Kolli**: \"1 PLL\" blir \"1\", \"5 Pallets\" blir \"5\"\\n\\n### LANDSKOD KONVERTERING\\n\\n* \"SE\" / \"SE-\" = \"Sweden\"\\n* \"NO\" / \"NO-\" = \"Norway\"\\n* \"DK\" / \"DK-\" = \"Denmark\"\\n* \"FI\" / \"FI-\" = \"Finland\"\\n* \"GB\" / \"GB-\" = \"United Kingdom\"\\n* \"DE\" / \"DE-\" = \"Germany\"\\n\\n### TELEMATIK\\n\\n* **\"37\": KI_TELEMATIK_NR** - Utelat dette feltet helt (ikke inkluder i output)\\n\\n### MOMS/MERVÄRDESSKATT PROHIBITION\\n\\n* **IGNORER HELT** momstabellen nederst (Nettobelopp, Momsfritt belopp, Momsbelopp, Totalbelopp)\\n* Ta ALDRIG med \"Nettobelopp\", \"Totalbelopp\" i kostnadsfelt\\n* **BARA kostnader från Text-tabellen**\\n\\n## STRIKT FÖRBUD\\n\\n* Ingen markdown eller ```json\\n* Inga förklaringar eller kommentarer\\n* **ALDRIG returnera feltnamn eller headers** - bara faktiska värden från PDF-en\\n* **EXEMPEL PÅ FEL**: \"1\": \"Forwarder\"\\n* **EXEMPEL PÅ RÄTT**: \"1\": \"FREJA TRANSPORT & LOGISTICS AB\"\\n* Bara nummernøklar och faktiska värden från dokumentet\\n* Inget text över eller under JSON\\n* Måste vara 100% gildig JSON\\n* Aldrig uppfinna data - bara strukturera det som finns i PDF-en\\n* **MERVÄRDESSKATT/MOMS ska ALDRIG mappas** - hoppa över alla moms-relaterade kostnader\\n\\n## NYTT KRAV – RETURNER KUN FELTER MED VERDI\\n\\n* Ta kun med nøkler (1–133) som faktisk har verdi i dokumentet.\\n* Ikke inkluder nøkler uten verdi (utelat helt).\\n* Output skal fortsatt være gyldig JSON: én sending = ett objekt; flere sendinger = et JSON-array av objekter.\\n* Start alltid direkte med JSON - ALDRI med ```json\\n\\n## SAMMANFATTNING\\n\\n* **En sending = ett Sänd. nr. = en rad gods-information**\\n* **Freja har typisk 1 sending per faktura** (men kan ha flere)\\n* **Alle sendinger från samme faktura** har samme \"1\", \"2\", \"3\", \"4\", \"5\", \"6\"\\n* **Kostnader varierar** - vissa sendingar har 3 kostnader, andra har 7-10\\n* Data går direkt til Google Sheets - formatfel förstör hela kedjan\\n"
+                                    },
+                                    {
+                                        "name": "MaserFrakt",
+                                        "value": "# PDF-FAKTURA STRUKTURERING - MASERFRAKT AB\\n\\nDU ER en EKSPERT I DOKUMENTFORSTÅELSE. Din jobb er å lese en faktura fra **MASERFRAKT AB** og strukturere **hver separat sending/transportoppdrag** inn i **eksakt 133 nummererte JSON-nøkler**.\\n\\n## MÅL\\n\\nDu skal bruke denna **standardiserade malen** og mappe hver sendings informasjon til riktige felt:\\n\\n{\\n\"1\": \"Forwarder\",\\n\"2\": \"Purchaser\",\\n\"3\": \"Bill-toAddrNo\",\\n\"4\": \"InvoiceDate\",\\n\"5\": \"InvoiceNo\",\\n\"6\": \"InvoiceCurrency\",\\n\"7\": \"Debit/Credit\",\\n\"8\": \"PartnerNo\",\\n\"9\": \"Departure Date\",\\n\"10\": \"Destination Date\",\\n\"11\": \"Transport Mode\",\\n\"12\": \"TermsOfDelivery\",\\n\"13\": \"DeptCountry\",\\n\"14\": \"DeptZip\",\\n\"15\": \"DeptCity\",\\n\"16\": \"DeptName\",\\n\"17\": \"DeptZone\",\\n\"18\": \"DestCountry\",\\n\"19\": \"DestZip\",\\n\"20\": \"DestCity\",\\n\"21\": \"DestName\",\\n\"22\": \"DestZone\",\\n\"23\": \"Net\",\\n\"24\": \"Gross\",\\n\"25\": \"Volume\",\\n\"26\": \"LoadingMeters\",\\n\"27\": \"PayWeight\",\\n\"28\": \"HandlingUnits\",\\n\"29\": \"Distance\",\\n\"30\": \"CalcHours\",\\n\"31\": \"CalcDays\",\\n\"32\": \"Trans1\",\\n\"33\": \"Trans2\",\\n\"34\": \"ADR\",\\n\"35\": \"CustomerRef\",\\n\"36\": \"ReceiverRef\",\\n\"37\": \"KI_TELEMATIK_NR\",\\n\"38\": \"CostName1\",\\n\"39\": \"CostAmount1\",\\n\"40\": \"CostCurr1\",\\n\"41\": \"CostName2\",\\n\"42\": \"CostAmount2\",\\n\"43\": \"CostCurr2\",\\n\"44\": \"CostName3\",\\n\"45\": \"CostAmount3\",\\n\"46\": \"CostCurr3\",\\n\"47\": \"CostName4\",\\n\"48\": \"CostAmount4\",\\n\"49\": \"CostCurr4\",\\n\"50\": \"CostName5\",\\n\"51\": \"CostAmount5\",\\n\"52\": \"CostCurr5\",\\n\"53\": \"CostName6\",\\n\"54\": \"CostAmount6\",\\n\"55\": \"CostCurr6\",\\n\"56\": \"CostName7\",\\n\"57\": \"CostAmount7\",\\n\"58\": \"CostCurr7\",\\n\"59\": \"CostName8\",\\n\"60\": \"CostAmount8\",\\n\"61\": \"CostCurr8\",\\n\"62\": \"CostName9\",\\n\"63\": \"CostAmount9\",\\n\"64\": \"CostCurr9\",\\n\"65\": \"CostName10\",\\n\"66\": \"CostAmount10\",\\n\"67\": \"CostCurr10\",\\n\"68\": \"CostName11\",\\n\"69\": \"CostAmount11\",\\n\"70\": \"CostCurr11\",\\n\"71\": \"CostName12\",\\n\"72\": \"CostAmount12\",\\n\"73\": \"CostCurr12\",\\n\"74\": \"CostName13\",\\n\"75\": \"CostAmount13\",\\n\"76\": \"CostCurr13\",\\n\"77\": \"CostName14\",\\n\"78\": \"CostAmount14\",\\n\"79\": \"CostCurr14\",\\n\"80\": \"CostName15\",\\n\"81\": \"CostAmount15\",\\n\"82\": \"CostCurr15\",\\n\"83\": \"CostName16\",\\n\"84\": \"CostAmount16\",\\n\"85\": \"CostCurr16\",\\n\"86\": \"CostName17\",\\n\"87\": \"CostAmount17\",\\n\"88\": \"CostCurr17\",\\n\"89\": \"CostName18\",\\n\"90\": \"CostAmount18\",\\n\"91\": \"CostCurr18\",\\n\"92\": \"CostName19\",\\n\"93\": \"CostAmount19\",\\n\"94\": \"CostCurr19\",\\n\"95\": \"CostName20\",\\n\"96\": \"CostAmount20\",\\n\"97\": \"CostCurr20\",\\n\"98\": \"CostName21\",\\n\"99\": \"CostAmount21\",\\n\"100\": \"CostCurr21\",\\n\"101\": \"CostName22\",\\n\"102\": \"CostAmount22\",\\n\"103\": \"CostCurr22\",\\n\"104\": \"CostName23\",\\n\"105\": \"CostAmount23\",\\n\"106\": \"CostCurr23\",\\n\"107\": \"CostName24\",\\n\"108\": \"CostAmount24\",\\n\"109\": \"CostCurr24\",\\n\"110\": \"CostName25\",\\n\"111\": \"CostAmount25\",\\n\"112\": \"CostCurr25\",\\n\"113\": \"CostName26\",\\n\"114\": \"CostAmount26\",\\n\"115\": \"CostCurr26\",\\n\"116\": \"CostName27\",\\n\"117\": \"CostAmount27\",\\n\"118\": \"CostCurr27\",\\n\"119\": \"CostName28\",\\n\"120\": \"CostAmount28\",\\n\"121\": \"CostCurr28\",\\n\"122\": \"CostName29\",\\n\"123\": \"CostAmount29\",\\n\"124\": \"CostCurr29\",\\n\"125\": \"CostName30\",\\n\"126\": \"CostAmount30\",\\n\"127\": \"CostCurr30\",\\n\"128\": \"Currency1\",\\n\"129\": \"Currency1RateToInvoiceCurrency\",\\n\"130\": \"Currency2\",\\n\"131\": \"Currency2RateToInvoiceCurrency\",\\n\"132\": \"Currency3\",\\n\"133\": \"Currency3RateToInvoiceCurrency\"\\n}\\n\\n## KRITISK: EN RAD PER SENDING/TRANSPORTOPPDRAG\\n\\n**EN FAKTURA kan innehålla FLERE SENDINGER - hver sending ska få sin egen JSON-rad:**\\n\\n* **1 faktura med 1 sending** = 1 JSON-objekt med 133 felt\\n* **1 faktura med 10 sendinger** = JSON-array med 10 objekt, vardera med 133 felt\\n* **1 faktura med 20 sendinger** = JSON-array med 20 objekt\\n\\n## MASERFRAKT AB - FAKTURASTRUKTUR\\n\\n**MASERFRAKT AB-fakturaer har en tabellstruktur hvor hver sending presenteras som:**\\n\\n**TABELLRAD (hovedinformasjon):**\\n- DokId (Dokument-ID / Sendingsnummer, t.ex. \"6278214306\")\\n- Datum (Transportdatum, format: YY-MM-DD, t.ex. \"25-09-01\")\\n- Extern ref (Referanse, t.ex. \"U\", \"14\")\\n- Från (Avsändaradresse: Företag, Adress, Stad)\\n- Frånort (Avsändarstad, t.ex. \"FALUN\")\\n- Till (Mottagaradresse: Företag, Stad)\\n- Tillort (Mottagarstad, t.ex. \"Västerås\")\\n- Övrigt (Ytterligare referanse, t.ex. \"ICA 1/9\")\\n- Resurs (Fordon, t.ex. \"HTJ77X\")\\n- Resurstyp (Fordonstyp, t.ex. \"4-Axl Fordon\")\\n\\n**KOSTNADSTABELL (under hver sending):**\\n- Nr (Kostnadskode, alltid \"T3050\" för MaserFrakt)\\n- Beskrivning (Kostnadsnamn: \"Partigods\", \"Exp.Avgift\", \"Drivmedelstillägg\", \"Pallavgift\", \"Farligt gods\")\\n- Antal Enhet (f.eks. \"7 PPL\", \"1 ST\", \"13 PALL\")\\n- A-pris (Enhetspris)\\n- Belopp (Totalpris för den kostnaden)\\n\\n## IDENTIFIERA SEPARATA SENDINGAR\\n\\n**En separat sending/transportoppdrag identifieras gennem:**\\n\\n* Unikt **DokId** (Dokument-ID, t.ex. \"6278214306\", \"6279731688\")\\n* Egen rad i sendingstabellen med eget Datum\\n* Egna Från/Till adresser\\n* Egen kostnadstabell med flera kostnader\\n* Eget Övrigt-referanse\\n\\n**VIKTIGT:** MaserFrakt-fakturaer har typisk **FLERE SENDINGER per faktura**. Samme fakturanummer og fakturadato används för alla sendingar inom samme faktura.\\n\\n## DETALJERT MAPPING-GUIDE\\n\\n### FAKTURA-HEADER (finn øverst i dokumentet):\\n\\n* **\"1\": Forwarder** = \"MASERFRAKT AB\"\\n* **\"2\": Purchaser** = Kundens navn från Fakturaadress (f.eks. \"HERDINS FÄRGVERK AB\")\\n* **\"3\": Bill-toAddrNo** = Kundnr (f.eks. \"DI10197\")\\n* **\"4\": InvoiceDate** = Fakturadatum i format ÅÅÅÅ-MM-DD (f.eks. \"2025-09-25\")\\n* **\"5\": InvoiceNo** = Faktura/OCR nr (f.eks. \"190241398\")\\n* **\"6\": InvoiceCurrency** = \"SEK\"\\n\\n### FOR HVER SENDING - TABELLRAD:\\n\\n**DOKID:**\\n* **\"8\": PartnerNo** = DokId (f.eks. \"6278214306\")\\n\\n**DATUM:**\\n* **\"9\": Departure Date** = Datum i format ÅÅÅÅ-MM-DD (Konvertera: \"25-09-01\" → \"2025-09-01\")\\n\\n**TRANSPORT MODE:**\\n* **\"11\": Transport Mode** = \"Road\"\\n\\n**REFERENS:**\\n* **\"35\": CustomerRef** = Referens från faktura-header (f.eks. \"Västerås/Hallstahammar\")\\n\\n**FRÅN (Avsändaradresse):**\\n* **\"16\": DeptName** = Företagsnamn från \"Från\" (f.eks. \"Herdins Färgverk AB\")\\n* **\"15\": DeptCity** = Frånort (f.eks. \"FALUN\")\\n* **\"13\": DeptCountry** = \"Sweden\"\\n\\n**TILL (Mottagaradresse):**\\n* **\"21\": DestName** = Företagsnamn från \"Till\" (f.eks. \"ICA SVERIGE AB\")\\n* **\"20\": DestCity** = Tillort (f.eks. \"Västerås\")\\n* **\"18\": DestCountry** = \"Sweden\"\\n\\n### FOR HVER SENDING - KOSTNADSTABELL:\\n\\n**KOLLI:**\\n* **\"28\": HandlingUnits** = Summer alle \"Antal Enhet\" med PPL eller PALL (Eksempel: \"7 PPL\" + \"13 PALL\" = \"20\", ignorera \"ST\")\\n\\n**ADR:**\\n* **\"34\": ADR** = \"Yes\" om det finns rad med \"Farligt gods\", annars utelat\\n\\n**KOSTNADER:**\\n* **\"38\": CostName1** = Beskrivning (f.eks. \"Partigods\")\\n* **\"39\": CostAmount1** = Belopp (f.eks. \"1236,90\")\\n* **\"40\": CostCurr1** = \"SEK\"\\n\\n**VANLIGA KOSTNADER:** Partigods, Exp.Avgift, Drivmedelstillägg, Pallavgift, Farligt gods\\n\\n## EXTRA VIKTIGT - SPECIFIKA KRAV FRÅN TOPLOGIC\\n\\n### DATUMFORMAT\\n* **\"4\": \"InvoiceDate\"** - Format **ÅÅÅÅ-MM-DD**\\n* **\"9\": \"Departure Date\"** - Format **ÅÅÅÅ-MM-DD** (Konvertera YY-MM-DD: \"25-09-01\" → \"2025-09-01\")\\n\\n### FRAKTSEDELSNUMMER\\n* **\"8\": \"PartnerNo\"** - DokId (t.ex. \"6278214306\")\\n\\n### DECIMALAVGRÄNSARE\\n* **Använd ALLTID \",\" som decimalavgränsare** (Exempel: \"1236,90\" INTE \"1236.90\")\\n\\n### NUMERISKE VERDIER\\n* **Kolli**: Summer bara PPL og PALL, ignorera ST\\n\\n### ADR IDENTIFIKASJON\\n* Om kostnadstabellen innehåller \"Farligt gods\": **\"34\": ADR** = \"Yes\", annars utelat\\n\\n### TELEMATIK\\n* **\"37\": KI_TELEMATIK_NR** - Utelat dette feltet helt\\n\\n### MOMS/MERVÄRDESSKATT PROHIBITION\\n* **IGNORER HELT** MVA-summering (Nettobelopp, Momsbelopp, Totalt att betala)\\n* Ta ALDRIG med \"Moms\", \"MVA\" i kostnadsfelt\\n\\n## STRIKT FÖRBUD\\n\\n* Ingen markdown eller ```json\\n* Inga förklaringer eller kommentarer\\n* **ALDRIG returnera feltnamn eller headers** - bara faktiska värden\\n* **FEL**: \"1\": \"Forwarder\" | **RÄTT**: \"1\": \"MASERFRAKT AB\"\\n* Bara nummernøklar och faktiska värden\\n* Inget text över eller under JSON\\n* Måste vara 100% giltig JSON\\n* Aldrig uppfinna data\\n* **MOMS ska ALDRIG mappas**\\n\\n## NYTT KRAV – RETURNER KUN FELTER MED VERDI\\n\\n* Ta kun med nøkler (1–133) som faktisk har verdi\\n* Ikke inkluder nøkler uten verdi (utelat helt)\\n* Output: én sending = ett objekt; flere sendinger = et JSON-array\\n* Start direkte med JSON - ALDRI med ```json\\n\\n## SAMMANFATTNING\\n\\n* **En sending = ett DokId = en rad + egen kostnadstabell**\\n* **MaserFrakt har typisk FLERE SENDINGER per faktura**\\n* **Alle sendinger från samme faktura** har samme \"1\", \"2\", \"3\", \"4\", \"5\", \"6\"\\n* **Kostnader varierar** - vissa har 3, andra har 5-6\\n* **DokId** = unikt sendingsnummer → **\"8\": PartnerNo**\\n* **Från/Frånort** = avsändare, **Till/Tillort** = mottagare\\n* **Referens** från header bruges för CustomerRef (inte Extern ref/Övrigt)\\n* Data går direkt til Google Sheets - formatfel förstör kedjan\\n"
+                                    }
+                                ]
+                            },
+                            "metadata": {
+                                "designer": {
+                                    "x": 2100,
+                                    "y": 300
+                                },
+                                "restore": {
+                                    "expect": {
+                                        "scope": {
+                                            "label": "One cycle"
+                                        },
+                                        "variables": {
+                                            "items": [
+                                                null,
+                                                {
+                                                    "name": {
+                                                        "collapsed": true
+                                                    }
+                                                },
+                                                {
+                                                    "name": {
+                                                        "collapsed": true
+                                                    }
+                                                },
+                                                {
+                                                    "name": {
+                                                        "collapsed": true
+                                                    }
+                                                },
+                                                {
+                                                    "name": {
+                                                        "collapsed": true
+                                                    }
+                                                },
+                                                {
+                                                    "name": {
+                                                        "collapsed": true
+                                                    }
+                                                },
+                                                {
+                                                    "name": {
+                                                        "collapsed": true
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                "expect": [
+                                    {
+                                        "name": "variables",
+                                        "spec": [
+                                            {
+                                                "name": "name",
+                                                "type": "text",
+                                                "label": "Variable name",
+                                                "required": true
+                                            },
+                                            {
+                                                "name": "value",
+                                                "type": "any",
+                                                "label": "Variable value"
+                                            }
+                                        ],
+                                        "type": "array",
+                                        "label": "Variables"
+                                    },
+                                    {
+                                        "name": "scope",
+                                        "type": "select",
+                                        "label": "Variable lifetime",
+                                        "required": true,
+                                        "validate": {
+                                            "enum": [
+                                                "roundtrip",
+                                                "execution"
+                                            ]
+                                        }
+                                    }
+                                ],
+                                "interface": [
+                                    {
+                                        "name": "prompt",
+                                        "type": "any",
+                                        "label": "prompt"
+                                    },
+                                    {
+                                        "name": "SAMTRANSPORT_prompt",
+                                        "type": "any",
+                                        "label": "SAMTRANSPORT_prompt"
+                                    },
+                                    {
+                                        "name": "sendify_prompt",
+                                        "type": "any",
+                                        "label": "sendify_prompt"
+                                    },
+                                    {
+                                        "name": "fedex_prompt",
+                                        "type": "any",
+                                        "label": "fedex_prompt"
+                                    },
+                                    {
+                                        "name": "NTG_prompt",
+                                        "type": "any",
+                                        "label": "NTG_prompt"
+                                    },
+                                    {
+                                        "name": "freja_prompt",
+                                        "type": "any",
+                                        "label": "freja_prompt"
+                                    },
+                                    {
+                                        "name": "MaserFrakt",
+                                        "type": "any",
+                                        "label": "MaserFrakt"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "id": 51,
+                            "module": "http:ActionSendData",
+                            "version": 3,
+                            "parameters": {
+                                "handleErrors": true,
+                                "useNewZLibDeCompress": true
+                            },
+                            "mapper": {
+                                "ca": "",
+                                "qs": [],
+                                "url": "https://toplogic2-production.up.railway.app/api/claude",
+                                "gzip": true,
+                                "method": "post",
+                                "headers": [
+                                    {
+                                        "name": "X-API-Key",
+                                        "value": "toplogic_secure_key_2025"
+                                    }
+                                ],
+                                "timeout": "",
+                                "useMtls": false,
+                                "authPass": "",
+                                "authUser": "",
+                                "bodyType": "x_www_form_urlencoded",
+                                "formFields": [
+                                    {
+                                        "key": "prompt",
+                                        "value": "{{switch(45.categories[]; \"FedEx\"; 36.fedex_prompt; \"Samtransport\"; 36.SAMTRANSPORT_prompt; \"Sendify\"; 36.sendify_prompt; \"Freja\"; 36.freja_prompt; \"NTG_road\"; 36.NTG_prompt; \"MaserFrakt\"; 36.MaserFrakt; 36.prompt)}}\\n\\nHer er OCR {{33.data}}"
+                                    },
+                                    {
+                                        "key": "webhookUrl",
+                                        "value": "https://hook.eu2.make.com/j33kho9fjjo54nk6aqqk5alndg5evplt"
+                                    },
+                                    {
+                                        "key": "requestId",
+                                        "value": "{{28.batchId}}"
+                                    },
+                                    {
+                                        "key": "options",
+                                        "value": "{\"model\":\"claude-sonnet-4-20250514\",\"maxTokens\":64000,\"temperature\":0.1}"
+                                    },
+                                    {
+                                        "key": "action",
+                                        "value": "{{28.action}}"
+                                    },
+                                    {
+                                        "key": "opplaster",
+                                        "value": "{{28.opplaster}}"
+                                    },
+                                    {
+                                        "key": "fileName",
+                                        "value": "{{28.fileName}}"
+                                    },
+                                    {
+                                        "key": "timestamp",
+                                        "value": "{{28.timestamp}}"
+                                    }
+                                ],
+                                "serializeUrl": false,
+                                "shareCookies": false,
+                                "parseResponse": false,
+                                "followRedirect": true,
+                                "useQuerystring": false,
+                                "followAllRedirects": false,
+                                "rejectUnauthorized": true
+                            },
+                            "metadata": {
+                                "designer": {
+                                    "x": 2400,
+                                    "y": 300
+                                },
+                                "restore": {
+                                    "expect": {
+                                        "qs": {
+                                            "mode": "chose"
+                                        },
+                                        "method": {
+                                            "mode": "chose",
+                                            "label": "POST"
+                                        },
+                                        "headers": {
+                                            "mode": "chose",
+                                            "items": [
+                                                null
+                                            ],
+                                            "collapsed": true
+                                        },
+                                        "bodyType": {
+                                            "label": "Application/x-www-form-urlencoded"
+                                        },
+                                        "formFields": {
+                                            "mode": "chose",
+                                            "items": [
+                                                null,
+                                                null,
+                                                null,
+                                                null,
+                                                null,
+                                                null,
+                                                null,
+                                                null
+                                            ]
+                                        }
+                                    }
+                                },
+                                "parameters": [
+                                    {
+                                        "name": "handleErrors",
+                                        "type": "boolean",
+                                        "label": "Evaluate all states as errors (except for 2xx and 3xx )",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "useNewZLibDeCompress",
+                                        "type": "hidden"
+                                    }
+                                ],
+                                "expect": [
+                                    {
+                                        "name": "url",
+                                        "type": "url",
+                                        "label": "URL",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "serializeUrl",
+                                        "type": "boolean",
+                                        "label": "Serialize URL",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "method",
+                                        "type": "select",
+                                        "label": "Method",
+                                        "required": true,
+                                        "validate": {
+                                            "enum": [
+                                                "get",
+                                                "head",
+                                                "post",
+                                                "put",
+                                                "patch",
+                                                "delete",
+                                                "options"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "name": "headers",
+                                        "spec": [
+                                            {
+                                                "name": "name",
+                                                "type": "text",
+                                                "label": "Name",
+                                                "required": true
+                                            },
+                                            {
+                                                "name": "value",
+                                                "type": "text",
+                                                "label": "Value"
+                                            }
+                                        ],
+                                        "type": "array",
+                                        "label": "Headers"
+                                    },
+                                    {
+                                        "name": "qs",
+                                        "spec": [
+                                            {
+                                                "name": "name",
+                                                "type": "text",
+                                                "label": "Name",
+                                                "required": true
+                                            },
+                                            {
+                                                "name": "value",
+                                                "type": "text",
+                                                "label": "Value"
+                                            }
+                                        ],
+                                        "type": "array",
+                                        "label": "Query String"
+                                    },
+                                    {
+                                        "name": "bodyType",
+                                        "type": "select",
+                                        "label": "Body type",
+                                        "validate": {
+                                            "enum": [
+                                                "raw",
+                                                "x_www_form_urlencoded",
+                                                "multipart_form_data"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "name": "parseResponse",
+                                        "type": "boolean",
+                                        "label": "Parse response",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "authUser",
+                                        "type": "text",
+                                        "label": "User name"
+                                    },
+                                    {
+                                        "name": "authPass",
+                                        "type": "password",
+                                        "label": "Password"
+                                    },
+                                    {
+                                        "name": "timeout",
+                                        "type": "uinteger",
+                                        "label": "Timeout",
+                                        "validate": {
+                                            "max": 300,
+                                            "min": 1
+                                        }
+                                    },
+                                    {
+                                        "name": "shareCookies",
+                                        "type": "boolean",
+                                        "label": "Share cookies with other HTTP modules",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "ca",
+                                        "type": "cert",
+                                        "label": "Self-signed certificate"
+                                    },
+                                    {
+                                        "name": "rejectUnauthorized",
+                                        "type": "boolean",
+                                        "label": "Reject connections that are using unverified (self-signed) certificates",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "followRedirect",
+                                        "type": "boolean",
+                                        "label": "Follow redirect",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "useQuerystring",
+                                        "type": "boolean",
+                                        "label": "Disable serialization of multiple same query string keys as arrays",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "gzip",
+                                        "type": "boolean",
+                                        "label": "Request compressed content",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "useMtls",
+                                        "type": "boolean",
+                                        "label": "Use Mutual TLS",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "formFields",
+                                        "spec": [
+                                            {
+                                                "name": "key",
+                                                "type": "text",
+                                                "label": "Key",
+                                                "required": true
+                                            },
+                                            {
+                                                "name": "value",
+                                                "type": "text",
+                                                "label": "Value"
+                                            }
+                                        ],
+                                        "type": "array",
+                                        "label": "Fields"
+                                    },
+                                    {
+                                        "name": "followAllRedirects",
+                                        "type": "boolean",
+                                        "label": "Follow all redirect",
+                                        "required": true
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "id": 58,
+                            "module": "gateway:WebhookRespond",
+                            "version": 1,
+                            "parameters": {},
+                            "mapper": {
+                                "body": "{{51.data}}",
+                                "status": "202",
+                                "headers": []
+                            },
+                            "metadata": {
+                                "designer": {
+                                    "x": 2700,
+                                    "y": 300
+                                },
+                                "restore": {
+                                    "expect": {
+                                        "headers": {
+                                            "mode": "chose"
+                                        }
+                                    }
+                                },
+                                "expect": [
+                                    {
+                                        "name": "status",
+                                        "type": "uinteger",
+                                        "label": "Status",
+                                        "required": true,
+                                        "validate": {
+                                            "min": 100
+                                        }
+                                    },
+                                    {
+                                        "name": "body",
+                                        "type": "any",
+                                        "label": "Body"
+                                    },
+                                    {
+                                        "name": "headers",
+                                        "spec": [
+                                            {
+                                                "name": "key",
+                                                "type": "text",
+                                                "label": "Key",
+                                                "required": true,
+                                                "validate": {
+                                                    "max": 256
+                                                }
+                                            },
+                                            {
+                                                "name": "value",
+                                                "type": "text",
+                                                "label": "Value",
+                                                "required": true,
+                                                "validate": {
+                                                    "max": 4096
+                                                }
+                                            }
+                                        ],
+                                        "type": "array",
+                                        "label": "Custom headers",
+                                        "validate": {
+                                            "maxItems": 16
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "metadata": {
+        "instant": true,
+        "version": 1,
+        "scenario": {
+            "roundtrips": 1,
+            "maxErrors": 3,
+            "autoCommit": true,
+            "autoCommitTriggerLast": true,
+            "sequential": false,
+            "slots": null,
+            "confidential": false,
+            "dataloss": false,
+            "dlq": false,
+            "freshVariables": false
+        },
+        "designer": {
+            "orphans": []
+        },
+        "zone": "eu2.make.com",
+        "notes": []
+    }
+}

@@ -407,55 +407,6 @@
             transform: scale(0.95);
         }
         
-        /* Batch ID styling */
-        .batch-id-display {
-            background: var(--color-blue-light);
-            border: 1px solid var(--color-blue);
-            border-radius: var(--radius-md);
-            padding: var(--spacing-sm) var(--spacing-md);
-            margin-top: var(--spacing-md);
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-            font-size: var(--font-size-small);
-            color: var(--color-gray-dark);
-        }
-
-        .batch-id-display strong {
-            color: var(--color-blue-dark);
-            font-weight: 600;
-        }
-
-        .batch-id-actions {
-            margin-left: auto;
-            display: flex;
-            gap: var(--spacing-xs);
-        }
-
-        .batch-action-btn {
-            background: white;
-            border: 1px solid var(--color-blue);
-            color: var(--color-blue);
-            padding: 4px 8px;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: var(--font-size-xs);
-            font-weight: 500;
-        }
-
-        .batch-action-btn:hover {
-            background: var(--color-blue);
-            color: white;
-        }
-
-        .batch-action-btn i {
-            width: 14px;
-            height: 14px;
-        }
 
         /* Sticky submit button */
         .form-actions {
@@ -516,20 +467,6 @@
             .file-row-name {
                 font-size: var(--font-size-small);
             }
-
-            .batch-id-display {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .batch-id-actions {
-                margin-left: 0;
-                width: 100%;
-            }
-
-            .batch-action-btn {
-                flex: 1;
-            }
         }
     </style>
 </head>
@@ -566,8 +503,6 @@
                                 <div class="progress-bar" id="progressBar">
                                     <div class="progress-fill" id="progressFill"></div>
                                 </div>
-
-                                <div class="batch-id-display" id="batchIdDisplay" style="display: none;"></div>
 
                                 <div class="form-actions">
                                     <button type="submit" class="btn btn-primary btn-full btn-large" id="submitBtn">
@@ -719,8 +654,6 @@
                 // Aktiver flerfilsopplasting
                 let selectedFiles = [];
                 let fileSuppliers = {}; // Store supplier info per file index
-                let pollingIntervals = {}; // Store polling intervals per file
-                let fileJobIds = {}; // Store Railway job IDs per file index
 
                 function renderFileRows(files) {
                     const fileList = document.getElementById('fileList');
@@ -771,36 +704,18 @@
 
                     statusEl.className = 'file-status';
 
-                    // New workflow stages
-                    if (status === 'waiting') {
-                        statusEl.classList.add('status-ready');
-                        statusEl.innerHTML = `
-                            <i data-lucide="clock" class="file-status-icon"></i>
-                            <span>Venter...</span>
-                        `;
-                    } else if (status === 'uploading') {
+                    // Simplified workflow stages
+                    if (status === 'uploading') {
                         statusEl.classList.add('status-uploading');
                         statusEl.innerHTML = `
                             <i data-lucide="upload" class="file-status-icon"></i>
                             <span>Laster opp...</span>
                         `;
-                    } else if (status === 'extracting_text') {
-                        statusEl.classList.add('status-uploading');
-                        statusEl.innerHTML = `
-                            <i data-lucide="file-text" class="file-status-icon"></i>
-                            <span>Henter tekst fra PDF...</span>
-                        `;
-                    } else if (status === 'ai_analysis') {
-                        statusEl.classList.add('status-uploading');
-                        statusEl.innerHTML = `
-                            <i data-lucide="brain" class="file-status-icon"></i>
-                            <span>Analyserer med AI...</span>
-                        `;
                     } else if (status === 'completed') {
                         statusEl.classList.add('status-success');
                         statusEl.innerHTML = `
                             <i data-lucide="check-circle" class="file-status-icon"></i>
-                            <span>Ferdig</span>
+                            <span>Lastet opp</span>
                         `;
                     } else if (status === 'error') {
                         statusEl.classList.add('status-error');
@@ -815,92 +730,12 @@
                     }
                 }
 
-                // Polling function to check Railway job status
-                async function pollJobStatus(jobId, fileIndex, fileName) {
-                    try {
-                        // Poll Railway API directly for job status
-                        const railwayUrl = 'https://toplogic-claude-async-api-production.up.railway.app';
-                        const response = await fetch(`${railwayUrl}/api/status/${jobId}`, {
-                            method: 'GET',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        });
-
-                        if (!response.ok) {
-                            console.warn(`Polling failed for ${fileName}:`, response.status);
-                            return;
-                        }
-
-                        const data = await response.json();
-                        console.log(`📊 Job status for ${fileName}:`, data);
-
-                        // Update status based on stage
-                        if (data.stage) {
-                            updateFileStatus(fileIndex, data.stage);
-                        }
-
-                        // Update supplier if detected
-                        if (data.detectedSupplier && !fileSuppliers[fileIndex]) {
-                            updateFileStatus(fileIndex, null, data.detectedSupplier);
-                        }
-
-                        // If completed or error, stop polling
-                        if (data.status === 'completed' || data.status === 'error') {
-                            stopPolling(fileIndex);
-                            updateFileStatus(fileIndex, data.status);
-
-                            // If completed and has sheet URL, update the UI
-                            if (data.status === 'completed' && data.sheetUrl) {
-                                console.log(`✅ Job completed for ${fileName}, sheet: ${data.sheetUrl}`);
-                            }
-                        }
-
-                    } catch (error) {
-                        console.error(`Polling error for ${fileName}:`, error);
-                    }
-                }
-
-                // Start polling for a specific file
-                function startPolling(jobId, fileIndex, fileName) {
-                    if (pollingIntervals[fileIndex]) {
-                        clearInterval(pollingIntervals[fileIndex]);
-                    }
-
-                    console.log(`🔄 Starting polling for ${fileName} (jobId: ${jobId})`);
-
-                    // Poll immediately
-                    pollJobStatus(jobId, fileIndex, fileName);
-
-                    // Then poll every 5 seconds
-                    pollingIntervals[fileIndex] = setInterval(() => {
-                        pollJobStatus(jobId, fileIndex, fileName);
-                    }, 5000);
-                }
-
-                // Stop polling for a specific file
-                function stopPolling(fileIndex) {
-                    if (pollingIntervals[fileIndex]) {
-                        clearInterval(pollingIntervals[fileIndex]);
-                        delete pollingIntervals[fileIndex];
-                        console.log(`⏹️ Stopped polling for file index ${fileIndex}`);
-                    }
-                }
-
-                // Stop all polling
-                function stopAllPolling() {
-                    Object.keys(pollingIntervals).forEach(fileIndex => {
-                        stopPolling(fileIndex);
-                    });
-                }
+                // No polling needed - just track upload status
 
                 // Funksjon for å fjerne enkeltfil
                 window.removeFile = function(index) {
                     if (index >= 0 && index < selectedFiles.length) {
                         const removedFile = selectedFiles[index];
-
-                        // Stop polling if active
-                        stopPolling(index);
 
                         selectedFiles.splice(index, 1);
 
@@ -1040,7 +875,6 @@
                     // Send alle filer med kø-system (inkludert enkeltfiler)
                     const batchId = app.generateBatchId();
                     console.log('Batch ID:', batchId);
-                    app.showBatchId(batchId);
                     
                     // Beregn total filstørrelse for vekting
                     const totalSize = files.reduce((sum, file) => sum + file.size, 0);
@@ -1125,39 +959,24 @@
                                     });
                                 },
                                 onSuccess: async (successMessage, response) => {
-                                    console.log('🔍 Upload response:', response);
-                                    console.log('🔍 Response type:', typeof response);
-                                    console.log('🔍 Has jobId?', response?.jobId);
+                                    console.log('✅ Upload successful:', response);
 
-                                    // Start polling if we got a jobId
-                                    if (response && response.jobId) {
-                                        console.log('✅ Starting polling with jobId:', response.jobId);
-                                        fileJobIds[0] = response.jobId;
-                                        updateFileStatus(0, 'waiting');
-                                        startPolling(response.jobId, 0, files[0].name);
-                                    } else {
-                                        console.warn('⚠️ No jobId in response - using fallback behavior');
-                                        console.log('⚠️ Full response object:', JSON.stringify(response, null, 2));
-                                        // Fallback to old behavior if no jobId
-                                        if (response && response.detectedSupplier) {
-                                            updateFileStatus(0, null, response.detectedSupplier);
-                                        }
-                                        updateFileStatus(0, 'completed');
-                                    }
+                                    // Mark as completed
+                                    updateFileStatus(0, 'completed');
 
                                     app.setProgress(100, true, {
-                                        status: 'Faktura sendt!',
+                                        status: 'Faktura lastet opp!',
                                         currentFile: files[0].name,
                                         currentFileIndex: 0,
                                         totalFiles: 1,
                                         currentFileSize: files[0].size,
                                         totalSize: files[0].size,
-                                    processedSize: files[0].size
-                                });
-                                
-                                // Finn opplaster-navn for personlig melding
-                                const opplasterNavn = opplaster.charAt(0).toUpperCase() + opplaster.slice(1);
-                                app.showMessage(`Fakturaen er prosessert! Excel-filen vil bli sendt til ${opplasterNavn} på e-post når prosesseringen er ferdig.`, 'success');
+                                        processedSize: files[0].size
+                                    });
+
+                                    // Finn opplaster-navn for personlig melding
+                                    const opplasterNavn = opplaster.charAt(0).toUpperCase() + opplaster.slice(1);
+                                    app.showMessage(`✅ Faktura lastet opp! Excel-filen sendes til ${opplasterNavn} på e-post innen 10 minutter.`, 'success');
                                 },
                                 onError: (error) => {
                                     app.showMessage(error, 'error');
@@ -1303,46 +1122,23 @@
                                             });
                                         },
                                         onSuccess: (successMessage, response) => {
-                                            console.log(`✅ Fil sendt vellykket: ${item.fileName}`, response);
+                                            console.log(`✅ Fil lastet opp: ${item.fileName}`);
                                             completedFiles.add(item.originalIndex);
-
-                                            // Start polling if we got a jobId
-                                            if (response && response.jobId) {
-                                                fileJobIds[item.originalIndex] = response.jobId;
-                                                updateFileStatus(item.originalIndex, 'waiting');
-                                                startPolling(response.jobId, item.originalIndex, item.fileName);
-                                            } else {
-                                                // Fallback to old behavior
-                                                if (response && response.detectedSupplier) {
-                                                    updateFileStatus(item.originalIndex, null, response.detectedSupplier);
-                                                }
-                                                updateFileStatus(item.originalIndex, 'completed');
-                                            }
+                                            updateFileStatus(item.originalIndex, 'completed');
+                                            successful++;
                                         },
                                         onError: (error) => {
                                             console.error(`❌ Fil feilet: ${item.fileName}`, error);
                                             updateFileStatus(item.originalIndex, 'error');
+                                            failed++;
                                         }
-                                    }).then(result => {
-                                        return { success: true, item: item };
-                                    }).catch(error => {
-                                        return { success: false, error, item: item };
                                     });
                                 });
                                 
                                 // Vent på at alle unntatt siste blir ferdig
-                                const results = await Promise.allSettled(promises);
-                                
-                                // Tell resultater for de første
-                                results.forEach(result => {
-                                    if (result.status === 'fulfilled' && result.value?.success) {
-                                        successful++;
-                                    } else {
-                                        failed++;
-                                    }
-                                });
-                                
-                                console.log(`✅ ${allExceptLast.length} fakturaer sendt. Venter 30 sek før siste faktura...`);
+                                await Promise.allSettled(promises);
+
+                                console.log(`✅ ${successful} av ${allExceptLast.length} fakturaer lastet opp. Venter 30 sek før siste faktura...`);
                             }
                             
                             // Send siste faktura med 30 sek forsinkelse og spesiell action
@@ -1422,26 +1218,14 @@
                                     });
                                 },
                                 onSuccess: (successMessage, response) => {
-                                    console.log(`✅ Siste faktura sendt vellykket: ${lastInvoice.fileName}`, response);
+                                    console.log(`✅ Siste faktura lastet opp: ${lastInvoice.fileName}`);
                                     successful++;
                                     completedFiles.add(lastInvoice.originalIndex);
-
-                                    // Start polling if we got a jobId
-                                    if (response && response.jobId) {
-                                        fileJobIds[lastInvoice.originalIndex] = response.jobId;
-                                        updateFileStatus(lastInvoice.originalIndex, 'waiting');
-                                        startPolling(response.jobId, lastInvoice.originalIndex, lastInvoice.fileName);
-                                    } else {
-                                        // Fallback to old behavior
-                                        if (response && response.detectedSupplier) {
-                                            updateFileStatus(lastInvoice.originalIndex, null, response.detectedSupplier);
-                                        }
-                                        updateFileStatus(lastInvoice.originalIndex, 'completed');
-                                    }
+                                    updateFileStatus(lastInvoice.originalIndex, 'completed');
 
                                     // Vis komplett status
                                     app.setProgress(100, true, {
-                                        status: 'Alle fakturaer sendt!',
+                                        status: 'Alle fakturaer lastet opp!',
                                         currentFile: lastInvoice.fileName,
                                         currentFileIndex: lastInvoice.originalIndex,
                                         totalFiles: formDataArray.length,
@@ -1457,12 +1241,12 @@
                                 }
                             });
                             
-                            console.log(`🏁 Alle fakturaer prosessert. Totalt vellykket: ${successful}, Feilet: ${failed}`);
-                            
+                            console.log(`🏁 Alle fakturaer lastet opp. Totalt vellykket: ${successful}, Feilet: ${failed}`);
+
                             // Finn opplaster-navn for personlig melding
                             const opplasterNavn = opplaster.charAt(0).toUpperCase() + opplaster.slice(1);
-                            
-                            const summary = `${successful} av ${formDataArray.length} faktura${formDataArray.length === 1 ? '' : 'er'} er prosessert! Excel-filen vil bli sendt til ${opplasterNavn} på e-post når prosesseringen er ferdig.`;
+
+                            const summary = `✅ ${successful} av ${formDataArray.length} faktura${formDataArray.length === 1 ? '' : 'er'} lastet opp! Excel-filen sendes til ${opplasterNavn} på e-post innen 10 minutter.`;
                             app.showMessage(summary, 'success');
                             
                             if (failed > 0) {
@@ -1487,15 +1271,11 @@
 
                 // Reset button
                 document.getElementById('resetBtn').addEventListener('click', function() {
-                    // Stop all polling
-                    stopAllPolling();
-
                     app.resetForm('uploadForm', {
                         onReset: () => {
                             // Flerfil reset
                             selectedFiles = [];
                             fileSuppliers = {};
-                            fileJobIds = {};
                             // Oppdater visningen med tom liste
                             updateFileDisplayInfo();
                         }
