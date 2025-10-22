@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - TopLogic AI</title>
+    <link rel="icon" type="image/png" href="https://images.squarespace-cdn.com/content/v1/67a10d12887082593bb5d293/d39dc0a0-5a17-4ef9-88a4-2d0edb45fd5e/LOGO+l.png?format=500w">
+    <link rel="stylesheet" href="../../styles/shared.css">
+    <link rel="stylesheet" href="../../styles/dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body class="dashboard-body">
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-section">
+                    <img src="https://www.toplogic.no/wp-content/uploads/2023/01/Toplogic_norge_logo.svg" alt="TopLogic" class="sidebar-logo" />
+                    <span class="company-name">TopLogic AI</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <button class="nav-item active" data-section="dashboard">
+                        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 21v-4a2 2 0 012-2h4a2 2 0 012 2v4"></path>
+                        </svg>
+                        Dashboard
+                    </button>
+                    <button class="nav-item" data-section="automations">
+                        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        Automations
+                    </button>
+                    <button class="nav-item" data-section="analytics">
+                        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        Analytics
+                    </button>
+                    <button class="nav-item" data-section="settings">
+                        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        Settings
+                    </button>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="main-header">
+                <div class="header-left">
+                    <h1 class="page-title">Dashboard</h1>
+                    <p class="page-subtitle">Oversikt over automation-aktivitet og tidsbesparelser</p>
+                </div>
+                <div class="header-right">
+                    <div class="header-actions">
+                        <button class="action-btn">
+                            <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            Quick Create
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- KPI Cards -->
+            <div class="kpi-section">
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-content">
+                            <div class="kpi-title">Total Tidsbesparelse</div>
+                            <div class="kpi-value" id="totalTimeSaved">125.5h</div>
+                            <div class="kpi-change positive">
+                                <svg class="change-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                </svg>
+                                +12.5% fra forrige måned
+                            </div>
+                            <div class="kpi-subtitle">Trending up this month</div>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-content">
+                            <div class="kpi-title">Antall Automations</div>
+                            <div class="kpi-value" id="totalAutomations">89</div>
+                            <div class="kpi-change negative">
+                                <svg class="change-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
+                                </svg>
+                                -20% fra forrige periode
+                            </div>
+                            <div class="kpi-subtitle">Acquisition needs attention</div>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-content">
+                            <div class="kpi-title">Aktive Kunder</div>
+                            <div class="kpi-value" id="activeCustomers">12</div>
+                            <div class="kpi-change positive">
+                                <svg class="change-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                </svg>
+                                +12.5% fra forrige måned
+                            </div>
+                            <div class="kpi-subtitle">Strong user retention</div>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-content">
+                            <div class="kpi-title">Effektivitetsrate</div>
+                            <div class="kpi-value" id="efficiencyRate">94.5%</div>
+                            <div class="kpi-change positive">
+                                <svg class="change-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                </svg>
+                                +4.5% fra forrige måned
+                            </div>
+                            <div class="kpi-subtitle">Meets growth projections</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-section">
+                <div class="chart-container main-chart">
+                    <div class="chart-header">
+                        <h3>Total Aktivitet</h3>
+                        <div class="chart-filters">
+                            <button class="filter-btn active" data-period="7">Siste 3 måneder</button>
+                            <button class="filter-btn" data-period="30">Siste 30 dager</button>
+                            <button class="filter-btn" data-period="90">Siste 7 dager</button>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Table -->
+            <div class="table-section">
+                <div class="table-header">
+                    <div class="table-tabs">
+                        <button class="tab-btn active" data-tab="recent">Siste aktiviteter</button>
+                        <button class="tab-btn" data-tab="performance">Ytelse (3)</button>
+                        <button class="tab-btn" data-tab="personnel">Nøkkelpersonell (2)</button>
+                        <button class="tab-btn" data-tab="documents">Fokuserte dokumenter</button>
+                    </div>
+                    <div class="table-controls">
+                        <button class="control-btn">
+                            <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+                            </svg>
+                            Tilpass kolonner
+                        </button>
+                        <button class="control-btn primary">
+                            <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            + Legg til seksjon
+                        </button>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table class="activity-table" id="activityTable">
+                        <thead>
+                            <tr>
+                                <th data-sort="header">Overskrift</th>
+                                <th data-sort="section_type">Seksjonstype</th>
+                                <th data-sort="status">Status</th>
+                                <th data-sort="target">Mål</th>
+                                <th data-sort="limit">Grense</th>
+                                <th data-sort="reviewer">Anmelder</th>
+                            </tr>
+                        </thead>
+                        <tbody id="activityTableBody">
+                            <tr>
+                                <td colspan="6" class="empty-row">
+                                    <div class="empty-state">
+                                        <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                        <p>Ingen data tilgjengelig</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Loading States -->
+            <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>Laster dashboard-data...</p>
+            </div>
+
+            <!-- Error Messages -->
+            <div id="errorMessage" class="error-message" style="display: none;">
+                <div class="error-content">
+                    <span class="error-icon">⚠️</span>
+                    <span class="error-text">Kunne ikke laste dashboard-data. Prøv igjen senere.</span>
+                    <button id="retryButton" class="retry-btn">Prøv igjen</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="../../legacy.js"></script>
+    <script type="module" src="../../config/supabase.js"></script>
+    <script type="module" src="dashboard.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialiser TopLogic App
+            const app = new TopLogicApp(false); // Ingen passord for dashboard
+            
+            console.log('📊 Metrics Dashboard lastet');
+        });
+    </script>
+</body>
+</html>

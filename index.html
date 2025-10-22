@@ -34,6 +34,11 @@
                                 <span>Prislister til EXCEL</span>
                             </a>
                         </li>
+        <li style="margin-bottom: var(--spacing-lg);">
+            <a href="#" onclick="checkMetricsAccess(event)" class="btn btn-primary btn-full btn-large animate-child" data-icon="📊">
+                <span>Metrics & Statistikk</span>
+            </a>
+        </li>
                     </ul>
                 </div>
 
@@ -60,6 +65,19 @@
     <script type="module" src="src/utils/scroll-animations.js"></script>
     
     <script>
+        function checkMetricsAccess(event) {
+            event.preventDefault();
+            
+            const password = prompt('Skriv inn kode for å få tilgang til Metrics Dashboard:');
+            
+            // Kode: "3210" (du kan endre denne)
+            if (password === '3210') {
+                window.location.href = 'src/apps/metrics-dashboard/';
+            } else if (password !== null) {
+                alert('Feil kode. Prøv igjen.');
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             // Vent litt ekstra for at ES6 modules skal være helt klare
             setTimeout(() => {

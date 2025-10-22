@@ -511,6 +511,23 @@ export class TopLogicApp {
         }
     }
 
+    // Retry-funksjon for robust opplasting
+    async submitFormWithRetry(formData, webhookType, options = {}, maxRetries = 3) {
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                await this.submitForm(formData, webhookType, options);
+                return; // Suksess
+            } catch (error) {
+                if (attempt === maxRetries) {
+                    console.error(`❌ Alle ${maxRetries} forsøk feilet for webhook ${webhookType}`);
+                    throw error;
+                }
+                console.warn(`⚠️ Forsøk ${attempt}/${maxRetries} feilet, prøver igjen om 3 sekunder...`);
+                await this.delay(3000);
+            }
+        }
+    }
+
     // Vis meldinger
     showMessage(text, type = 'info', duration = 5000) {
         const messageElement = document.getElementById('message');

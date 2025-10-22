@@ -1079,64 +1079,88 @@
                             const lastInvoice = sortedFormDataWithIndex[sortedFormDataWithIndex.length - 1];
                             
                             if (allExceptLast.length > 0) {
-                                console.log(`📤 Sender først ${allExceptLast.length} fakturaer parallelt...`);
+                                console.log(`📤 Sender ${allExceptLast.length} fakturaer sekvensielt...`);
                                 
-                                // Oppdater status for alle unntatt siste
-                                allExceptLast.forEach(item => {
-                                    updateFileStatus(item.originalIndex, 'uploading');
-                                });
-                                
-                                // Send alle unntatt siste parallelt
-                                const promises = allExceptLast.map((item) => {
-                                    console.log(`Starter sending av fil: ${item.fileName} (${TopLogicUtils.formatFileSize(item.fileSize)})`);
-                                    console.log(`📋 FormData innhold:`, {
-                                        fileName: item.formData.get('fileName'),
-                                        opplaster: item.formData.get('opplaster'),
-                                        timestamp: item.formData.get('timestamp')
+                                // Send filer i grupper på 2 med 2 sekunders mellomrom
+                                for (let i = 0; i < allExceptLast.length; i += 2) {
+                                    const batch = allExceptLast.slice(i, i + 2);
+                                    console.log(`📤 Sender gruppe ${Math.floor(i/2) + 1}: ${batch.map(b => b.fileName).join(', ')}`);
+                                    
+                                    // Oppdater status for alle filer i denne gruppen
+                                    batch.forEach(item => {
+                                        updateFileStatus(item.originalIndex, 'uploading');
                                     });
                                     
-                                    return app.submitForm(item.formData, 'faktura', {
-                                        batchId: batchId,
-                                        onProgress: (progress) => {
-                                            // Beregn kun fremgang for denne filen, ikke legg til i total
-                                            const fileProgress = (progress / 100) * item.fileSize;
-                                            
-                                            // Beregn total prosessert størrelse (kun ferdigstilte filer + current progress)
-                                            const currentProcessedSize = Array.from(completedFiles).reduce((sum, fileIndex) => {
-                                                return sum + files[fileIndex].size;
-                                            }, 0) + fileProgress;
-                                            
-                                            // Progress går fra 10% til 100% (10% er forberedelse)
-                                            const uploadProgress = (currentProcessedSize / totalSize) * 90;
-                                            const actualProgress = 10 + uploadProgress;
-                                            
-                                            // Oppdater progressbar med riktig samlet fremgang
-                                            app.setProgress(actualProgress, true, {
-                                                status: 'Laster opp fakturaer...',
-                                                currentFile: item.fileName,
-                                                currentFileIndex: item.originalIndex,
-                                                totalFiles: formDataArray.length,
-                                                currentFileSize: item.fileSize,
-                                                totalSize,
-                                                processedSize: currentProcessedSize
-                                            });
-                                        },
-                                        onSuccess: (successMessage, response) => {
-                                            console.log(`✅ Fil lastet opp: ${item.fileName}`);
-                                            completedFiles.add(item.originalIndex);
-                                            updateFileStatus(item.originalIndex, 'completed');
-                                            successful++;
-                                        },
-                                        onError: (error) => {
-                                            console.error(`❌ Fil feilet: ${item.fileName}`, error);
+                                    // Send begge filer samtidig
+                                    const promises = batch.map(async (item) => {
+                                        console.log(`Starter sending av fil: ${item.fileName} (${TopLogicUtils.formatFileSize(item.fileSize)})`);
+                                        
+                                        try {
+                                            await app.submitFormWithRetry(item.formData, 'faktura', {
+                                                batchId: batchId,
+                                                onProgress: (progress) => {
+                                                    const fileProgress = (progress / 100) * item.fileSize;
+                                                    const currentProcessedSize = Array.from(completedFiles).reduce((sum, fileIndex) => {
+                                                        return sum + files[fileIndex].size;
+                                                    }, 0) + fileProgress;
+                                                    
+                                                    const uploadProgress = (currentProcessedSize / totalSize) * 90;
+                                                    const actualProgress = 10 + uploadProgress;
+                                                    
+                                                    app.setProgress(actualProgress, true, {
+                                                        status: 'Laster opp fakturaer...',
+                                                        currentFile: item.fileName,
+                                                        currentFileIndex: item.originalIndex,
+                                                        totalFiles: formDataArray.length,
+                                                        currentFileSize: item.fileSize,
+                                                        totalSize,
+                                                        processedSize: currentProcessedSize
+                                                    });
+                                                },
+                                                onSuccess: (successMessage, response) => {
+                                                    console.log(`✅ Fil lastet opp: ${item.fileName}`);
+                                                    completedFiles.add(item.originalIndex);
+                                                    updateFileStatus(item.originalIndex, 'completed');
+                                                    successful++;
+                                                    
+                                                    const completedSize = Array.from(completedFiles).reduce((sum, fileIndex) => {
+                                                        return sum + files[fileIndex].size;
+                                                    }, 0);
+                                                    const uploadProgress = (completedSize / totalSize) * 90;
+                                                    const actualProgress = 10 + uploadProgress;
+                                                    
+                                                    app.setProgress(actualProgress, true, {
+                                                        status: `Gruppe ${Math.floor(i/2) + 1} fullført`,
+                                                        currentFile: item.fileName,
+                                                        currentFileIndex: item.originalIndex,
+                                                        totalFiles: formDataArray.length,
+                                                        currentFileSize: item.fileSize,
+                                                        totalSize,
+                                                        processedSize: completedSize
+                                                    });
+                                                },
+                                                onError: (error) => {
+                                                    console.error(`❌ Fil feilet: ${item.fileName}`, error);
+                                                    updateFileStatus(item.originalIndex, 'error');
+                                                    failed++;
+                                                }
+                                            }, 3);
+                                        } catch (error) {
+                                            console.error(`❌ Fil ${item.fileName} feilet etter alle forsøk`);
                                             updateFileStatus(item.originalIndex, 'error');
                                             failed++;
                                         }
                                     });
-                                });
-                                
-                                // Vent på at alle unntatt siste blir ferdig
-                                await Promise.allSettled(promises);
+                                    
+                                    // Vent på at begge filer i gruppen er ferdig
+                                    await Promise.allSettled(promises);
+                                    
+                                    // Delay mellom grupper (ikke etter siste gruppe)
+                                    if (i + 2 < allExceptLast.length) {
+                                        console.log('⏱️ Venter 2 sekunder før neste gruppe...');
+                                        await app.delay(2000); // 2 sekunder
+                                    }
+                                }
 
                                 console.log(`✅ ${successful} av ${allExceptLast.length} fakturaer lastet opp. Venter 30 sek før siste faktura...`);
                             }
@@ -1192,7 +1216,7 @@
                                 timestamp: lastInvoice.formData.get('timestamp')
                             });
                             
-                            await app.submitForm(lastInvoice.formData, 'faktura', {
+                            await app.submitFormWithRetry(lastInvoice.formData, 'faktura', {
                                 batchId: batchId,
                                 onProgress: (progress) => {
                                     const lastFileProgress = (progress / 100) * lastInvoice.fileSize;
@@ -1239,9 +1263,10 @@
                                     failed++;
                                     updateFileStatus(lastInvoice.originalIndex, 'error');
                                 }
-                            });
+                            }, 3); // 3 retry-forsøk
                             
                             console.log(`🏁 Alle fakturaer lastet opp. Totalt vellykket: ${successful}, Feilet: ${failed}`);
+                            console.log('✅ Upload complete - alle filer prosessert');
 
                             // Finn opplaster-navn for personlig melding
                             const opplasterNavn = opplaster.charAt(0).toUpperCase() + opplaster.slice(1);
