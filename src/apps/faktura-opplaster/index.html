@@ -660,10 +660,16 @@
                     if (!fileList) return;
 
                     fileList.innerHTML = '';
-                    files.forEach((file, idx) => {
+                    
+                    // Sorter filer fra minst til størst
+                    const sortedFiles = [...files].sort((a, b) => a.size - b.size);
+                    
+                    sortedFiles.forEach((file, idx) => {
                         const row = document.createElement('div');
                         row.className = 'file-row';
-                        const supplierInfo = fileSuppliers[idx] ? `<span class="file-row-supplier"><i data-lucide="truck"></i>${fileSuppliers[idx]}</span>` : '';
+                        // Finn original indeks for å få riktig supplier info
+                        const originalIndex = files.findIndex(f => f === file);
+                        const supplierInfo = fileSuppliers[originalIndex] ? `<span class="file-row-supplier"><i data-lucide="truck"></i>${fileSuppliers[originalIndex]}</span>` : '';
                         row.innerHTML = `
                             <div class="file-row-main">
                                 <div class="file-row-name">${file.name}</div>
@@ -677,7 +683,7 @@
                                     <i data-lucide="circle" class="file-status-icon"></i>
                                     <span>Klar</span>
                                 </div>
-                                <button type="button" class="file-remove-btn" onclick="removeFile(${idx})" title="Fjern fil">
+                                <button type="button" class="file-remove-btn" onclick="removeFile(${originalIndex})" title="Fjern fil">
                                     <i data-lucide="x" style="width: 16px; height: 16px;"></i>
                                 </button>
                             </div>
@@ -692,7 +698,22 @@
                 }
 
                 function updateFileStatus(idx, status, supplierName = null) {
-                    const statusEl = document.getElementById(`status_${idx}`);
+                    // Finn riktig status element basert på sortert rekkefølge
+                    const fileList = document.getElementById('fileList');
+                    if (!fileList) return;
+                    
+                    const rows = fileList.querySelectorAll('.file-row');
+                    let statusEl = null;
+                    
+                    // Finn riktig rad basert på original indeks
+                    for (let i = 0; i < rows.length; i++) {
+                        const removeBtn = rows[i].querySelector('.file-remove-btn');
+                        if (removeBtn && removeBtn.onclick.toString().includes(`removeFile(${idx})`)) {
+                            statusEl = rows[i].querySelector('.file-status');
+                            break;
+                        }
+                    }
+                    
                     if (!statusEl) return;
 
                     // Store supplier if provided
