@@ -1095,22 +1095,20 @@
                             
                             app.showMessage(`Sender fakturaer sortert fra minst til størst...`, 'info');
                             
-                            // Send alle filer én om gangen, vent på respons mellom hver
+                            // Send alle filer sekvensielt: først alle unntatt siste, så vent 30s, så siste
                             console.log(`📤 Sender ${sortedFormDataWithIndex.length} fakturaer sekvensielt...`);
 
-                            for (let i = 0; i < sortedFormDataWithIndex.length; i++) {
-                                const item = sortedFormDataWithIndex[i];
-                                const isLastInvoice = (i === sortedFormDataWithIndex.length - 1);
-                                
+                            // Pekere til alle unntatt den siste og den siste
+                            const allExceptLast = sortedFormDataWithIndex.slice(0, -1);
+                            const lastInvoice = sortedFormDataWithIndex[sortedFormDataWithIndex.length - 1];
+
+                            // 1) Send alle unntatt siste, én og én (venter på webhook-respons pr. fil)
+                            for (let i = 0; i < allExceptLast.length; i++) {
+                                const item = allExceptLast[i];
+
                                 console.log(`📤 Sender faktura ${i + 1}/${sortedFormDataWithIndex.length}: ${item.fileName}`);
                                 updateFileStatus(item.originalIndex, 'uploading');
-                                
-                                // Legg til action-feltet for siste faktura
-                                if (isLastInvoice) {
-                                    item.formData.set('action', 'last_invoice');
-                                    console.log('🏁 Dette er siste faktura - setter action: "last_invoice"');
-                                }
-                                
+
                                 try {
                                     await app.submitFormWithRetry(item.formData, 'faktura', {
                                         batchId: batchId,
@@ -1119,10 +1117,10 @@
                                             const currentProcessedSize = Array.from(completedFiles).reduce((sum, fileIndex) => {
                                                 return sum + files[fileIndex].size;
                                             }, 0) + fileProgress;
-                                            
+
                                             const uploadProgress = (currentProcessedSize / totalSize) * 90;
                                             const actualProgress = 10 + uploadProgress;
-                                            
+
                                             app.setProgress(actualProgress, true, {
                                                 status: 'Laster opp fakturaer...',
                                                 currentFile: item.fileName,
@@ -1133,18 +1131,18 @@
                                                 processedSize: currentProcessedSize
                                             });
                                         },
-                                        onSuccess: (successMessage, response) => {
+                                        onSuccess: () => {
                                             console.log(`✅ Fil lastet opp: ${item.fileName}`);
                                             completedFiles.add(item.originalIndex);
                                             updateFileStatus(item.originalIndex, 'completed');
                                             successful++;
-                                            
+
                                             const completedSize = Array.from(completedFiles).reduce((sum, fileIndex) => {
                                                 return sum + files[fileIndex].size;
                                             }, 0);
                                             const uploadProgress = (completedSize / totalSize) * 90;
                                             const actualProgress = 10 + uploadProgress;
-                                            
+
                                             app.setProgress(actualProgress, true, {
                                                 status: `Faktura ${i + 1}/${sortedFormDataWithIndex.length} fullført`,
                                                 currentFile: item.fileName,
@@ -1166,13 +1164,86 @@
                                     updateFileStatus(item.originalIndex, 'error');
                                     failed++;
                                 }
-                                
-                                // Liten pause mellom filer for å la Make.com puste (ikke etter siste)
-                                if (!isLastInvoice) {
-                                    await app.delay(500); // 0.5 sekund
+
+                                // Ingen kunstig pause; vi har allerede ventet på webhook-respons
+                            }
+
+                            // 2) Vent 30 sekunder før siste faktura
+                            if (lastInvoice) {
+                                console.log('⏱️ Venter 30 sekunder før siste faktura for Make.com prosessering...');
+                                app.showMessage('Venter 30 sekunder før siste faktura...', 'info');
+
+                                let waitProgress = 0;
+                                const completedSize = Array.from(completedFiles).reduce((sum, fileIndex) => {
+                                    return sum + files[fileIndex].size;
+                                }, 0);
+                                const uploadProgress = (completedSize / totalSize) * 90;
+                                const currentProgress = 10 + uploadProgress;
+
+                                const waitInterval = setInterval(() => {
+                                    waitProgress += 100/30; // 30 sekunder
+                                    const remainingSeconds = Math.floor(30 - (waitProgress * 30 / 100));
+
+                                    app.setProgress(currentProgress, true, {
+                                        status: `Venter på siste faktura... (${remainingSeconds}s)`,
+                                        currentFile: lastInvoice.fileName,
+                                        currentFileIndex: lastInvoice.originalIndex,
+                                        totalFiles: formDataArray.length,
+                                        currentFileSize: lastInvoice.fileSize,
+                                        totalSize,
+                                        processedSize: completedSize
+                                    });
+                                }, 1000);
+
+                                await app.delay(30000); // 30 sekunder
+                                clearInterval(waitInterval);
+
+                                // 3) Send siste faktura med action last_invoice
+                                console.log('🚀 Sender siste faktura med "last_invoice" action:', lastInvoice.fileName);
+                                updateFileStatus(lastInvoice.originalIndex, 'uploading');
+                                lastInvoice.formData.set('action', 'last_invoice');
+
+                                try {
+                                    await app.submitFormWithRetry(lastInvoice.formData, 'faktura', {
+                                        batchId: batchId,
+                                        onProgress: (progress) => {
+                                            const lastFileProgress = (progress / 100) * lastInvoice.fileSize;
+                                            const completedSizeNow = Array.from(completedFiles).reduce((sum, fileIndex) => {
+                                                return sum + files[fileIndex].size;
+                                            }, 0) + lastFileProgress;
+
+                                            const uploadProgressNow = (completedSizeNow / totalSize) * 90;
+                                            const actualProgressNow = 10 + uploadProgressNow;
+
+                                            app.setProgress(actualProgressNow, true, {
+                                                status: 'Sender siste faktura...',
+                                                currentFile: lastInvoice.fileName,
+                                                currentFileIndex: lastInvoice.originalIndex,
+                                                totalFiles: formDataArray.length,
+                                                currentFileSize: lastInvoice.fileSize,
+                                                totalSize,
+                                                processedSize: completedSizeNow
+                                            });
+                                        },
+                                        onSuccess: () => {
+                                            console.log(`✅ Siste faktura lastet opp: ${lastInvoice.fileName}`);
+                                            successful++;
+                                            completedFiles.add(lastInvoice.originalIndex);
+                                            updateFileStatus(lastInvoice.originalIndex, 'completed');
+                                        },
+                                        onError: (error) => {
+                                            console.error(`❌ Siste faktura feilet: ${lastInvoice.fileName}`, error);
+                                            failed++;
+                                            updateFileStatus(lastInvoice.originalIndex, 'error');
+                                        }
+                                    }, 3);
+                                } catch (error) {
+                                    console.error(`❌ Siste faktura ${lastInvoice.fileName} feilet etter alle forsøk`);
+                                    updateFileStatus(lastInvoice.originalIndex, 'error');
+                                    failed++;
                                 }
                             }
-                            
+
                             // Vis komplett status
                             app.setProgress(100, true, {
                                 status: 'Alle fakturaer lastet opp!',
